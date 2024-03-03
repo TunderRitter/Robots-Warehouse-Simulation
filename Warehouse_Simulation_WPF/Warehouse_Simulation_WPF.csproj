@@ -8,4 +8,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Warehouse_Simulation_Model\Warehouse_Simulation_Model.csproj" />
+  </ItemGroup>
+
 </Project>
