@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Warehouse_Simulation_Model.persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
-namespace Warehouse_Simulation_Model
+namespace Warehouse_Simulation_Model.Model
 {
     public class Replay
     {
         private readonly Robot[] _robots;
-        private readonly Target[] _targets; // List?
+        private readonly Target[] _targets;
         private double _speed;
         private bool _paused;
         private readonly Cell[][,] _map;

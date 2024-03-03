@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Warehouse_Simulation_Model.persistence;
+﻿namespace Warehouse_Simulation_Model.Persistence;
 
 
 public class Log
@@ -27,23 +21,23 @@ public class Log
         actionModel = "";
         AllValid = "";
         teamSize = 0;
-        start = new List<object[]>();
+        start = [];
         numTaskFinished = 0;
         sumOfCost = 0;
         MakeSpan = 0;
-        actualPaths = new List<string>();
-        plannerPaths = new List<string>();
-        errors = new List<object[]>();
-        events = new List<object[]>();
-        tasks = new List<int[]>();
+        actualPaths = [];
+        plannerPaths = [];
+        errors = [];
+        events = [];
+        tasks = [];
     }
 
-    public Log Read(string str)
+    public Log Read(string filename)
     {
         return new Log();
     }
 
-    public Log Write(string str)
+    public Log Write(string filename)
     {
         return new Log();
     }

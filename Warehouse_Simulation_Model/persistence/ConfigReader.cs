@@ -1,36 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Warehouse_Simulation_Model.Model;
 
-namespace Warehouse_Simulation_Model.persistence;
+namespace Warehouse_Simulation_Model.Persistence;
 
 
-public class ConfigReader
+public static class ConfigReader
 {
-    public ConfigReader()
+    private static void ReadRobots(string filename)
     {
 
     }
 
-
-    private void ReadRobots(string str)
+    private static void ReadTargets(string filename)
     {
 
     }
 
-    private void ReadTargets(string str)
-    {
-
-    }
-
-    public Scheduler Read(string str)
+    public static Scheduler Read(string filename) // Shouldn't use model :/
     {
         return null;
     }
 
-    public void ReadMap(string str)
+    public static void ReadMap(string filename)
     {
 
     }

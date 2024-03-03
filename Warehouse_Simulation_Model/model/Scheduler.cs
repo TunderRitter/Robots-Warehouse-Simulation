@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
-using Warehouse_Simulation_Model.persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
-namespace Warehouse_Simulation_Model;
+namespace Warehouse_Simulation_Model.Model;
 
 
 public class Scheduler
@@ -19,7 +13,7 @@ public class Scheduler
     private readonly ITaskAssigner _method;
 
     private Cell[,] _map;
-    public Cell[,] Map => _map;
+    public Cell[,] Map => _map; // Encapsulation!
     public int Steps { get; private set; }
 
 
@@ -39,7 +33,7 @@ public class Scheduler
 
     }
 
-    private void RobotFinished(Robot robot)
+    private void Robot_Finished(object? sender, int e)
     {
 
     }
