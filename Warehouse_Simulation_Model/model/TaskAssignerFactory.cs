@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Warehouse_Simulation_Model
+namespace Warehouse_Simulation_Model;
+
+
+public class TaskAssignerFactory
 {
-    public class TaskAssignerFactory
+    public ITaskAssigner Create(string str)
     {
-        public ITaskAssigner Create(String str)
-        {
-            return null;
-        }
+        return null;
     }
 }

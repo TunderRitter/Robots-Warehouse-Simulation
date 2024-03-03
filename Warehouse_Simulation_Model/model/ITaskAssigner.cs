@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Warehouse_Simulation_Model
+namespace Warehouse_Simulation_Model;
+
+
+public interface ITaskAssigner
 {
-    public interface ITaskAssigner
-    {
-        public void Assign(Robot[] robots, Target[] targets) { }
-    }
+    public void Assign(Robot[] robots, Target[] targets);
 }

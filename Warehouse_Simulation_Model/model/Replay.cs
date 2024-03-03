@@ -9,14 +9,12 @@ namespace Warehouse_Simulation_Model
 {
     public class Replay
     {
-        private Robot[] _robots;
-        private Target[] _targets;
-        private Cell[][,] _map;
-        public Cell[][,] Map
-        {
-            get { return _map; }
-            set { _map = value; }
-        }
+        private readonly Robot[] _robots;
+        private readonly Target[] _targets; // List?
+        private double _speed;
+        private bool _paused;
+        private readonly Cell[][,] _map;
+        public Cell[][,] Map => _map;
 
 
         public Replay()
@@ -39,7 +37,7 @@ namespace Warehouse_Simulation_Model
 
         }
 
-        public void ChangeSpeed()
+        public void ChangeSpeed(double speed)
         {
              
         }
@@ -54,7 +52,7 @@ namespace Warehouse_Simulation_Model
 
         }
 
-        public void SkipTo()
+        public void SkipTo(int step)
         {
 
         }

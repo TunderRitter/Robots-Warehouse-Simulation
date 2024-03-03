@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Warehouse_Simulation_Model
+namespace Warehouse_Simulation_Model;
+
+
+public enum Direction
 {
-    public enum Direction
-    {
-        N,
-        W,
-        S,
-        E
-    }
+    N,
+    W,
+    S,
+    E
 }
