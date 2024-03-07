@@ -1,27 +1,39 @@
-﻿using Warehouse_Simulation_Model.Model;
+﻿using System.Text.Json;
 
 namespace Warehouse_Simulation_Model.Persistence;
 
 
 public static class ConfigReader
 {
-    private static void ReadRobots(string filename)
+    public static void Read(string path)
+    {
+		try
+		{
+			ConfigFile config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(path));
+            ReadMap(config.mapFile);
+            ReadRobots(config.agentFile);
+            ReadTargets(config.taskFile);
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
+
+    public static void ReadMap(string path)
     {
 
     }
 
-    private static void ReadTargets(string filename)
-    {
+	private static void ReadRobots(string path)
+	{
+		List<(int, int)> robots = [];
+	}
 
-    }
+	private static void ReadTargets(string path)
+	{
 
-    public static Scheduler Read(string filename) // Shouldn't use model :/
-    {
-        return null;
-    }
+	}
 
-    public static void ReadMap(string filename)
-    {
-
-    }
+	private static (int, int) ConvertCoordinates(int coor, int width) => (coor / width, coor % width);
 }
