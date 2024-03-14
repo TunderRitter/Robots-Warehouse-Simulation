@@ -2,10 +2,10 @@
 
 public struct ConfigFile
 {
-	public string mapFile;
-	public string agentFile;
-	public int teamSize;
-	public string taskFile;
-	public int numTasksReveal;
-	public string taskAssignmentStrategy;
+	public string mapFile { get; set; }
+	public string agentFile { get; set; }
+	public int teamSize { get; set; }
+	public string taskFile { get; set; }
+	public int numTasksReveal { get; set; }
+	public string taskAssignmentStrategy { get; set; }
 }
