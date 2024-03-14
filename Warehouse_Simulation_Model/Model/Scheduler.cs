@@ -11,6 +11,7 @@ public class Scheduler
     private readonly Log _log;
     private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _method;
+    private readonly AStar _astar;
 
     private Cell[,] _map;
     public Cell[,] Map => _map; // Encapsulation!
@@ -23,10 +24,6 @@ public class Scheduler
     }
 
 
-    private List<(int, int)> AStar()
-    {
-        return null;
-    }
 
     private void TurnRobot(string str, Robot robot)
     {
@@ -58,9 +55,15 @@ public class Scheduler
 
     }
 
-    public void CalculateRoutes(Robot[] robots)
+    public void CalculateRoutes()
     {
-
+        for (int i=0; i<_robots.Length; i++)
+        {
+            if (_robots[i].TargetPos != null && _routes[i].Count == 0)
+            {
+                _routes[i] = _astar.AStarSearch(_robots[i]);
+            }
+        }
     }
 
     public void WriteLog()
