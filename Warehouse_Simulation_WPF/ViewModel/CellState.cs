@@ -69,6 +69,21 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
+        private int _id;
+        public int Id
+        {
+            get { return _id; }
+            set
+            {
+                if (_id != value)
+                {
+                    _id = value;
+                    OnPropertyChanged(nameof(Id));
+                }
+            }
+        }
+
+
 
 
         public event PropertyChangedEventHandler? PropertyChanged;
