@@ -46,17 +46,17 @@ public class Log
         {
             throw;
         }
-	}
+    }
 
-	public void Write(string path)
-	{
-		try
-		{
-			File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-	}
+    public void Write(string path)
+    {
+        try
+        {
+            File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
