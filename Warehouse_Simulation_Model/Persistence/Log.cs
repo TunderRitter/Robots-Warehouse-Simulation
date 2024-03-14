@@ -11,9 +11,10 @@ public class Log
     public List<object[]> start { get; set; }
     public int numTaskFinished { get; set; }
     public int sumOfCost { get; set; }
-    public int MakeSpan { get; set; }
+    public int makespan { get; set; }
     public List<string> actualPaths { get; set; }
     public List<string> plannerPaths { get; set; }
+    public List<double> plannerTimes { get; set; }
     public List<object[]> errors { get; set; }
     public List<object[]> events { get; set; }
     public List<int[]> tasks { get; set; }
@@ -27,9 +28,10 @@ public class Log
         start = [];
         numTaskFinished = 0;
         sumOfCost = 0;
-        MakeSpan = 0;
+        makespan = 0;
         actualPaths = [];
         plannerPaths = [];
+        plannerTimes = [];
         errors = [];
         events = [];
         tasks = [];
