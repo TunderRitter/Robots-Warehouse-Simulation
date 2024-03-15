@@ -8,12 +8,16 @@ namespace Warehouse_Simulation_Model.Model;
 
 public class AStarCell
 {
-    public int I, J;
-    public AStarCell? Parent;
+    public int I {get; set;}
+    public int J { get; set; }
+    public AStarCell? Parent { get; set; }
     // g = távolság a kiindulóponttól
     // h = távolság a célállomástól (légvonalban, falakat nem figyelve)
     // f = g + h
-    public int f, g, h;
+    public int g { get; set; }
+    public int h { get; set; }
+    public int f { get; set; }
+
 
     public AStarCell(int i, int j, AStarCell? parent)
     {
@@ -24,10 +28,10 @@ public class AStarCell
 }
 public class AStar
 {
-    private bool[,] map;
+    private bool[,] _map;
     public AStar(bool[,] m)
     {
-        map = m;
+        _map = m;
     }
     public static int Lowest_f_cost(List<AStarCell> list)
     {
@@ -43,8 +47,8 @@ public class AStar
     }
     public Queue<(int,int)> AStarSearch(Robot robot)
     {
-        int row = map.GetLength(0);
-        int col = map.GetLength(1);
+        int row = _map.GetLength(0);
+        int col = _map.GetLength(1);
 
         List<AStarCell> Open = new();
         List<AStarCell> Closed = new();
@@ -87,7 +91,7 @@ public class AStar
                     neighbor.J < 0 || neighbor.J >= col))
                 {
                     //megnézi, hogy padló-e
-                    if (!map[neighbor.I, neighbor.J])
+                    if (!_map[neighbor.I, neighbor.J])
                     {
                         
                         //int cost = Math.Abs(neighbor.I - startcell.I) + Math.Abs(neighbor.J - startcell.J) + 1;
