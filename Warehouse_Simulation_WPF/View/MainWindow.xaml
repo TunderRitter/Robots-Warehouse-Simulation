@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Warehouse_Simulation_WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="300" Width="500">
+        Width="500" Height="300"
+        Title="MainWindow">
     <Grid>
         <Grid Name="MenuGrid" Grid.Row="0" Background="LightGray"
               Visibility="{Binding Path=Menu, UpdateSourceTrigger=PropertyChanged}">
@@ -13,13 +14,16 @@
                         FontSize="20"
                        VerticalAlignment="Top" HorizontalAlignment="Center"
                        Margin="0,60,0,0"/>
-            <Button Name="Simulation" Content="New simulation"
+            <Button x:Name="Simulation" Content="New simulation"
                     Height="40" Width="100" 
                     HorizontalAlignment="Left" VerticalAlignment="Top"
-                    Margin="120,120,0,0"/>
+                    Margin="120,120,0,0"
+                    Click="MenuButton_Click"
+                    />
             <Button Name="Replay" Content="Start replay"
                     Height="40" Width="100" Margin="0,120,120,0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Click="MenuButton_Click"/>
         </Grid>
         <Grid Name="SimulationGrid" Visibility="{Binding Path=Simulation}">
             <ItemsControl ItemsSource="{Binding Path=Cells}">

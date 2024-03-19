@@ -11,4 +11,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
+    private void MenuButton_Click(object sender, EventArgs e)
+    {
+        this.WindowState = WindowState.Maximized;
+    }
+
 }
