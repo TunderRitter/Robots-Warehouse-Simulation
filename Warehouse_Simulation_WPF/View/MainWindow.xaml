@@ -5,8 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Warehouse_Simulation_WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="300" Width="500">
     <Grid>
+        <Grid Name="MenuGrid" Grid.Row="0" Background="LightGray"
+              Visibility="{Binding Path=Menu, UpdateSourceTrigger=PropertyChanged}">
+            <TextBlock Name="Title" Text="Warehouse simulator"
+                        FontSize="20"
+                       VerticalAlignment="Top" HorizontalAlignment="Center"
+                       Margin="0,60,0,0"/>
+            <Button Name="Simulation" Content="New simulation"
+                    Height="40" Width="100" 
+                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Margin="120,120,0,0"/>
+            <Button Name="Replay" Content="Start replay"
+                    Height="40" Width="100" Margin="0,120,120,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        </Grid>
+        <Grid Name="SimulationGrid" Visibility="{Binding Path=Simulation}">
+            <ItemsControl ItemsSource="{Binding Path=Cells}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
+                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle Height="30" Width="30">
 
+                        </Rectangle>
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style>
+                        <Setter Property="Grid.Row" Value="{Binding X}" />
+                        <Setter Property="Grid.Column" Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+
+            </ItemsControl>
+        </Grid>
     </Grid>
 </Window>
