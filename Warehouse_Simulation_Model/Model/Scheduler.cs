@@ -38,11 +38,6 @@ public class Scheduler
         AssignTask(sender);
     }
 
-    public void RemoveTarget(Target target)
-    {
-
-    }
-
     public void AssignTask(Robot robot)
     {
         robot.TargetPos = null;
