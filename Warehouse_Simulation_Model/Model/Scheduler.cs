@@ -29,7 +29,7 @@ public class Scheduler
     {
         //System.Timers.Timer timer = new System.Timers.Timer();
 
-        for (int i = 0; i < _robots.Count; i++)
+        for (int i = 0; i < _robots.Length; i++)
         {
             AssignTask(_robots[i]);
         }
@@ -38,7 +38,7 @@ public class Scheduler
 
         while(_targets.Count > 0 && Steps >= _to_step) ;
         {
-            for (int i = 0; i < _robots.Count; i++)
+            for (int i = 0; i < _robots.Length; i++)
             {
                 CalculateStep(_robots[i], i);
             }
@@ -60,7 +60,10 @@ public class Scheduler
 
     private void Robot_Finished(object? sender, int e)
     {
-        AssignTask(sender);
+        if (sender != null)
+        {
+            if (sender.GetType() == typeof(Robot)) AssignTask(sender); //megnézem hogy robot-e és null-e de még mindig rinyál
+        }
     }
 
     public void AssignTask(Robot robot)
@@ -68,16 +71,18 @@ public class Scheduler
         robot.TargetPos = null;
         if(_targets.Count > 0)
         {
-            (int X, int Y) pos = _targets.Dequeue();
-            robot.TargetPos.X = pos.X;
-            robot.TargetPos.Y = pos.Y;
+            Target target = _targets.Dequeue();
+            (int X, int Y) pos = target.Pos;
+            robot.TargetPos = (pos.X, pos.Y);
         }
     }
 
     public void CalculateStep(Robot robot, int i)
     {
-        (int X, int Y) pos_to = _routes[i][0];
+        (int X, int Y) pos_to = _routes[i].Peek();
         (int X, int Y) pos_from = robot.Pos;
+
+        bool remove = false; //csak akkor kell dequeue ha nem kell fordulnia a robotnak
 
         if(pos_from.X == pos_to.X)
         {
@@ -87,15 +92,82 @@ public class Scheduler
                 {
                     case Direction.N:
                         //TurnRobotLeft(robot);
+                        break;
                     case Direction.W:
                         //odaléphet, vele szembe van
+                        remove = true;
+                        break;
                     case Direction.S:
                         //TurnRobotRight(robot);
+                        break;
                     case Direction.E:
                         //TurnRobotLeft(robot);
+                        break;
+                }
+            }
+            else if(pos_from.X == pos_to.Y + 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        //TurnRobotRight(robot);
+                        break;
+                    case Direction.W:
+                        //TurnRobotLeft(robot);
+                        break;
+                    case Direction.S:
+                        //TurnRobotLeft(robot);
+                        break;
+                    case Direction.E:
+                        //odaléphet, vele szembe van
+                        remove = true;
+                        break;
                 }
             }
         }
+        else if(pos_from.Y == pos_to.Y)
+        {
+            if(pos_from.X == pos_to.X - 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        //odaléphet, vele szembe van
+                        remove = true;
+                        break;
+                    case Direction.W:
+                        //TurnRobotRight(robot);
+                        break;
+                    case Direction.S:
+                        //TurnRobotLeft(robot);
+                        break;
+                    case Direction.E:
+                        //TurnRobotLeft(robot);
+                        break;
+                }
+            }
+            else if(pos_from.X == pos_to.X + 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        //TurnRobotLeft(robot);
+                        break;
+                    case Direction.W:
+                        //TurnRobotLeft(robot);
+                        break;
+                    case Direction.S:
+                        //odaléphet, vele szembe van
+                        remove = true;
+                        break;
+                    case Direction.E:
+                        //TurnRobotRight(robot);
+                        break;
+                }
+            }
+        }
+
+        if (remove) _routes[i].Dequeue();
     }
 
     public void ExecuteStep()
