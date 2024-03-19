@@ -18,10 +18,42 @@ public class Robot
         Direction = direction;
     }
 
-
-    public void Turn(string dir)
+    public void TurnRight()
     {
+        switch(Direction)
+        {
+            case Direction.N:
+                Direction = Direction.E;
+                break;
+            case Direction.E:
+                Direction = Direction.S;
+                break;
+            case Direction.S:
+                Direction = Direction.W;
+                break;
+            case Direction.W:
+                Direction = Direction.N;
+                break;
+        }
+    }
 
+    public void TurnLeft()
+    {
+        switch (Direction)
+        {
+            case Direction.N:
+                Direction = Direction.W;
+                break;
+            case Direction.E:
+                Direction = Direction.N;
+                break;
+            case Direction.S:
+                Direction = Direction.E;
+                break;
+            case Direction.W:
+                Direction = Direction.S;
+                break;
+        }
     }
 
     private void OnFinished() => Finished?.Invoke(this, Id);

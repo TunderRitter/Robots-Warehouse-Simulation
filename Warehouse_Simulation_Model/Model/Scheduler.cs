@@ -28,9 +28,14 @@ public class Scheduler
         return null;
     }
 
-    private void TurnRobot(string str, Robot robot)
+    private void TurnRobotLeft(Robot robot)
     {
+        robot.TurnLeft();
+    }
 
+    private void TurnRobotRight(Robot robot)
+    {
+        robot.TurnRight();
     }
 
     private void Robot_Finished(object? sender, int e)
