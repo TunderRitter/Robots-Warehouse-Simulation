@@ -82,7 +82,7 @@ public class Scheduler
         (int X, int Y) pos_to = _routes[i].Peek();
         (int X, int Y) pos_from = robot.Pos;
 
-        string actual_path = "";
+        string move = "";
 
         if(pos_from.X == pos_to.X)
         {
@@ -91,16 +91,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.W:
-                        actual_path = "G";
+                        move = "G";
                         break;
                     case Direction.S:
-                        actual_path = "R";
+                        move = "R";
                         break;
                     case Direction.E:
-                        actual_path = "L";
+                        move = "L";
                         break;
                 }
             }
@@ -109,16 +109,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        actual_path = "R";
+                        move = "R";
                         break;
                     case Direction.W:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.S:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.E:
-                        actual_path = "G";
+                        move = "G";
                         break;
                 }
             }
@@ -130,16 +130,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        actual_path = "G";
+                        move = "G";
                         break;
                     case Direction.W:
-                        actual_path = "R";
+                        move = "R";
                         break;
                     case Direction.S:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.E:
-                        actual_path = "L";
+                        move = "L";
                         break;
                 }
             }
@@ -148,27 +148,39 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.W:
-                        actual_path = "L";
+                        move = "L";
                         break;
                     case Direction.S:
-                        actual_path = "G";
+                        move = "G";
                         break;
                     case Direction.E:
-                        actual_path = "R";
+                        move = "R";
                         break;
                 }
             }
         }
 
-        ExecuteStep(robot, i, actual_path);
+        ExecuteStep(robot, i, move);
     }
 
-    public void ExecuteStep()
+    public void ExecuteStep(Robot robot, int i, String move)
     {
-
+        switch (move)
+        {
+            case "G":
+                robot.Pos = _routes[i].Dequeue();
+                break;
+            case "L":
+                TurnRobotLeft(robot);
+                break;
+            case "R":
+                TurnRobotRight(robot);
+                break;
+        }
+        //write to log??
     }
 
     public void CalculateRoutes()
