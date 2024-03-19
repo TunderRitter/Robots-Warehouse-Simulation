@@ -82,7 +82,7 @@ public class Scheduler
         (int X, int Y) pos_to = _routes[i].Peek();
         (int X, int Y) pos_from = robot.Pos;
 
-        bool remove = false; //csak akkor kell dequeue ha nem kell fordulnia a robotnak
+        string actual_path = "";
 
         if(pos_from.X == pos_to.X)
         {
@@ -91,17 +91,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.W:
-                        //odaléphet, vele szembe van
-                        remove = true;
+                        actual_path = "G";
                         break;
                     case Direction.S:
-                        //TurnRobotRight(robot);
+                        actual_path = "R";
                         break;
                     case Direction.E:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                 }
             }
@@ -110,17 +109,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        //TurnRobotRight(robot);
+                        actual_path = "R";
                         break;
                     case Direction.W:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.S:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.E:
-                        //odaléphet, vele szembe van
-                        remove = true;
+                        actual_path = "G";
                         break;
                 }
             }
@@ -132,17 +130,16 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        //odaléphet, vele szembe van
-                        remove = true;
+                        actual_path = "G";
                         break;
                     case Direction.W:
-                        //TurnRobotRight(robot);
+                        actual_path = "R";
                         break;
                     case Direction.S:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.E:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                 }
             }
@@ -151,23 +148,22 @@ public class Scheduler
                 switch (robot.Direction)
                 {
                     case Direction.N:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.W:
-                        //TurnRobotLeft(robot);
+                        actual_path = "L";
                         break;
                     case Direction.S:
-                        //odaléphet, vele szembe van
-                        remove = true;
+                        actual_path = "G";
                         break;
                     case Direction.E:
-                        //TurnRobotRight(robot);
+                        actual_path = "R";
                         break;
                 }
             }
         }
 
-        if (remove) _routes[i].Dequeue();
+        ExecuteStep(robot, i, actual_path);
     }
 
     public void ExecuteStep()
