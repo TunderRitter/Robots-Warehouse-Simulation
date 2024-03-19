@@ -45,7 +45,13 @@ public class Scheduler
 
     public void AssignTask(Robot robot)
     {
-
+        robot.TargetPos = null;
+        if(_targets.Count > 0)
+        {
+            (int X, int Y) pos = _targets.Dequeue();
+            robot.TargetPos.X = pos.X;
+            robot.TargetPos.Y = pos.Y;
+        }
     }
 
     public void CalculateStep()
