@@ -23,8 +23,6 @@ public class Scheduler
 
     }
 
-
-
     private void TurnRobotLeft(Robot robot)
     {
         robot.TurnLeft();
@@ -37,7 +35,7 @@ public class Scheduler
 
     private void Robot_Finished(object? sender, int e)
     {
-
+        AssignTask(sender);
     }
 
     public void RemoveTarget(Target target)
