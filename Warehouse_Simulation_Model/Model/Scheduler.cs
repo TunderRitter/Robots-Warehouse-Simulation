@@ -38,9 +38,9 @@ public class Scheduler
 
         while(_targets.Count > 0 && Steps >= _to_step) ;
         {
-            foreach (Robot robot in _robots)
+            for (int i = 0; i < _robots.Count; i++)
             {
-                CalculateStep(robot);
+                CalculateStep(_robots[i], i);
             }
             //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
         }
@@ -74,9 +74,28 @@ public class Scheduler
         }
     }
 
-    public void CalculateStep()
+    public void CalculateStep(Robot robot, int i)
     {
+        (int X, int Y) pos_to = _routes[i][0];
+        (int X, int Y) pos_from = robot.Pos;
 
+        if(pos_from.X == pos_to.X)
+        {
+            if(pos_from.Y == pos_to.Y - 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        //TurnRobotLeft(robot);
+                    case Direction.W:
+                        //odaléphet, vele szembe van
+                    case Direction.S:
+                        //TurnRobotRight(robot);
+                    case Direction.E:
+                        //TurnRobotLeft(robot);
+                }
+            }
+        }
     }
 
     public void ExecuteStep()
