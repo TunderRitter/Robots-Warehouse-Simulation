@@ -1,4 +1,5 @@
 ﻿using Warehouse_Simulation_Model.Persistence;
+using System.Timers;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -12,6 +13,7 @@ public class Scheduler
     private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _method;
     private readonly AStar _astar;
+    private readonly int _to_step;
 
     private Cell[,] _map;
     public Cell[,] Map => _map; // Encapsulation!
@@ -20,10 +22,31 @@ public class Scheduler
 
     public Scheduler(int mapWidth, int mapHeight, Robot[] robots, double timeLimit, Log log, ITaskAssigner method)
     {
-
+        Schedule();
     }
 
+    private void Schedule()
+    {
+        //System.Timers.Timer timer = new System.Timers.Timer();
 
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            AssignTask(_robots[i]);
+        }
+
+        CalculateRoutes();
+
+        while(_targets.Count > 0 && Steps >= _to_step) ;
+        {
+            for (int i = 0; i < _robots.Length; i++)
+            {
+                CalculateStep(_robots[i], i);
+            }
+            //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
+        }
+
+        //System.Threading.Thread.Sleep(1000);
+    }
 
     private void TurnRobotLeft(Robot robot)
     {
@@ -37,27 +60,124 @@ public class Scheduler
 
     private void Robot_Finished(object? sender, int e)
     {
-
-    }
-
-    public void RemoveTarget(Target target)
-    {
-
+        if (sender != null && sender is Robot robot) AssignTask(robot);
     }
 
     public void AssignTask(Robot robot)
     {
-
+        robot.TargetPos = null;
+        if(_targets.Count > 0)
+        {
+            Target target = _targets.Dequeue();
+            (int X, int Y) pos = target.Pos;
+            robot.TargetPos = (pos.X, pos.Y);
+        }
     }
 
-    public void CalculateStep()
+    public void CalculateStep(Robot robot, int i)
     {
+        (int X, int Y) pos_to = _routes[i].Peek();
+        (int X, int Y) pos_from = robot.Pos;
 
+        string move = "";
+
+        if(pos_from.X == pos_to.X)
+        {
+            if(pos_from.Y == pos_to.Y - 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        move = "L";
+                        break;
+                    case Direction.W:
+                        move = "G";
+                        break;
+                    case Direction.S:
+                        move = "R";
+                        break;
+                    case Direction.E:
+                        move = "L";
+                        break;
+                }
+            }
+            else if(pos_from.X == pos_to.Y + 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        move = "R";
+                        break;
+                    case Direction.W:
+                        move = "L";
+                        break;
+                    case Direction.S:
+                        move = "L";
+                        break;
+                    case Direction.E:
+                        move = "G";
+                        break;
+                }
+            }
+        }
+        else if(pos_from.Y == pos_to.Y)
+        {
+            if(pos_from.X == pos_to.X - 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        move = "G";
+                        break;
+                    case Direction.W:
+                        move = "R";
+                        break;
+                    case Direction.S:
+                        move = "L";
+                        break;
+                    case Direction.E:
+                        move = "L";
+                        break;
+                }
+            }
+            else if(pos_from.X == pos_to.X + 1)
+            {
+                switch (robot.Direction)
+                {
+                    case Direction.N:
+                        move = "L";
+                        break;
+                    case Direction.W:
+                        move = "L";
+                        break;
+                    case Direction.S:
+                        move = "G";
+                        break;
+                    case Direction.E:
+                        move = "R";
+                        break;
+                }
+            }
+        }
+
+        ExecuteStep(robot, i, move);
     }
 
-    public void ExecuteStep()
+    public void ExecuteStep(Robot robot, int i, String move)
     {
-
+        switch (move)
+        {
+            case "G":
+                robot.Pos = _routes[i].Dequeue();
+                break;
+            case "L":
+                TurnRobotLeft(robot);
+                break;
+            case "R":
+                TurnRobotRight(robot);
+                break;
+        }
+        //write to log??
     }
 
     public void CalculateRoutes()
@@ -78,7 +198,7 @@ public class Scheduler
 
     public void AddTarget(int x, int y)
     {
-
+        _targets.Enqueue(new Target((x, y)));
     }
 
 }
