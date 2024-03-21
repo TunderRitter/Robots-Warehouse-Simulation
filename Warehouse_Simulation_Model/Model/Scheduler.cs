@@ -60,10 +60,7 @@ public class Scheduler
 
     private void Robot_Finished(object? sender, int e)
     {
-        if (sender != null)
-        {
-            if (sender.GetType() == typeof(Robot)) AssignTask(sender); //megnézem hogy robot-e és null-e de még mindig rinyál
-        }
+        if (sender != null && sender is Robot robot) AssignTask(robot);
     }
 
     public void AssignTask(Robot robot)
