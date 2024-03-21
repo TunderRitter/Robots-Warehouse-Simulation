@@ -91,7 +91,7 @@ public class MainViewModel : INotifyPropertyChanged
         set { _zoomValue = value; OnPropertyChanged(nameof(ZoomValue)); }
     }
 
-
+    public event EventHandler? ExitGame;
 
 
     public ObservableCollection<CellState> Cells { get; private set; }
@@ -105,12 +105,16 @@ public class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel(Scheduler scheduler)
     {
-        Zoom = new DelegateCommand(ZoomMethod);
         ZoomValue = 1;
         _scheduler = scheduler;
 
-        Cells = new ObservableCollection<CellState>();
+        Zoom = new DelegateCommand(ZoomMethod);
+        NewSimulation = new DelegateCommand(param => OnNewSimulation());
+        LoadReplay = new DelegateCommand(param => OnReplay());
+        Exit = new DelegateCommand(param => OnExitGame());
 
+
+        Cells = new ObservableCollection<CellState>();
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
             for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
@@ -147,9 +151,21 @@ public class MainViewModel : INotifyPropertyChanged
                 }
             }
         }
+    }
 
+    private void OnNewSimulation()
+    {
 
+    }
 
+    private void OnReplay()
+    {
+
+    }
+
+    private void OnExitGame()
+    {
+        ExitGame?.Invoke(this, EventArgs.Empty);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
