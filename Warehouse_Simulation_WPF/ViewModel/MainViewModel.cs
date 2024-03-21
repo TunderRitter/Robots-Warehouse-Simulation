@@ -41,48 +41,30 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private int _mapHeight;
 
-    private String _menu = "Visible";
-    public String Menu
+    public int MapHeight
     {
-        get { return _menu; }
-        set
-        {
-            if (_menu != value)
-            {
-                _menu = value;
-                OnPropertyChanged(nameof(Menu));
-            }
-        }
+        get { return _mapHeight; }
+        set { _mapHeight = value; OnPropertyChanged(nameof(MapHeight)); }
     }
 
-    private String _simulation = "Collapsed";
-    public String Simulation
+    private int _cellSize;
+
+    public int CellSize
     {
-        get { return _simulation; }
-        set
-        {
-            if (_simulation != value)
-            {
-                _simulation = value;
-                OnPropertyChanged(nameof(Simulation));
-            }
-        }
+        get { return _cellSize; }
+        set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
+    }
+    private int _circleSize;
+
+    public int CircleSize
+    {
+        get { return _circleSize; }
+        set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
     }
 
-    private String _replay = "Collapsed";
-    public String Replay
-    {
-        get { return _replay; }
-        set
-        {
-            if (_replay != value)
-            {
-                _replay = value;
-                OnPropertyChanged(nameof(Replay));
-            }
-        }
-    }
+
 
     private int _zoomValue;
     public int ZoomValue
@@ -132,6 +114,13 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+    private void CalculateHeight()
+    {
+        int height = (int)SystemParameters.PrimaryScreenHeight - 200;
+        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
+        CellSize = height / _scheduler.Map.GetLength(0);
+        CircleSize = CellSize - 10;
+    }
 
     private void ZoomMethod(object? parameter)
     {
@@ -169,6 +158,8 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler? NewSimulationStarted;
+    
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

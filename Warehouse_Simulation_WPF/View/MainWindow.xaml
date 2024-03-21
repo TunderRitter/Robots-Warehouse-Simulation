@@ -29,6 +29,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style TargetType="Rectangle">
+            <Setter Property="Height" Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}"/>
+            <Setter Property="Width" Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}"/>
+        </Style>
+        <Style TargetType="Ellipse">
+            <Setter Property="Height" Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}"/>
+            <Setter Property="Width" Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -49,11 +57,13 @@
                     Click="ReplayButton_Click"/>
         </Grid>
         <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
+            
             <Grid.RowDefinitions>
                 <RowDefinition Height="80"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
+            
             <Button Content="+" Command="{Binding Path=Zoom}"
                 CommandParameter="Up" Width="30"
                 Margin="30,30,0,0"
@@ -66,12 +76,11 @@
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                    
                     Grid.Row="1"
-                 
                     Background="LightGray" Height="500" Width="800"
-                          Margin="50,0,0,0" HorizontalAlignment="Left"
-                          VerticalAlignment="Top">
+                    Margin="50,0,0,0" HorizontalAlignment="Left"
+                    VerticalAlignment="Top">
+                
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
 
                     <StackPanel.LayoutTransform>
@@ -82,26 +91,27 @@
 
                         <TextBlock Text="test"></TextBlock>
                         <ItemsControl ItemsSource="{Binding Path=Cells}">
+                            
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
                                     Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
+                            
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Height="30" Width="30">
                                         <Rectangle
-                                            Height="30" Width="30"
+                                            
                                             Grid.Row="0"
                                             Fill="{Binding Square}"/>
                                         <Ellipse
-                                            Height="30" Width="30"
+                                            
                                             Grid.Row="0"
                                             Fill="{Binding Circle}"/>
                                     </Grid>
                                 </DataTemplate>
-
                             </ItemsControl.ItemTemplate>
                             <ItemsControl.ItemContainerStyle>
                                 <Style>
