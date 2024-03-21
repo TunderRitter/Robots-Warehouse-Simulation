@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Media;
 
 namespace Warehouse_Simulation_WPF.ViewModel
 {
@@ -41,8 +42,8 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        private Color _square;
-        public Color Square
+        private Brush _square;
+        public Brush Square
         {
             get { return _square; }
             set
@@ -55,8 +56,8 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        private Color _circle;
-        public Color Circle
+        private Brush _circle;
+        public Brush Circle
         {
             get { return _circle; }
             set
@@ -83,7 +84,7 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        public CellState(String id, Color cirlce, Color square, int x, int y)
+        public CellState(String id, Brush cirlce, Brush square, int x, int y)
         {
             _x = x;
             _y = y;
