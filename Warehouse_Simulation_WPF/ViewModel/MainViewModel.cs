@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media;
 using Warehouse_Simulation_Model.Model;
 
 namespace Warehouse_Simulation_WPF.ViewModel;
@@ -10,6 +11,8 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
+    Scheduler _scheduler;
+
     private int _row;
     public int Row
     {
@@ -40,9 +43,9 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     private String _menu = "Visible";
-	public String Menu
-	{
-		get { return _menu; }
+    public String Menu
+    {
+        get { return _menu; }
         set
         {
             if (_menu != value)
@@ -88,7 +91,7 @@ public class MainViewModel : INotifyPropertyChanged
         set { _zoomValue = value; OnPropertyChanged(nameof(ZoomValue)); }
     }
 
-
+    public event EventHandler? ExitGame;
 
 
     public ObservableCollection<CellState> Cells { get; private set; }
@@ -100,10 +103,34 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand Zoom { get; private set; }
 
 
-    public MainViewModel() 
+    public MainViewModel(Scheduler scheduler)
     {
-        Zoom = new DelegateCommand(ZoomMethod);
         ZoomValue = 1;
+        _scheduler = scheduler;
+
+        Zoom = new DelegateCommand(ZoomMethod);
+        NewSimulation = new DelegateCommand(param => OnNewSimulation());
+        LoadReplay = new DelegateCommand(param => OnReplay());
+        Exit = new DelegateCommand(param => OnExitGame());
+
+
+        Cells = new ObservableCollection<CellState>();
+        for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
+        {
+            for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
+            {
+                Cell cell = _scheduler.Map[i, j];
+                String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+                Cells.Add(new CellState
+                {
+                    X = i,
+                    Y = j,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    Square = (cell is Floor) ? Brushes.White : Brushes.Black,
+                    Id = id == null ? String.Empty : id
+                }) ;
+            }
+        }
     }
 
     private void ZoomMethod(object? parameter)
@@ -124,9 +151,21 @@ public class MainViewModel : INotifyPropertyChanged
                 }
             }
         }
-        
-       
-       
+    }
+
+    private void OnNewSimulation()
+    {
+
+    }
+
+    private void OnReplay()
+    {
+
+    }
+
+    private void OnExitGame()
+    {
+        ExitGame?.Invoke(this, EventArgs.Empty);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
