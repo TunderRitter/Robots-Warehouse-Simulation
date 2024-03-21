@@ -84,17 +84,6 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        public CellState(String id, Brush cirlce, Brush square, int x, int y)
-        {
-            _x = x;
-            _y = y;
-            _square = square;
-            _id = id;
-            _circle = cirlce;
-        }
-
-
-
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
