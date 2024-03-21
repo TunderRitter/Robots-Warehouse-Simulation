@@ -15,10 +15,12 @@ public static class ConfigReader
             (int, int)[] targets = ReadCoordinates(config.taskFile, map);
             return new SchedulerData
             {
+                Map = map,
                 Robots = robots,
                 Targets = targets,
+                TeamSize = config.TeamSize,
                 TasksSeen = config.numTasksReveal,
-                Map = map,
+                Strategy = config.taskAssignmentStrategy,
             };
         }
         catch (Exception)
