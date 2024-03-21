@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Width="500" Height="300"
         Title="MainWindow">
+
     <Grid>
-        <Grid Name="MenuGrid" Grid.Row="0" Background="LightGray"
-              Visibility="{Binding Path=Menu, UpdateSourceTrigger=PropertyChanged}">
+        <Grid x:Name="MenuGrid" Grid.Row="0" Background="LightGray">
             <TextBlock Name="Title" Text="Warehouse simulator"
                         FontSize="20"
                        VerticalAlignment="Top" HorizontalAlignment="Center"
@@ -25,30 +25,75 @@
                     HorizontalAlignment="Right" VerticalAlignment="Top"
                     Click="MenuButton_Click"/>
         </Grid>
-        <Grid Name="SimulationGrid" Visibility="{Binding Path=Simulation}">
-            <ItemsControl ItemsSource="{Binding Path=Cells}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
-                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Rectangle Height="30" Width="30">
+        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+            <Button Content="+" Command="{Binding Path=Zoom}"
+                CommandParameter="Up"
+                Margin="30,30,0,0"
+                    Grid.Row="2"
+                HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Button Content="-" Command="{Binding Path=Zoom}"
+                CommandParameter="Down" 
+                Margin="100,30,0,0"
+                    Grid.Row="2"
+                HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
-                        </Rectangle>
-                    </DataTemplate>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                    
+                    Grid.Row="1"
+                 
+                    Background="LightGray" Height="500" Width="800"
+                          Margin="50,0,0,0" HorizontalAlignment="Left"
+                          VerticalAlignment="Top">
+                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
 
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style>
-                        <Setter Property="Grid.Row" Value="{Binding X}" />
-                        <Setter Property="Grid.Column" Value="{Binding Y}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
+                    <StackPanel.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}" ScaleY="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel.LayoutTransform>
 
-            </ItemsControl>
+                    <Grid x:Name="SimulationGrid">
+
+                        <TextBlock Text="aaaaaaaaaaaaaaaaaaa"></TextBlock>
+                        <ItemsControl ItemsSource="{Binding Path=Cells}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
+                                    Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="30" Width="30">
+                                        <Rectangle
+                                            Height="30" Width="30"
+                                            Grid.Row="0"
+                                            Fill="{Binding Square}"/>
+                                        <Ellipse
+                                            Height="30" Width="30"
+                                            Grid.Row="0"
+                                            Fill="{Binding Circle}"/>
+                                    </Grid>
+                                </DataTemplate>
+
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="Grid.Row" Value="{Binding X}" />
+                                    <Setter Property="Grid.Column" Value="{Binding Y}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+
+                        </ItemsControl>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
+        
+        
+            
     </Grid>
 </Window>

@@ -14,6 +14,10 @@ public partial class MainWindow : Window
     private void MenuButton_Click(object sender, EventArgs e)
     {
         this.WindowState = WindowState.Maximized;
+        MenuGrid.Visibility = Visibility.Collapsed;
+        SimGrid.Visibility = Visibility.Visible;
     }
+
+
 
 }
