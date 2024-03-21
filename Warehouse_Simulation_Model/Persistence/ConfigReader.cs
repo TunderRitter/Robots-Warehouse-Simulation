@@ -36,7 +36,7 @@ public static class ConfigReader
             int Height = int.Parse(Lines[1].Split(" ")[1]);
             int Width = int.Parse(Lines[2].Split(" ")[1]);
             bool[,] Map = new bool[Height, Width];
-            if (Map.GetLength(1) == 0 || Map.GetLength(0) == 0) throw new ArgumentOutOfRangeException("Map must be at least 1x1");
+            if (Map.GetLength(1) == 0 || Map.GetLength(0) == 0) throw new ArgumentException("Map must be at least 1x1");
             if (Lines.Length - 4 != Height)
             {
                 throw new ArgumentException("The number of lines in the map doesn't match the height.");
