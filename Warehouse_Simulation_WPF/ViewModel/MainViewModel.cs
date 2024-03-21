@@ -42,47 +42,11 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
 
-    private String _menu = "Visible";
-    public String Menu
-    {
-        get { return _menu; }
-        set
-        {
-            if (_menu != value)
-            {
-                _menu = value;
-                OnPropertyChanged(nameof(Menu));
-            }
-        }
-    }
+    
 
-    private String _simulation = "Collapsed";
-    public String Simulation
-    {
-        get { return _simulation; }
-        set
-        {
-            if (_simulation != value)
-            {
-                _simulation = value;
-                OnPropertyChanged(nameof(Simulation));
-            }
-        }
-    }
+    
 
-    private String _replay = "Collapsed";
-    public String Replay
-    {
-        get { return _replay; }
-        set
-        {
-            if (_replay != value)
-            {
-                _replay = value;
-                OnPropertyChanged(nameof(Replay));
-            }
-        }
-    }
+    
 
     private int _zoomValue;
     public int ZoomValue
