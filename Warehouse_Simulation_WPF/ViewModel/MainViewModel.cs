@@ -56,6 +56,13 @@ public class MainViewModel : INotifyPropertyChanged
         get { return _cellSize; }
         set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
     }
+    private int _circleSize;
+
+    public int CircleSize
+    {
+        get { return _circleSize; }
+        set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
+    }
 
 
 
@@ -112,6 +119,7 @@ public class MainViewModel : INotifyPropertyChanged
         int height = (int)SystemParameters.PrimaryScreenHeight - 200;
         MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
         CellSize = height / _scheduler.Map.GetLength(0);
+        CircleSize = CellSize - 10;
     }
 
     private void ZoomMethod(object? parameter)
