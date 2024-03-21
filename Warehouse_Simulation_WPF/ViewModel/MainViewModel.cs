@@ -41,12 +41,23 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private int _mapHeight;
 
-    
+    public int MapHeight
+    {
+        get { return _mapHeight; }
+        set { _mapHeight = value; OnPropertyChanged(nameof(MapHeight)); }
+    }
 
-    
+    private int _cellSize;
 
-    
+    public int CellSize
+    {
+        get { return _cellSize; }
+        set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
+    }
+
+
 
     private int _zoomValue;
     public int ZoomValue
@@ -96,6 +107,12 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+    private void CalculateHeight()
+    {
+        int height = (int)SystemParameters.PrimaryScreenHeight - 200;
+        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
+        CellSize = height / _scheduler.Map.GetLength(0);
+    }
 
     private void ZoomMethod(object? parameter)
     {
@@ -133,6 +150,8 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler? NewSimulationStarted;
+    
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
