@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media;
 using Warehouse_Simulation_Model.Model;
 
 namespace Warehouse_Simulation_WPF.ViewModel;
@@ -10,6 +11,8 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
+    Scheduler _scheduler;
+
     private int _row;
     public int Row
     {
@@ -40,9 +43,9 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     private String _menu = "Visible";
-	public String Menu
-	{
-		get { return _menu; }
+    public String Menu
+    {
+        get { return _menu; }
         set
         {
             if (_menu != value)
@@ -100,10 +103,29 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand Zoom { get; private set; }
 
 
-    public MainViewModel() 
+    public MainViewModel(Scheduler scheduler)
     {
         Zoom = new DelegateCommand(ZoomMethod);
         ZoomValue = 1;
+        _scheduler = scheduler;
+
+        Cells = new ObservableCollection<CellState>();
+
+        for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
+        {
+            for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
+            {
+                Cell cell = _scheduler.Map[i, j];
+                Cells.Add(new CellState
+                {
+                    X = i,
+                    Y = j,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    Square = (cell is Floor) ? Brushes.White : Brushes.Black,
+                    Id = (cell is Floor place) ? (place.Robot == null ? (place.Target == null ? String.Empty : place.Target.Id.ToString()) : place.Robot.Id.ToString()) : String.Empty
+                }); ;
+            }
+        }
     }
 
     private void ZoomMethod(object? parameter)
@@ -124,9 +146,9 @@ public class MainViewModel : INotifyPropertyChanged
                 }
             }
         }
-        
-       
-       
+
+
+
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
