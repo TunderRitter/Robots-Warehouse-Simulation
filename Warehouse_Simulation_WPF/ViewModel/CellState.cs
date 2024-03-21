@@ -69,8 +69,8 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        private int _id;
-        public int Id
+        private String _id;
+        public String Id
         {
             get { return _id; }
             set
@@ -83,6 +83,14 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
+        public CellState(String id, Color cirlce, Color square, int x, int y)
+        {
+            _x = x;
+            _y = y;
+            _square = square;
+            _id = id;
+            _circle = cirlce;
+        }
 
 
 
