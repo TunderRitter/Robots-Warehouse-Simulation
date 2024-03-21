@@ -15,10 +15,12 @@ public static class ConfigReader
             (int, int)[] targets = ReadCoordinates(config.taskFile, map);
             return new SchedulerData
             {
+                Map = map,
                 Robots = robots,
                 Targets = targets,
+                TeamSize = config.TeamSize,
                 TasksSeen = config.numTasksReveal,
-                Map = map,
+                Strategy = config.taskAssignmentStrategy,
             };
         }
         catch (Exception)
@@ -32,11 +34,11 @@ public static class ConfigReader
         try
         {
             string FullContent = File.ReadAllText(path);
-            string[] Lines = FullContent.Split("\n");
+            string[] Lines = FullContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             int Height = int.Parse(Lines[1].Split(" ")[1]);
             int Width = int.Parse(Lines[2].Split(" ")[1]);
             bool[,] Map = new bool[Height, Width];
-            if (Map.GetLength(1) == 0 || Map.GetLength(0) == 0) throw new ArgumentOutOfRangeException("Map must be at least 1x1");
+            if (Map.GetLength(1) == 0 || Map.GetLength(0) == 0) throw new ArgumentException("Map must be at least 1x1");
             if (Lines.Length - 4 != Height)
             {
                 throw new ArgumentException("The number of lines in the map doesn't match the height.");
@@ -79,12 +81,12 @@ public static class ConfigReader
     {
         try
         {
-            int[] lines = Array.ConvertAll(File.ReadAllText(path).Split("\n", StringSplitOptions.RemoveEmptyEntries), int.Parse);
+            int[] lines = Array.ConvertAll(File.ReadAllText(path).Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries), int.Parse);
             if (lines[0] != lines.Length - 1) throw new ArgumentException("Number of coordinates does not match");
             (int row, int col)[] coors = new (int, int)[lines[0]];
-            for (int i = 1; i < coors.Length; i++)
+            for (int i = 0; i < coors.Length; i++)
             {
-                coors[i] = ConvertCoordinates(lines[i], map.GetLength(1));
+                coors[i] = ConvertCoordinates(lines[i + 1], map.GetLength(1));
                 if (coors[i].row < 0
                     || coors[i].row >= map.GetLength(0)
                     || coors[i].col < 0

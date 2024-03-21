@@ -1,20 +1,24 @@
-﻿namespace Warehouse_Simulation_Model.Persistence;
+﻿using System.Text.Json;
+
+namespace Warehouse_Simulation_Model.Persistence;
 
 
 public class Log
 {
-    public string actionModel;
-    public string AllValid;
-    public int teamSize;
-    public List<object[]> start;
-    public int numTaskFinished;
-    public int sumOfCost;
-    public int MakeSpan;
-    public List<string> actualPaths;
-    public List<string> plannerPaths;
-    public List<object[]> errors;
-    public List<object[]> events;
-    public List<int[]> tasks;
+    public string actionModel {  get; set; }
+    public string AllValid { get; set; }
+    public int teamSize { get; set; }
+    public List<object[]> start { get; set; }
+    public int numTaskFinished { get; set; }
+    public int sumOfCost { get; set; }
+    public int makespan { get; set; }
+    public List<string> actualPaths { get; set; }
+    public List<string> plannerPaths { get; set; }
+    public List<double> plannerTimes { get; set; }
+    public List<object[]> errors { get; set; }
+    public List<object[]> events { get; set; }
+    public List<int[]> tasks { get; set; }
+
 
     public Log()
     {
@@ -24,21 +28,37 @@ public class Log
         start = [];
         numTaskFinished = 0;
         sumOfCost = 0;
-        MakeSpan = 0;
+        makespan = 0;
         actualPaths = [];
         plannerPaths = [];
+        plannerTimes = [];
         errors = [];
         events = [];
         tasks = [];
     }
 
-    public Log Read(string filename)
+
+    public static Log Read(string path)
     {
-        return new Log();
+        try
+        {
+            return JsonSerializer.Deserialize<Log>(File.ReadAllText(path)) ?? throw new NullReferenceException();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
-    public Log Write(string filename)
+    public void Write(string path)
     {
-        return new Log();
+        try
+        {
+            File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
