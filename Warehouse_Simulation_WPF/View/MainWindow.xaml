@@ -8,6 +8,29 @@
         Width="500" Height="300"
         Title="MainWindow">
 
+    <Window.Resources>
+        <LinearGradientBrush x:Key="GradientBrush1"  
+                            StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="Gray" Offset="0"/>
+            <GradientStop Color="LightGray" Offset="0.5"/>
+            <GradientStop Color="Gray" Offset="1"/>
+        </LinearGradientBrush>
+        <Style TargetType="Button">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="15" Background="White" BorderThickness="1" Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid x:Name="MenuGrid" Grid.Row="0" Background="LightGray">
             <TextBlock Name="Title" Text="Warehouse simulator"
@@ -15,31 +38,31 @@
                        VerticalAlignment="Top" HorizontalAlignment="Center"
                        Margin="0,60,0,0"/>
             <Button x:Name="Simulation" Content="New simulation"
-                    Height="40" Width="100" 
+                    Height="40" Width="120" 
                     HorizontalAlignment="Left" VerticalAlignment="Top"
                     Margin="120,120,0,0"
-                    Click="MenuButton_Click"
+                    Click="SimulationButton_Click"
                     />
             <Button Name="Replay" Content="Start replay"
-                    Height="40" Width="100" Margin="0,120,120,0"
+                    Height="40" Width="120" Margin="0,120,120,0"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Click="MenuButton_Click"/>
+                    Click="ReplayButton_Click"/>
         </Grid>
-        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed">
+        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
             <Grid.RowDefinitions>
                 <RowDefinition Height="80"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <Button Content="+" Command="{Binding Path=Zoom}"
-                CommandParameter="Up"
+                CommandParameter="Up" Width="30"
                 Margin="30,30,0,0"
-                    Grid.Row="2"
+                    Grid.Row="0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <Button Content="-" Command="{Binding Path=Zoom}"
-                CommandParameter="Down" 
+                CommandParameter="Down" Width="30"
                 Margin="100,30,0,0"
-                    Grid.Row="2"
+                    Grid.Row="0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -57,7 +80,7 @@
 
                     <Grid x:Name="SimulationGrid">
 
-                        <TextBlock Text="aaaaaaaaaaaaaaaaaaa"></TextBlock>
+                        <TextBlock Text="test"></TextBlock>
                         <ItemsControl ItemsSource="{Binding Path=Cells}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -91,6 +114,10 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
+            <Grid x:Name="ReplayButtons" Grid.Row="1">
+                
+            </Grid>
+            <Slider x:Name="ReplaySLider" Grid.Row="2"></Slider>
         </Grid>
         
         
