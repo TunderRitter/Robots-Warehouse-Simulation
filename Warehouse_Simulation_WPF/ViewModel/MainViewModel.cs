@@ -116,14 +116,15 @@ public class MainViewModel : INotifyPropertyChanged
             for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
             {
                 Cell cell = _scheduler.Map[i, j];
+                String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
                     Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
                     Square = (cell is Floor) ? Brushes.White : Brushes.Black,
-                    Id = (cell is Floor place) ? (place.Robot == null ? (place.Target == null ? String.Empty : place.Target.Id.ToString()) : place.Robot.Id.ToString()) : String.Empty
-                }); ;
+                    Id = id == null ? String.Empty : id
+                }) ;
             }
         }
     }
