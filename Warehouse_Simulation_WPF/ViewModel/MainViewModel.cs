@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Warehouse_Simulation_Model.Model;
@@ -80,16 +81,53 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private int _zoomValue;
+    public int ZoomValue
+    {
+        get { return _zoomValue; }
+        set { _zoomValue = value; OnPropertyChanged(nameof(ZoomValue)); }
+    }
+
+
+
+
     public ObservableCollection<CellState> Cells { get; private set; }
 
     public DelegateCommand NewSimulation { get; private set; }
     public DelegateCommand LoadReplay { get; private set; }
     public DelegateCommand Exit { get; private set; }
 
+    public DelegateCommand Zoom { get; private set; }
 
 
+    public MainViewModel() 
+    {
+        Zoom = new DelegateCommand(ZoomMethod);
+        ZoomValue = 1;
+    }
 
-    public MainViewModel() { }
+    private void ZoomMethod(object? parameter)
+    {
+        if (parameter != null)
+        {
+            string? p = parameter.ToString();
+            if (p != null)
+            {
+                switch (p)
+                {
+                    case "Up":
+                        ZoomValue = Math.Min(8, ZoomValue + 1);
+                        break;
+                    case "Down":
+                        ZoomValue = Math.Max(1, ZoomValue - 1);
+                        break;
+                }
+            }
+        }
+        
+       
+       
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
