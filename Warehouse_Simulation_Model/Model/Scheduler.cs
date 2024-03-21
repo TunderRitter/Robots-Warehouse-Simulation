@@ -96,8 +96,19 @@ public class Scheduler
 
     public void AssignTasks()
     {
-        
-    }
+		Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
+		int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
+		Robot[] free = new Robot[len];
+		Array.Copy(freeAll, free, len);
+
+		Target[] targets = new Target[len];
+		for (int i = 0; i < len; i++)
+		{
+			targets[i] = _targets.Dequeue();
+		}
+
+		_strategy.Assign(free, targets);
+	}
 
     public void CalculateStep(Robot robot, int i)
     {
