@@ -56,5 +56,9 @@ public class Robot
         }
     }
 
-    private void OnFinished() => Finished?.Invoke(this, Id);
+    private void OnFinished()
+    {
+        TargetPos = null;
+        Finished?.Invoke(this, Id);
+    }
 }
