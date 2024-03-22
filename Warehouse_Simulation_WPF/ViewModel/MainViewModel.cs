@@ -42,7 +42,6 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     private int _mapHeight;
-
     public int MapHeight
     {
         get { return _mapHeight; }
@@ -50,22 +49,17 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     private int _cellSize;
-
     public int CellSize
     {
         get { return _cellSize; }
         set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
     }
     private int _circleSize;
-
     public int CircleSize
     {
         get { return _circleSize; }
         set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
     }
-
-
-
     private int _zoomValue;
     public int ZoomValue
     {
@@ -89,6 +83,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         ZoomValue = 1;
         _scheduler = scheduler;
+        _scheduler.ChangeOccurred += _scheduler_ChangeOccurred;
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
@@ -114,6 +109,15 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    private void _scheduler_ChangeOccurred(object? sender, EventArgs e)
+    {
+        if (_scheduler != null)
+        {
+            //itt frissítünk minden propertyt a viewmodellben
+        }
+    }
+
     private void CalculateHeight()
     {
         int height = (int)SystemParameters.PrimaryScreenHeight - 200;
@@ -144,7 +148,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnNewSimulation()
     {
-
+        NewSimulationStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnReplay()

@@ -20,6 +20,10 @@ public class Scheduler
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int Steps { get; private set; }
 
+    //Fontos!!!
+    //Minden függvényben hívjátok meg pls, mert ez értesíti a viewmodelt MINDEN változásról a schedulerben!!!!
+    public event EventHandler? ChangeOccurred;
+
 
     public Scheduler(SchedulerData data)
     {
