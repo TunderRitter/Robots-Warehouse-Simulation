@@ -64,6 +64,8 @@ public class Scheduler
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
 
+        ChangeOccurred?.Invoke(this, EventArgs.Empty);
+
         AssignTasks();
 
         Schedule();
