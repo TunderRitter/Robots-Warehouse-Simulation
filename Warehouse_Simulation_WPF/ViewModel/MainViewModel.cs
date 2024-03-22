@@ -43,6 +43,8 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public int HeightOfWIndow { get; set; }
+
     private int _mapHeight;
     public int MapHeight
     {
@@ -131,7 +133,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void CalculateHeight()
     {
         if (_scheduler == null) return;
-        int height = 600;
+        int height = (int)System.Windows.SystemParameters.PrimaryScreenHeight - 200;
         MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
         CellSize = MapHeight / _scheduler.Map.GetLength(0);
         CircleSize = CellSize - 10;
@@ -151,7 +153,8 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     X = i,
                     Y = j,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.DarkSeaGreen : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.White)) : Brushes.Black,
                     Square = (cell is Floor) ? Brushes.White : Brushes.Black,
                     Id = id == null ? String.Empty : id
                 });

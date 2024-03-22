@@ -64,11 +64,12 @@ public class Scheduler
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
 
-        ChangeOccurred?.Invoke(this, EventArgs.Empty);
 
-        AssignTasks();
+        //innen majd szedjétek ki a kikommentelést!!!
 
-        Schedule();
+        //AssignTasks();
+
+        //Schedule();
     }
 
     private void Schedule()
@@ -82,7 +83,7 @@ public class Scheduler
 
         CalculateRoutes();
 
-        while(_targets.Count > 0 && Steps >= _steps) ;
+        while(_targets.Count > 0 && Steps >= _steps) 
         {
             for (int i = 0; i < _robots.Length; i++)
             {

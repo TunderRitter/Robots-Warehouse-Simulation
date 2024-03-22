@@ -61,12 +61,12 @@
         <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
             
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="75"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="800"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             
@@ -86,7 +86,7 @@
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                     Grid.Row="1"
                     Grid.Column="0"
-                    Background="LightGray" Height="500" Width="800"
+                    Background="LightGray" Height="auto" Width="auto"
                     Margin="50,0,0,0" HorizontalAlignment="Left"
                     VerticalAlignment="Top">
                 
@@ -100,12 +100,13 @@
 
                         <ItemsControl ItemsSource="{Binding Path=Cells}" 
                                       Width="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
-                                      Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}">
+                                      Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
+                                      Background="Black">
                             
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
-                                    Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
+                                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             
@@ -114,11 +115,18 @@
                                     <Grid Height="auto" Width="auto">
                                         <Rectangle
                                             Grid.Row="0"
-                                            Fill="{Binding Square}"/>
+                                            Fill="{Binding Square}"
+                                            />
                                         <Ellipse
-                                            
                                             Grid.Row="0"
-                                            Fill="{Binding Circle}"/>
+                                            Fill="{Binding Circle}"
+                                            />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Text="{Binding Id}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -136,7 +144,7 @@
             <Grid x:Name="ReplayButtons" Grid.Row="1" Grid.Column="1">
                 
             </Grid>
-            <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0"></Slider>
+            <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0" Visibility="Collapsed"></Slider>
         </Grid>
         
         
