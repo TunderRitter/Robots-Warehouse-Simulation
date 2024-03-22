@@ -18,7 +18,7 @@ public static class ConfigReader
                 Map = map,
                 Robots = robots,
                 Targets = targets,
-                TeamSize = config.TeamSize,
+                TeamSize = config.teamSize,
                 TasksSeen = config.numTasksReveal,
                 Strategy = config.taskAssignmentStrategy,
             };

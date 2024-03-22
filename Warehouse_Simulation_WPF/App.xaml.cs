@@ -13,8 +13,8 @@ namespace Warehouse_Simulation_WPF;
 /// </summary>
 public partial class App : Application
 {
-    private readonly MainWindow _view = null!;
-    private readonly MainViewModel _viewModel = null!;
+    private MainWindow _view = null!;
+    private MainViewModel _viewModel = null!;
     private Scheduler _model = null!;
     public App()
     {
