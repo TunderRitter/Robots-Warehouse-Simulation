@@ -50,11 +50,13 @@
                     HorizontalAlignment="Left" VerticalAlignment="Top"
                     Margin="120,120,0,0"
                     Click="SimulationButton_Click"
+                    Command="{Binding Path=NewSimulation}"
                     />
             <Button Name="Replay" Content="Start replay"
                     Height="40" Width="120" Margin="0,120,120,0"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Click="ReplayButton_Click"/>
+                    Click="ReplayButton_Click"
+                    Command="{Binding Path=LoadReplay}"/>
         </Grid>
         <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
             
