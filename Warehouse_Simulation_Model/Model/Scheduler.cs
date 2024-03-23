@@ -22,7 +22,6 @@ public class Scheduler
     public int Steps { get; private set; }
 
     //Fontos!!!
-    //Minden függvényben hívjátok meg pls, mert ez értesíti a viewmodelt MINDEN változásról a schedulerben!!!!
     public event EventHandler? ChangeOccurred;
 
 
@@ -96,14 +95,15 @@ public class Scheduler
 
             endTime = DateTime.Now;
             Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
-            if(elapsedMillisecs < _timeLimit * 1000)
+            if(elapsedMillisecs < _timeLimit)
             {
-                Thread.Sleep((int)(_timeLimit * 1000 - elapsedMillisecs));
+                Thread.Sleep((int)(_timeLimit - elapsedMillisecs));
                 ChangeOccurred?.Invoke(this, new EventArgs());
             }
             else
             {
-                Thread.Sleep(Convert.ToInt32((Math.Floor(elapsedMillisecs / _timeLimit * 1000) +1) * _timeLimit));
+                Thread.Sleep(Convert.ToInt32((Math.Floor(elapsedMillisecs / _timeLimit) +1) * _timeLimit));
+                ChangeOccurred?.Invoke(this, new EventArgs());
             }
         }
     }
