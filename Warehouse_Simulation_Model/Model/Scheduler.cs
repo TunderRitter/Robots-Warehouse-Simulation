@@ -12,12 +12,12 @@ public class Scheduler
     private readonly ITaskAssigner _strategy;
     private readonly AStar _astar;
     private readonly double _timeLimit;
-    private readonly int _steps;
     private readonly int _teamSize;
     private bool _robotFreed;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
-    public int Steps { get; private set; }
+    public int MaxSteps { get; set; }
+    public int Step { get; private set; }
 
     //Fontos!!!
     public event EventHandler? ChangeOccurred;
@@ -66,9 +66,11 @@ public class Scheduler
         _astar = new AStar(data.Map);
 
         _timeLimit = 1000; // !!!
-        _steps = 10000; // !!!
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
+
+        MaxSteps = 10000; // !!!
+        Step = 0;
     }
 
     public void Schedule()
@@ -79,7 +81,7 @@ public class Scheduler
         AssignTasks();
         CalculateRoutes();
 
-        while(Steps >= _steps) 
+        while(Step < MaxSteps) 
         {
             if (_robotFreed)
             {
@@ -106,6 +108,8 @@ public class Scheduler
             {
                 // log
             }
+
+            Step++;
         }
     }
 
