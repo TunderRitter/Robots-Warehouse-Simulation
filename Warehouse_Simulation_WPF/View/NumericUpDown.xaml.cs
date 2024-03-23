@@ -66,4 +66,69 @@ public partial class NumericUpDown : UserControl
     {
         InitializeComponent();
     }
+
+
+	private void IncrementButton_Click(object sender, RoutedEventArgs e)
+	{
+		if (int.TryParse(numericTextBox.Text, out int value) && value < Max)
+			numericTextBox.Text = (++value).ToString();
+	}
+
+	private void DecrementButton_Click(object sender, RoutedEventArgs e)
+	{
+		if (int.TryParse(numericTextBox.Text, out int value) && value > Min)
+			numericTextBox.Text = (--value).ToString();
+	}
+
+	private void NumericTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+	{
+		if ((_selected || numericTextBox.Text == "") && e.Text == "0")
+		{
+			e.Handled = true;
+			return;
+		}
+		if (!int.TryParse(e.Text, out _))
+			e.Handled = true;
+		else
+			_selected = false;
+	}
+
+	private void NumericTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+	{
+		if (e.Key == Key.Space)
+			e.Handled = true;
+	}
+
+	private void NumericTextBox_SelectionChanged(object sender, RoutedEventArgs e)
+	{
+		if (numericTextBox.SelectionStart == 0 && numericTextBox.SelectionLength > 0)
+			_selected = true;
+	}
+
+	private void NumericTextBox_GotFocus(object sender, RoutedEventArgs e)
+	{
+		numericTextBox.SelectAll();
+		_selected = true;
+	}
+
+	private void NumericTextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+	{
+		if (!numericTextBox.IsKeyboardFocusWithin)
+		{
+			numericTextBox.Focus();
+			e.Handled = true;
+		}
+	}
+
+	private void NumericTextBox_LostFocus(object sender, RoutedEventArgs e)
+	{
+		if (int.TryParse(numericTextBox.Text, out int value))
+			numericTextBox.Text = Math.Clamp(value, Min, Max).ToString();
+		else if (numericTextBox.Text == "")
+			numericTextBox.Text = Default.ToString();
+		else
+			numericTextBox.Text = Max.ToString();
+	}
+
+	private void NumericTextBox_TextChanged(object sender, TextChangedEventArgs e) => Command?.Execute(numericTextBox.Text);
 }
