@@ -47,6 +47,7 @@ public class Scheduler
             Robot robot = new(i, data.Robots[i], Direction.N);
             _robots[i] = robot;
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
+            robot.Finished += Robot_Finished;
         }
         _targets = new Queue<Target>();
         foreach ((int row, int col) target in data.Targets)
@@ -89,6 +90,7 @@ public class Scheduler
             for (int i = 0; i < _robots.Length; i++)
             {
                 CalculateStep(_robots[i], i);
+                _robots[i].CheckPos();
             }
 
             //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
@@ -112,7 +114,7 @@ public class Scheduler
 
     private static void TurnRobotRight(Robot robot) => robot.TurnRight();
 
-    private void Robot_Finished(object? sender, int e) => _robotFreed = true;
+    private void Robot_Finished(object? sender, EventArgs e) => _robotFreed = true;
 
     public void AssignTasks()
     {

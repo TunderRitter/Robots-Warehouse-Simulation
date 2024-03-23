@@ -7,7 +7,7 @@ public class Robot
     public (int row, int col) Pos { get; set; }
     public (int row, int col)? TargetPos { get; set; }
     public Direction Direction { get; private set; }
-    public event EventHandler<int>? Finished;
+    public event EventHandler? Finished;
 
 
     public Robot(int id, (int, int) pos, Direction direction)
@@ -56,9 +56,14 @@ public class Robot
         }
     }
 
+    public void CheckPos()
+    {
+        if (Pos == TargetPos) OnFinished();
+    }
+
     private void OnFinished()
     {
         TargetPos = null;
-        Finished?.Invoke(this, Id);
+        Finished?.Invoke(this , EventArgs.Empty);
     }
 }
