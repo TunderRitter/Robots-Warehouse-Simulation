@@ -1,6 +1,4 @@
 ﻿using Warehouse_Simulation_Model.Persistence;
-using System.Timers;
-using System.Diagnostics;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -67,7 +65,7 @@ public class Scheduler
         _strategy = TaskAssignerFactory.Create(data.Strategy);
         _astar = new AStar(data.Map);
 
-        _timeLimit = 1; // !!!
+        _timeLimit = 1000; // !!!
         _steps = 10000; // !!!
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
@@ -118,9 +116,9 @@ public class Scheduler
     private void Robot_Finished(object? sender, EventArgs e)
     {
         _robotFreed = true;
-		if (sender is Robot robot)
-			((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
-	}
+        if (sender is Robot robot)
+            ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
+    }
 
     public void AssignTasks()
     {
@@ -238,9 +236,12 @@ public class Scheduler
 
     }
 
-    public void AddTarget(int x, int y)
+    public void AddTarget(int row, int col)
     {
-        _targets.Enqueue(new Target((x, y)));
-    }
+        if (Map[row, col] is Wall || (Map[row, col] is Floor floor && floor.Target != null)) return;
 
+        Target target = new((row, col));
+        _targets.Enqueue(target);
+        ((Floor)Map[row, col]).Target = target;
+    }
 }
