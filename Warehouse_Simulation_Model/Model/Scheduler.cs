@@ -1,5 +1,6 @@
 ﻿using Warehouse_Simulation_Model.Persistence;
 using System.Timers;
+using System.Diagnostics;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -56,43 +57,59 @@ public class Scheduler
 
         _log = new Log();
         _routes = new Queue<(int, int)>[data.Robots.Length];
+        for (int i = 0; i < data.Robots.Length; i++)
+        {
+            _routes[i] = new Queue<(int, int)>();
+        }
+
         _strategy = TaskAssignerFactory.Create(data.Strategy);
         _astar = new AStar(data.Map);
 
-        _timeLimit = 10; // !!!
-        _steps = 10; // !!!
+        _timeLimit = 1; // !!!
+        _steps = 10000; // !!!
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
-
-
-        //innen majd szedjétek ki a kikommentelést!!!
-
-        //AssignTasks();
-
-        //Schedule();
     }
 
-    private void Schedule()
+    public void Schedule()
     {
-        //System.Timers.Timer timer = new System.Timers.Timer();
-        if (_robotFreed)
-        {
-            AssignTasks();
-            _robotFreed = false;
-        }
+        System.Timers.Timer timer = new System.Timers.Timer();
 
+        DateTime startTime, endTime;
+        startTime = DateTime.Now;
+
+        AssignTasks();
         CalculateRoutes();
 
-        while(_targets.Count > 0 && Steps >= _steps) 
+        while(Steps >= _steps) 
         {
+            timer.Start();
+
+            if (_robotFreed)
+            {
+                AssignTasks();
+                _robotFreed = false;
+            }
+
             for (int i = 0; i < _robots.Length; i++)
             {
                 CalculateStep(_robots[i], i);
             }
-            //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
-        }
 
-        //System.Threading.Thread.Sleep(1000);
+            //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
+
+            endTime = DateTime.Now;
+            Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
+            if(elapsedMillisecs < _timeLimit * 1000)
+            {
+                Thread.Sleep((int)(_timeLimit * 1000 - elapsedMillisecs));
+                ChangeOccurred?.Invoke(this, new EventArgs());
+            }
+            else
+            {
+                Thread.Sleep(Convert.ToInt32((Math.Floor(elapsedMillisecs / _timeLimit * 1000) +1) * _timeLimit));
+            }
+        }
     }
 
     private static void TurnRobotLeft(Robot robot) => robot.TurnLeft();
