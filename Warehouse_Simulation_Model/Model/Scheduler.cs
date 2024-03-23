@@ -70,7 +70,7 @@ public class Scheduler
         _robotFreed = false;
 
         MaxSteps = 10000; // !!!
-        Step = 0;
+        Step = 1;
     }
 
     public void Schedule()
@@ -81,7 +81,7 @@ public class Scheduler
         AssignTasks();
         CalculateRoutes();
 
-        while(Step < MaxSteps) 
+        while(Step <= MaxSteps) 
         {
             if (_robotFreed)
             {
@@ -226,7 +226,7 @@ public class Scheduler
 
     public void CalculateRoutes()
     {
-        for (int i=0; i<_robots.Length; i++)
+        for (int i = 0; i < _robots.Length; i++)
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
             {
