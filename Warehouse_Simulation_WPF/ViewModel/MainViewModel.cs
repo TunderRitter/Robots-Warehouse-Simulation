@@ -79,6 +79,36 @@ public class MainViewModel : INotifyPropertyChanged
         set { _zoomValue = value; OnPropertyChanged(nameof(ZoomValue)); }
     }
 
+    private int _intValue;
+
+    public string IntValue
+    {
+        get { return _intValue.ToString(); }
+        set {
+            if (int.TryParse(value, out int val) && val != _intValue)
+            {
+                _intValue = val;
+                Debug.WriteLine(val);
+                OnPropertyChanged();
+            }
+        }
+    }
+    private int _stepValue;
+
+    public string StepValue
+    {
+        get { return _stepValue.ToString(); }
+        set {
+            if (int.TryParse(value, out int val) && val != _stepValue)
+            {
+                _stepValue = val;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+
+
     public event EventHandler? ExitGame;
 
 
@@ -91,17 +121,24 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand Exit { get; private set; }
 
     public DelegateCommand Zoom { get; private set; }
+    public DelegateCommand StepCommand { get; init; }
+    public DelegateCommand IntCommand { get; init; }
+
 
 
     public MainViewModel()
     {
         ZoomValue = 1;
+        IntValue = "1000";
+        StepValue = "100";
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
         StartSim = new DelegateCommand(param => OnSimStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
         Exit = new DelegateCommand(param => OnExitGame());
+        StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
+        IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
 
         Cells = new ObservableCollection<CellState>();
         
@@ -113,7 +150,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
-            CalculateHeight();
+            
             UpdateMap();
         }
     }
@@ -123,6 +160,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
+            CalculateHeight();
             _scheduler_ChangeOccurred(null, EventArgs.Empty);
             //Debug.WriteLine("scheduler kész");
 
@@ -188,6 +226,8 @@ public class MainViewModel : INotifyPropertyChanged
     private void OnSimStart()
     {
         if (_scheduler == null) return;
+        //_scheduler.Steps = _stepValue;
+        //_scheduler.TimeLimit = _intValue;
         _scheduler.Schedule();
     }
 

@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
-        xmlns:local="clr-namespace:Warehouse_Simulation_WPF"
+        
+        xmlns:local="clr-namespace:Warehouse_Simulation_WPF.View"
         mc:Ignorable="d"
         Width="500" Height="300"
         Title="MainWindow">
@@ -155,21 +156,34 @@
                 
             </Grid>
             <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0" Visibility="Collapsed"></Slider>
-            <Grid Grid.Row="1" Grid.Column="1">
+            <Grid Grid.Row="1" Grid.Column="1" Background="Thistle"
+                  Width="300" Height="150">
                 <TextBlock Text="Number of steps:"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
                            Margin="30,30,0,0"/>
-                
-                <TextBlock Text="Interval of steps:"
+                <local:NumericUpDown x:Name="stepNum"
+                     Default="100"
+                     Value="{Binding StepValue, Mode=TwoWay}"
+                     Command="{Binding SetNumericUpDownCommand}" 
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="240,30,0,0"/>
+                <TextBlock Text="Interval of steps (in milliseconds):"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
                            Margin="30,60,0,0"/>
-                
+                <local:NumericUpDown x:Name="intervalNum"
+                     Default="1000"
+                     Value="{Binding IntValue, Mode=TwoWay}"
+                     Command="{Binding SetNumericUpDownCommand}" 
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="240,60,0,0"/>
                 <Button Content="START" Width="100"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
-                        Margin="30,90,0,0"
+                        Margin="45,90,0,0"
                         Command="{Binding Path=StartSim}"/>
             </Grid>
             
