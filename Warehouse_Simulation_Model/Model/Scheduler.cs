@@ -98,16 +98,15 @@ public class Scheduler
             //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
 
             endTime = DateTime.Now;
-            Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
-            if(elapsedMillisecs < _timeLimit)
+            double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
+            int waitTime = (int)(elapsedMillisecs / _timeLimit);
+
+            Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
+            ChangeOccurred?.Invoke(this, EventArgs.Empty);
+
+            for (int i = 0; i < waitTime; i++)
             {
-                Thread.Sleep((int)(_timeLimit - elapsedMillisecs));
-                ChangeOccurred?.Invoke(this, new EventArgs());
-            }
-            else
-            {
-                Thread.Sleep(Convert.ToInt32((Math.Floor(elapsedMillisecs / _timeLimit) +1) * _timeLimit));
-                ChangeOccurred?.Invoke(this, new EventArgs());
+                // log
             }
         }
     }
@@ -116,7 +115,10 @@ public class Scheduler
 
     private static void TurnRobotRight(Robot robot) => robot.TurnRight();
 
-    private void Robot_Finished(object? sender, EventArgs e) => _robotFreed = true;
+    private void Robot_Finished(object? sender, EventArgs e)
+    {
+        _robotFreed = true;
+    }
 
     public void AssignTasks()
     {
@@ -201,15 +203,19 @@ public class Scheduler
         Robot robot = _robots[i];
         switch (move)
         {
-            case "G":
+            case "F":
+                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
                 robot.Pos = _routes[i].Dequeue();
+                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
                 break;
-            case "L":
+            case "C":
                 TurnRobotLeft(robot);
                 break;
             case "R":
                 TurnRobotRight(robot);
                 break;
+            default:
+                throw new InvalidOperationException("Invalid move");
         }
         //write to log??
     }
