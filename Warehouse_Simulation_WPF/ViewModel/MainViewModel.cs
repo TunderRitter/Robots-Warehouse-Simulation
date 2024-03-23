@@ -86,6 +86,8 @@ public class MainViewModel : INotifyPropertyChanged
 
     public DelegateCommand NewSimulation { get; private set; }
     public DelegateCommand LoadReplay { get; private set; }
+
+    public DelegateCommand StartSim { get; private set; }
     public DelegateCommand Exit { get; private set; }
 
     public DelegateCommand Zoom { get; private set; }
@@ -97,6 +99,7 @@ public class MainViewModel : INotifyPropertyChanged
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
+        StartSim = new DelegateCommand(param => OnSimStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
         Exit = new DelegateCommand(param => OnExitGame());
 
@@ -122,7 +125,7 @@ public class MainViewModel : INotifyPropertyChanged
             _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
             _scheduler_ChangeOccurred(null, EventArgs.Empty);
             //Debug.WriteLine("scheduler kész");
-            
+
         }
         catch (Exception)
         {
@@ -154,8 +157,8 @@ public class MainViewModel : INotifyPropertyChanged
                     X = i,
                     Y = j,
                     //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.DarkSeaGreen : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.White)) : Brushes.Black,
-                    Square = (cell is Floor) ? Brushes.White : Brushes.Black,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
+                    Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
                     Id = id == null ? String.Empty : id
                 });
             }
@@ -180,6 +183,12 @@ public class MainViewModel : INotifyPropertyChanged
                 }
             }
         }
+    }
+
+    private void OnSimStart()
+    {
+        if (_scheduler == null) return;
+        _scheduler.Schedule();
     }
 
     private void OnNewSimulation()
