@@ -132,6 +132,7 @@ public class AStar
             Last = Last.Parent;
         }
         Queue<(int, int)> Path = new Queue<(int, int)>(Path_list);
+        Path.Dequeue();
         return Path;
 
     }
