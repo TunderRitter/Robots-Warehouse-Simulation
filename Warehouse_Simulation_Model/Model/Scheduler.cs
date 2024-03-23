@@ -110,6 +110,7 @@ public class Scheduler
             }
 
             Step++;
+            startTime = DateTime.Now;
         }
     }
 

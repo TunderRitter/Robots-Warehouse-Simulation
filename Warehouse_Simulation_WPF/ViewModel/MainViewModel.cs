@@ -183,22 +183,26 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateMap()
     {
         if (_scheduler == null) return;
-        Cells.Clear();
+        Application.Current.Dispatcher.Invoke(() => Cells.Clear());
+        
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
             for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
             {
                 Cell cell = _scheduler.Map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+                Application.Current.Dispatcher.Invoke(() =>
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
                     //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null) ? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
                     Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
                     Id = id == null ? String.Empty : id
-                });
+                })
+                );
+                
             }
         }
     }
@@ -228,7 +232,8 @@ public class MainViewModel : INotifyPropertyChanged
         if (_scheduler == null) return;
         //_scheduler.Steps = _stepValue;
         //_scheduler.TimeLimit = _intValue;
-        _scheduler.Schedule();
+        //_scheduler.Schedule();
+        Task.Run(() => _scheduler.Schedule());
     }
 
     private void OnNewSimulation()
