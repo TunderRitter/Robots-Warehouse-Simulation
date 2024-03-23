@@ -73,8 +73,6 @@ public class Scheduler
 
     public void Schedule()
     {
-        System.Timers.Timer timer = new System.Timers.Timer();
-
         DateTime startTime, endTime;
         startTime = DateTime.Now;
 
@@ -83,8 +81,6 @@ public class Scheduler
 
         while(Steps >= _steps) 
         {
-            timer.Start();
-
             if (_robotFreed)
             {
                 AssignTasks();
