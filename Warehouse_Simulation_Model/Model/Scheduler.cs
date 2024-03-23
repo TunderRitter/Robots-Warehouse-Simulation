@@ -103,7 +103,7 @@ public class Scheduler
 
             Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
-
+            
             for (int i = 0; i < waitTime; i++)
             {
                 // log
@@ -143,6 +143,7 @@ public class Scheduler
     public void CalculateStep(int i)
     {
         Robot robot = _robots[i];
+        if (_routes[i].Count == 0) return;
         (int row, int col) posTo = _routes[i].Peek();
         (int row, int col) posFrom = robot.Pos;
 
