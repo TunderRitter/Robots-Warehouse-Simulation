@@ -137,87 +137,59 @@ public class Scheduler
     public void CalculateStep(int i)
     {
         Robot robot = _robots[i];
-        (int X, int Y) pos_to = _routes[i].Peek();
-        (int X, int Y) pos_from = robot.Pos;
+        (int row, int col) posTo = _routes[i].Peek();
+        (int row, int col) posFrom = robot.Pos;
 
         string move = "";
 
-        if(pos_from.X == pos_to.X)
+        if (posFrom.row == posTo.row)
         {
-            if(pos_from.Y == pos_to.Y - 1)
+            if (posFrom.col - 1 == posTo.col)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "L";
-                        break;
-                    case Direction.W:
-                        move = "G";
-                        break;
-                    case Direction.S:
-                        move = "R";
-                        break;
-                    case Direction.E:
-                        move = "L";
-                        break;
-                }
+                    Direction.N => "C",
+                    Direction.E => "R",
+                    Direction.S => "R",
+                    Direction.W => "F",
+                    _ => throw new Exception(),
+                };
             }
-            else if(pos_from.X == pos_to.Y + 1)
+            else if (posFrom.col + 1 == posTo.col)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "R";
-                        break;
-                    case Direction.W:
-                        move = "L";
-                        break;
-                    case Direction.S:
-                        move = "L";
-                        break;
-                    case Direction.E:
-                        move = "G";
-                        break;
-                }
+                    Direction.N => "R",
+                    Direction.E => "F",
+                    Direction.S => "C",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
             }
         }
-        else if(pos_from.Y == pos_to.Y)
+        else if (posFrom.col == posTo.col)
         {
-            if(pos_from.X == pos_to.X - 1)
+            if (posFrom.row - 1 == posTo.row)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "G";
-                        break;
-                    case Direction.W:
-                        move = "R";
-                        break;
-                    case Direction.S:
-                        move = "L";
-                        break;
-                    case Direction.E:
-                        move = "L";
-                        break;
-                }
+                    Direction.N => "F",
+                    Direction.E => "C",
+                    Direction.S => "R",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
             }
-            else if(pos_from.X == pos_to.X + 1)
+            else if (posFrom.row + 1 == posTo.row)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "L";
-                        break;
-                    case Direction.W:
-                        move = "L";
-                        break;
-                    case Direction.S:
-                        move = "G";
-                        break;
-                    case Direction.E:
-                        move = "R";
-                        break;
-                }
+                    Direction.N => "R",
+                    Direction.E => "R",
+                    Direction.S => "F",
+                    Direction.W => "C",
+                    _ => throw new Exception(),
+                };
             }
         }
 
