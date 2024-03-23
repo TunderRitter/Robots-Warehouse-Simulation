@@ -50,9 +50,11 @@ public class Scheduler
             robot.Finished += Robot_Finished;
         }
         _targets = new Queue<Target>();
-        foreach ((int row, int col) target in data.Targets)
+        foreach ((int row, int col) targetPos in data.Targets)
         {
-            _targets.Enqueue(new Target(target));
+            Target target = new(targetPos);
+            _targets.Enqueue(target);
+            ((Floor)Map[targetPos.row, targetPos.col]).Target = target;
         }
 
         _log = new Log();
@@ -89,7 +91,7 @@ public class Scheduler
 
             for (int i = 0; i < _robots.Length; i++)
             {
-                CalculateStep(_robots[i], i);
+                CalculateStep(i);
                 _robots[i].CheckPos();
             }
 
@@ -118,22 +120,23 @@ public class Scheduler
 
     public void AssignTasks()
     {
-		Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
-		int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
-		Robot[] free = new Robot[len];
-		Array.Copy(freeAll, free, len);
+        Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
+        int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
+        Robot[] free = new Robot[len];
+        Array.Copy(freeAll, free, len);
 
-		Target[] targets = new Target[len];
-		for (int i = 0; i < len; i++)
-		{
-			targets[i] = _targets.Dequeue();
-		}
+        Target[] targets = new Target[len];
+        for (int i = 0; i < len; i++)
+        {
+            targets[i] = _targets.Dequeue();
+        }
 
-		_strategy.Assign(free, targets);
-	}
+        _strategy.Assign(free, targets);
+    }
 
-    public void CalculateStep(Robot robot, int i)
+    public void CalculateStep(int i)
     {
+        Robot robot = _robots[i];
         (int X, int Y) pos_to = _routes[i].Peek();
         (int X, int Y) pos_from = robot.Pos;
 
@@ -218,11 +221,12 @@ public class Scheduler
             }
         }
 
-        ExecuteStep(robot, i, move);
+        ExecuteStep(i, move);
     }
 
-    public void ExecuteStep(Robot robot, int i, String move)
+    public void ExecuteStep(int i, string move)
     {
+        Robot robot = _robots[i];
         switch (move)
         {
             case "G":
