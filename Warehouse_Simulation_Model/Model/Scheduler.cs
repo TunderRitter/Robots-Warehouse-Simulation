@@ -72,7 +72,7 @@ public class Scheduler
         //Schedule();
     }
 
-    private void Schedule()
+    public void Schedule()
     {
         //System.Timers.Timer timer = new System.Timers.Timer();
         if (_robotFreed)
