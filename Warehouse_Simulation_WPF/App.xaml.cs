@@ -13,9 +13,9 @@ namespace Warehouse_Simulation_WPF;
 /// </summary>
 public partial class App : Application
 {
-    private readonly MainWindow _view = null!;
-    private readonly MainViewModel _viewModel = null!;
-    private Scheduler _model = null!;
+    private MainWindow _view = null!;
+    private MainViewModel _viewModel = null!;
+    //private Scheduler _model = null!;
     public App()
     {
         Startup += new StartupEventHandler(App_Startup);
@@ -24,7 +24,7 @@ public partial class App : Application
 
     private void App_Startup(object? sender, StartupEventArgs e)
     {
-        _viewModel = new MainViewModel(_model);
+        _viewModel = new MainViewModel();
         _viewModel.NewSimulationStarted += new EventHandler(NewSimulation);
 
         _view = new MainWindow();
@@ -40,18 +40,19 @@ public partial class App : Application
         try
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "Awari játék betöltése";
+            openFileDialog.Title = "Load config file";
             openFileDialog.Filter = "Json Files|*.json";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (openFileDialog.ShowDialog() == true)
             {
-  
-                _model = new Scheduler(ConfigReader.Read(openFileDialog.FileName));
+
+                //_model = new Scheduler(ConfigReader.Read(openFileDialog.FileName));
+                _viewModel.CreateScheduler(openFileDialog.FileName);
             }
         }
         catch (Exception)
         {
-            MessageBox.Show("Could'nt load file", "Warehouse Simulator", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Couldn't load file", "Warehouse Simulator", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
     private void View_Closing(object? sender, CancelEventArgs e)

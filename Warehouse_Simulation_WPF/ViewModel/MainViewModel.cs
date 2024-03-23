@@ -1,17 +1,19 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Win32;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using Warehouse_Simulation_Model.Model;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_WPF.ViewModel;
 
 
 public class MainViewModel : INotifyPropertyChanged
 {
-    Scheduler _scheduler;
+    Scheduler? _scheduler;
 
     private int _row;
     public int Row
@@ -41,31 +43,35 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private int _mapHeight;
+    public int HeightOfWIndow { get; set; }
 
+    private int _mapHeight;
     public int MapHeight
     {
         get { return _mapHeight; }
         set { _mapHeight = value; OnPropertyChanged(nameof(MapHeight)); }
     }
+    private int _mapWidth;
+
+    public int MapWidth
+    {
+        get { return _mapWidth; }
+        set { _mapWidth = value; OnPropertyChanged(nameof(MapWidth)); }
+    }
+
 
     private int _cellSize;
-
     public int CellSize
     {
         get { return _cellSize; }
         set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
     }
     private int _circleSize;
-
     public int CircleSize
     {
         get { return _circleSize; }
         set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
     }
-
-
-
     private int _zoomValue;
     public int ZoomValue
     {
@@ -85,18 +91,58 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand Zoom { get; private set; }
 
 
-    public MainViewModel(Scheduler scheduler)
+    public MainViewModel()
     {
         ZoomValue = 1;
-        _scheduler = scheduler;
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
         LoadReplay = new DelegateCommand(param => OnReplay());
         Exit = new DelegateCommand(param => OnExitGame());
 
-
         Cells = new ObservableCollection<CellState>();
+        
+    }
+
+    private void _scheduler_ChangeOccurred(object? sender, EventArgs e)
+    {
+        if (_scheduler != null)
+        {
+            Row = _scheduler.Map.GetLength(0);
+            Col = _scheduler.Map.GetLength(1);
+            CalculateHeight();
+            UpdateMap();
+        }
+    }
+    public void CreateScheduler(string path)
+    {
+        try
+        {
+            _scheduler = new Scheduler(ConfigReader.Read(path));
+            _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
+            _scheduler_ChangeOccurred(null, EventArgs.Empty);
+            //Debug.WriteLine("scheduler kész");
+            
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    private void CalculateHeight()
+    {
+        if (_scheduler == null) return;
+        int height = (int)System.Windows.SystemParameters.PrimaryScreenHeight - 200;
+        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
+        CellSize = MapHeight / _scheduler.Map.GetLength(0);
+        CircleSize = CellSize - 10;
+        MapWidth = CellSize * _scheduler.Map.GetLength(1);
+    }
+    private void UpdateMap()
+    {
+        if (_scheduler == null) return;
+        Cells.Clear();
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
             for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
@@ -107,19 +153,13 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     X = i,
                     Y = j,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.DarkSeaGreen : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.White)) : Brushes.Black,
                     Square = (cell is Floor) ? Brushes.White : Brushes.Black,
                     Id = id == null ? String.Empty : id
-                }) ;
+                });
             }
         }
-    }
-    private void CalculateHeight()
-    {
-        int height = (int)SystemParameters.PrimaryScreenHeight - 200;
-        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
-        CellSize = height / _scheduler.Map.GetLength(0);
-        CircleSize = CellSize - 10;
     }
 
     private void ZoomMethod(object? parameter)
@@ -144,7 +184,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnNewSimulation()
     {
-
+        NewSimulationStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnReplay()

@@ -20,6 +20,10 @@ public class Scheduler
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int Steps { get; private set; }
 
+    //Fontos!!!
+    //Minden függvényben hívjátok meg pls, mert ez értesíti a viewmodelt MINDEN változásról a schedulerben!!!!
+    public event EventHandler? ChangeOccurred;
+
 
     public Scheduler(SchedulerData data)
     {
@@ -60,9 +64,12 @@ public class Scheduler
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
 
-        AssignTasks();
 
-        Schedule();
+        //innen majd szedjétek ki a kikommentelést!!!
+
+        //AssignTasks();
+
+        //Schedule();
     }
 
     private void Schedule()
@@ -76,7 +83,7 @@ public class Scheduler
 
         CalculateRoutes();
 
-        while(_targets.Count > 0 && Steps >= _steps) ;
+        while(_targets.Count > 0 && Steps >= _steps) 
         {
             for (int i = 0; i < _robots.Length; i++)
             {

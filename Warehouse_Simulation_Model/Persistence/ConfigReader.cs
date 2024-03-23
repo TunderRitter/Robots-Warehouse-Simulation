@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 
 namespace Warehouse_Simulation_Model.Persistence;
 
@@ -18,7 +19,7 @@ public static class ConfigReader
                 Map = map,
                 Robots = robots,
                 Targets = targets,
-                TeamSize = config.TeamSize,
+                TeamSize = config.teamSize,
                 TasksSeen = config.numTasksReveal,
                 Strategy = config.taskAssignmentStrategy,
             };
@@ -34,7 +35,7 @@ public static class ConfigReader
         try
         {
             string FullContent = File.ReadAllText(path);
-            string[] Lines = FullContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            string[] Lines = FullContent.Split(["\n", "\r\n"], StringSplitOptions.RemoveEmptyEntries);
             int Height = int.Parse(Lines[1].Split(" ")[1]);
             int Width = int.Parse(Lines[2].Split(" ")[1]);
             bool[,] Map = new bool[Height, Width];
@@ -81,7 +82,7 @@ public static class ConfigReader
     {
         try
         {
-            int[] lines = Array.ConvertAll(File.ReadAllText(path).Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries), int.Parse);
+            int[] lines = Array.ConvertAll(File.ReadAllText(path).Split(["\n", "\r\n"], StringSplitOptions.RemoveEmptyEntries), int.Parse);
             if (lines[0] != lines.Length - 1) throw new ArgumentException("Number of coordinates does not match");
             (int row, int col)[] coors = new (int, int)[lines[0]];
             for (int i = 0; i < coors.Length; i++)

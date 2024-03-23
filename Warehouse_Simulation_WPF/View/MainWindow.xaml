@@ -50,34 +50,43 @@
                     HorizontalAlignment="Left" VerticalAlignment="Top"
                     Margin="120,120,0,0"
                     Click="SimulationButton_Click"
+                    Command="{Binding Path=NewSimulation}"
                     />
             <Button Name="Replay" Content="Start replay"
                     Height="40" Width="120" Margin="0,120,120,0"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Click="ReplayButton_Click"/>
+                    Click="ReplayButton_Click"
+                    Command="{Binding Path=LoadReplay}"/>
         </Grid>
         <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
             
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="75"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="800"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
             <Button Content="+" Command="{Binding Path=Zoom}"
                 CommandParameter="Up" Width="30"
                 Margin="30,30,0,0"
                     Grid.Row="0"
+                    Grid.Column="0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <Button Content="-" Command="{Binding Path=Zoom}"
                 CommandParameter="Down" Width="30"
                 Margin="100,30,0,0"
                     Grid.Row="0"
+                    Grid.Column="0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                     Grid.Row="1"
-                    Background="LightGray" Height="500" Width="800"
+                    Grid.Column="0"
+                    Background="LightGray" Height="auto" Width="auto"
                     Margin="50,0,0,0" HorizontalAlignment="Left"
                     VerticalAlignment="Top">
                 
@@ -89,27 +98,35 @@
 
                     <Grid x:Name="SimulationGrid">
 
-                        <TextBlock Text="test"></TextBlock>
-                        <ItemsControl ItemsSource="{Binding Path=Cells}">
+                        <ItemsControl ItemsSource="{Binding Path=Cells}" 
+                                      Width="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
+                                      Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
+                                      Background="Black">
                             
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
-                                    Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
+                                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Height="30" Width="30">
+                                    <Grid Height="auto" Width="auto">
                                         <Rectangle
-                                            
                                             Grid.Row="0"
-                                            Fill="{Binding Square}"/>
+                                            Fill="{Binding Square}"
+                                            />
                                         <Ellipse
-                                            
                                             Grid.Row="0"
-                                            Fill="{Binding Circle}"/>
+                                            Fill="{Binding Circle}"
+                                            />
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Text="{Binding Id}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -124,10 +141,10 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
-            <Grid x:Name="ReplayButtons" Grid.Row="1">
+            <Grid x:Name="ReplayButtons" Grid.Row="1" Grid.Column="1">
                 
             </Grid>
-            <Slider x:Name="ReplaySLider" Grid.Row="2"></Slider>
+            <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0" Visibility="Collapsed"></Slider>
         </Grid>
         
         
