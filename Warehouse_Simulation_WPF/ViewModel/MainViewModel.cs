@@ -148,10 +148,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_scheduler != null)
         {
-            Row = _scheduler.Map.GetLength(0);
-            Col = _scheduler.Map.GetLength(1);
-            
-            UpdateMap();
+            Application.Current.Dispatcher.Invoke(() => UpdateMap());
         }
     }
     public void CreateScheduler(string path)
@@ -161,8 +158,11 @@ public class MainViewModel : INotifyPropertyChanged
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
             CalculateHeight();
-            _scheduler_ChangeOccurred(null, EventArgs.Empty);
+            Row = _scheduler.Map.GetLength(0);
+            Col = _scheduler.Map.GetLength(1);
+            //_scheduler_ChangeOccurred(null, EventArgs.Empty);
             //Debug.WriteLine("scheduler kész");
+            CreateMap();
 
         }
         catch (Exception)
@@ -180,18 +180,17 @@ public class MainViewModel : INotifyPropertyChanged
         CircleSize = CellSize - 10;
         MapWidth = CellSize * _scheduler.Map.GetLength(1);
     }
-    private void UpdateMap()
+    private void CreateMap()
     {
         if (_scheduler == null) return;
-        Application.Current.Dispatcher.Invoke(() => Cells.Clear());
-        
+        Cells.Clear();
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
             for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
             {
                 Cell cell = _scheduler.Map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-                Application.Current.Dispatcher.Invoke(() =>
+                
                 Cells.Add(new CellState
                 {
                     X = i,
@@ -200,10 +199,24 @@ public class MainViewModel : INotifyPropertyChanged
                     Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null) ? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
                     Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
                     Id = id == null ? String.Empty : id
-                })
-                );
-                
+                });
+
             }
+        }
+    }
+    private void UpdateMap()
+    {
+        if (_scheduler == null) return;
+        //Application.Current.Dispatcher.Invoke(() => );
+        for (int i = 0; i<Cells.Count; i++)
+        {
+            int idx = i;
+            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
+            String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null) ? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue;
+            Cells[idx].Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue;
+            Cells[idx].Id = id == null ? String.Empty : id;
+
         }
     }
 
