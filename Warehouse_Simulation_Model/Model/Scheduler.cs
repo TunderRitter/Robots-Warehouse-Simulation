@@ -86,6 +86,7 @@ public class Scheduler
             if (_robotFreed)
             {
                 AssignTasks();
+                CalculateRoutes();
                 _robotFreed = false;
             }
 
