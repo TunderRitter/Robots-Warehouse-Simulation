@@ -118,7 +118,9 @@ public class Scheduler
     private void Robot_Finished(object? sender, EventArgs e)
     {
         _robotFreed = true;
-    }
+		if (sender is Robot robot)
+			((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
+	}
 
     public void AssignTasks()
     {
