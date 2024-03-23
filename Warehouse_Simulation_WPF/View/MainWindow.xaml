@@ -165,7 +165,7 @@
                 <local:NumericUpDown x:Name="stepNum"
                      Default="100"
                      Value="{Binding StepValue, Mode=TwoWay}"
-                     Command="{Binding SetNumericUpDownCommand}" 
+                     Command="{Binding StepCommand}" 
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="240,30,0,0"/>
@@ -176,7 +176,7 @@
                 <local:NumericUpDown x:Name="intervalNum"
                      Default="1000"
                      Value="{Binding IntValue, Mode=TwoWay}"
-                     Command="{Binding SetNumericUpDownCommand}" 
+                     Command="{Binding IntCommand}" 
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="240,60,0,0"/>

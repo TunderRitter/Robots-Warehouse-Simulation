@@ -13,14 +13,14 @@ public partial class MainWindow : Window
     }
     private void ReplayButton_Click(object sender, EventArgs e)
     {
-        this.WindowState = WindowState.Maximized;
         MenuGrid.Visibility = Visibility.Collapsed;
+        this.WindowState = WindowState.Maximized;
         SimGrid.Visibility = Visibility.Visible;
     }
     private void SimulationButton_Click(object sender, EventArgs e)
     {
-        this.WindowState = WindowState.Maximized;
         MenuGrid.Visibility = Visibility.Collapsed;
+        this.WindowState = WindowState.Maximized;
         SimGrid.Visibility = Visibility.Visible;
     }
 
