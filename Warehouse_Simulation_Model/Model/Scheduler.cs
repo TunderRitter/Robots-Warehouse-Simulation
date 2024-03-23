@@ -1,6 +1,4 @@
 ﻿using Warehouse_Simulation_Model.Persistence;
-using System.Timers;
-using System.Diagnostics;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -14,12 +12,12 @@ public class Scheduler
     private readonly ITaskAssigner _strategy;
     private readonly AStar _astar;
     private readonly double _timeLimit;
-    private readonly int _steps;
     private readonly int _teamSize;
     private bool _robotFreed;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
-    public int Steps { get; private set; }
+    public int MaxSteps { get; set; }
+    public int Step { get; private set; }
 
     //Fontos!!!
     public event EventHandler? ChangeOccurred;
@@ -50,9 +48,11 @@ public class Scheduler
             robot.Finished += Robot_Finished;
         }
         _targets = new Queue<Target>();
-        foreach ((int row, int col) target in data.Targets)
+        foreach ((int row, int col) targetPos in data.Targets)
         {
-            _targets.Enqueue(new Target(target));
+            Target target = new(targetPos);
+            _targets.Enqueue(target);
+            ((Floor)Map[targetPos.row, targetPos.col]).Target = target;
         }
 
         _log = new Log();
@@ -65,10 +65,12 @@ public class Scheduler
         _strategy = TaskAssignerFactory.Create(data.Strategy);
         _astar = new AStar(data.Map);
 
-        _timeLimit = 1; // !!!
-        _steps = 10000; // !!!
+        _timeLimit = 1000; // !!!
         _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
         _robotFreed = false;
+
+        MaxSteps = 10000; // !!!
+        Step = 1;
     }
 
     public void Schedule()
@@ -79,7 +81,7 @@ public class Scheduler
         AssignTasks();
         CalculateRoutes();
 
-        while(Steps >= _steps) 
+        while(Step <= MaxSteps) 
         {
             if (_robotFreed)
             {
@@ -89,24 +91,25 @@ public class Scheduler
 
             for (int i = 0; i < _robots.Length; i++)
             {
-                CalculateStep(_robots[i], i);
+                CalculateStep(i);
                 _robots[i].CheckPos();
             }
 
             //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
 
             endTime = DateTime.Now;
-            Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
-            if(elapsedMillisecs < _timeLimit)
+            double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
+            int waitTime = (int)(elapsedMillisecs / _timeLimit);
+
+            Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
+            ChangeOccurred?.Invoke(this, EventArgs.Empty);
+
+            for (int i = 0; i < waitTime; i++)
             {
-                Thread.Sleep((int)(_timeLimit - elapsedMillisecs));
-                ChangeOccurred?.Invoke(this, new EventArgs());
+                // log
             }
-            else
-            {
-                Thread.Sleep(Convert.ToInt32((Math.Floor(elapsedMillisecs / _timeLimit) +1) * _timeLimit));
-                ChangeOccurred?.Invoke(this, new EventArgs());
-            }
+
+            Step++;
         }
     }
 
@@ -114,133 +117,116 @@ public class Scheduler
 
     private static void TurnRobotRight(Robot robot) => robot.TurnRight();
 
-    private void Robot_Finished(object? sender, EventArgs e) => _robotFreed = true;
+    private void Robot_Finished(object? sender, EventArgs e)
+    {
+        _robotFreed = true;
+        if (sender is Robot robot)
+            ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
+    }
 
     public void AssignTasks()
     {
-		Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
-		int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
-		Robot[] free = new Robot[len];
-		Array.Copy(freeAll, free, len);
+        Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
+        int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
+        Robot[] free = new Robot[len];
+        Array.Copy(freeAll, free, len);
 
-		Target[] targets = new Target[len];
-		for (int i = 0; i < len; i++)
-		{
-			targets[i] = _targets.Dequeue();
-		}
+        Target[] targets = new Target[len];
+        for (int i = 0; i < len; i++)
+        {
+            targets[i] = _targets.Dequeue();
+        }
 
-		_strategy.Assign(free, targets);
-	}
+        _strategy.Assign(free, targets);
+    }
 
-    public void CalculateStep(Robot robot, int i)
+    public void CalculateStep(int i)
     {
-        (int X, int Y) pos_to = _routes[i].Peek();
-        (int X, int Y) pos_from = robot.Pos;
+        Robot robot = _robots[i];
+        (int row, int col) posTo = _routes[i].Peek();
+        (int row, int col) posFrom = robot.Pos;
 
         string move = "";
 
-        if(pos_from.X == pos_to.X)
+        if (posFrom.row == posTo.row)
         {
-            if(pos_from.Y == pos_to.Y - 1)
+            if (posFrom.col - 1 == posTo.col)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "L";
-                        break;
-                    case Direction.W:
-                        move = "G";
-                        break;
-                    case Direction.S:
-                        move = "R";
-                        break;
-                    case Direction.E:
-                        move = "L";
-                        break;
-                }
+                    Direction.N => "C",
+                    Direction.E => "R",
+                    Direction.S => "R",
+                    Direction.W => "F",
+                    _ => throw new Exception(),
+                };
             }
-            else if(pos_from.X == pos_to.Y + 1)
+            else if (posFrom.col + 1 == posTo.col)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "R";
-                        break;
-                    case Direction.W:
-                        move = "L";
-                        break;
-                    case Direction.S:
-                        move = "L";
-                        break;
-                    case Direction.E:
-                        move = "G";
-                        break;
-                }
+                    Direction.N => "R",
+                    Direction.E => "F",
+                    Direction.S => "C",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
             }
         }
-        else if(pos_from.Y == pos_to.Y)
+        else if (posFrom.col == posTo.col)
         {
-            if(pos_from.X == pos_to.X - 1)
+            if (posFrom.row - 1 == posTo.row)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "G";
-                        break;
-                    case Direction.W:
-                        move = "R";
-                        break;
-                    case Direction.S:
-                        move = "L";
-                        break;
-                    case Direction.E:
-                        move = "L";
-                        break;
-                }
+                    Direction.N => "F",
+                    Direction.E => "C",
+                    Direction.S => "R",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
             }
-            else if(pos_from.X == pos_to.X + 1)
+            else if (posFrom.row + 1 == posTo.row)
             {
-                switch (robot.Direction)
+                move = robot.Direction switch
                 {
-                    case Direction.N:
-                        move = "L";
-                        break;
-                    case Direction.W:
-                        move = "L";
-                        break;
-                    case Direction.S:
-                        move = "G";
-                        break;
-                    case Direction.E:
-                        move = "R";
-                        break;
-                }
+                    Direction.N => "R",
+                    Direction.E => "R",
+                    Direction.S => "F",
+                    Direction.W => "C",
+                    _ => throw new Exception(),
+                };
             }
         }
 
-        ExecuteStep(robot, i, move);
+        ExecuteStep(i, move);
     }
 
-    public void ExecuteStep(Robot robot, int i, String move)
+    public void ExecuteStep(int i, string move)
     {
+        Robot robot = _robots[i];
         switch (move)
         {
-            case "G":
+            case "F":
+                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
                 robot.Pos = _routes[i].Dequeue();
+                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
                 break;
-            case "L":
+            case "C":
                 TurnRobotLeft(robot);
                 break;
             case "R":
                 TurnRobotRight(robot);
                 break;
+            default:
+                throw new InvalidOperationException("Invalid move");
         }
         //write to log??
     }
 
     public void CalculateRoutes()
     {
-        for (int i=0; i<_robots.Length; i++)
+        for (int i = 0; i < _robots.Length; i++)
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
             {
@@ -254,9 +240,12 @@ public class Scheduler
 
     }
 
-    public void AddTarget(int x, int y)
+    public void AddTarget(int row, int col)
     {
-        _targets.Enqueue(new Target((x, y)));
-    }
+        if (Map[row, col] is Wall || (Map[row, col] is Floor floor && floor.Target != null)) return;
 
+        Target target = new((row, col));
+        _targets.Enqueue(target);
+        ((Floor)Map[row, col]).Target = target;
+    }
 }
