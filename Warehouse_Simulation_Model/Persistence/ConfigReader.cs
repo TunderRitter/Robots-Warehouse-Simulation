@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Warehouse_Simulation_Model.Persistence;
 
@@ -10,10 +9,11 @@ public static class ConfigReader
     {
         try
         {
+            string configParent = Directory.GetParent(path)?.FullName ?? throw new DirectoryNotFoundException();
             ConfigFile config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(path));
-            bool[,] map = ReadMap(config.mapFile);
-            (int, int)[] robots = ReadCoordinates(config.agentFile, map);
-            (int, int)[] targets = ReadCoordinates(config.taskFile, map);
+            bool[,] map = ReadMap(Path.Combine(configParent, config.mapFile.Replace("/", "\\")));
+            (int, int)[] robots = ReadCoordinates(Path.Combine(configParent, config.agentFile.Replace("/", "\\")), map);
+            (int, int)[] targets = ReadCoordinates(Path.Combine(configParent, config.taskFile.Replace("/", "\\")), map);
             return new SchedulerData
             {
                 Map = map,
