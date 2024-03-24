@@ -106,6 +106,14 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+    private bool canOrder;
+
+    public bool CanOrder
+    {
+        get { return canOrder; }
+        set { canOrder = value; OnPropertyChanged(nameof(CanOrder)); }
+    }
+
 
 
 
@@ -200,9 +208,25 @@ public class MainViewModel : INotifyPropertyChanged
                     Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
                     Id = id == null ? String.Empty : id
                 });
+                Cells[^1].TargetPlaced += new EventHandler(_cell_TargetPlaced);
 
             }
         }
+    }
+    private void _cell_TargetPlaced(object? sender, EventArgs c)
+    {
+        if (_scheduler == null) { return; }
+        if (CanOrder)
+        {
+            if(c is CellCoordinates coordinates)
+            {
+                int i = coordinates.X;
+                int j = coordinates.Y;
+                _scheduler.AddTarget(i, j);
+                
+            }
+        }
+
     }
     private void UpdateMap()
     {

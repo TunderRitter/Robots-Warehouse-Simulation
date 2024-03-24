@@ -83,9 +83,28 @@ namespace Warehouse_Simulation_WPF.ViewModel
                 }
             }
         }
+        public CellState()
+        {
+            OnlineOrder = new DelegateCommand(OrderMethod);
+        }
+        private void OrderMethod(object? parameter)
+        {
+            TargetPlaced?.Invoke(this, new CellCoordinates(X, Y));
+        }
+        public DelegateCommand OnlineOrder { get; set; }
+        public event EventHandler? TargetPlaced;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+    public class CellCoordinates: EventArgs
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public CellCoordinates(int x, int y)
+        {
+            X = x; Y = y;
+        }
     }
 }
