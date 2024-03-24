@@ -157,7 +157,6 @@ public class Scheduler
     public void CalculateStep(int i)
     {
         Robot robot = _robots[i];
-        if (_routes[i].Count == 0) return;
         (int row, int col) posTo = _routes[i].Peek();
         (int row, int col) posFrom = robot.Pos;
 
@@ -175,6 +174,8 @@ public class Scheduler
                     Direction.W => "F",
                     _ => throw new Exception(),
                 };
+
+                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.col + 1 == posTo.col)
             {
@@ -186,6 +187,8 @@ public class Scheduler
                     Direction.W => "R",
                     _ => throw new Exception(),
                 };
+
+                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
         else if (posFrom.col == posTo.col)
@@ -200,6 +203,8 @@ public class Scheduler
                     Direction.W => "R",
                     _ => throw new Exception(),
                 };
+
+                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.row + 1 == posTo.row)
             {
@@ -211,6 +216,8 @@ public class Scheduler
                     Direction.W => "C",
                     _ => throw new Exception(),
                 };
+
+                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
 
@@ -232,6 +239,8 @@ public class Scheduler
                 break;
             case "R":
                 TurnRobotRight(robot);
+                break;
+            case "W":
                 break;
             default:
                 throw new InvalidOperationException("Invalid move");
