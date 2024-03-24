@@ -11,13 +11,21 @@ public class Scheduler
     private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _strategy;
     private readonly AStar _astar;
-    private readonly double _timeLimit;
+    private double _timeLimit;
     private readonly int _teamSize;
     private bool _robotFreed;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
+    public double TimeLimit
+    {
+        get { return _timeLimit; }
+        set
+        {
+            _timeLimit = value;
+        }
+    }
 
     //Fontos!!!
     public event EventHandler? ChangeOccurred;
@@ -86,6 +94,7 @@ public class Scheduler
             if (_robotFreed)
             {
                 AssignTasks();
+                CalculateRoutes();
                 _robotFreed = false;
             }
 
@@ -103,13 +112,14 @@ public class Scheduler
 
             Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
-
+            
             for (int i = 0; i < waitTime; i++)
             {
                 // log
             }
 
             Step++;
+            startTime = DateTime.Now;
         }
     }
 
@@ -147,6 +157,7 @@ public class Scheduler
     public void CalculateStep(int i)
     {
         Robot robot = _robots[i];
+        if (_routes[i].Count == 0) return;
         (int row, int col) posTo = _routes[i].Peek();
         (int row, int col) posFrom = robot.Pos;
 

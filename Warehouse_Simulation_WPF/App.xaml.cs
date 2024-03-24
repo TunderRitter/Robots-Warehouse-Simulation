@@ -47,6 +47,10 @@ public partial class App : Application
             {
 
                 //_model = new Scheduler(ConfigReader.Read(openFileDialog.FileName));
+                
+                _view.MenuGrid.Visibility = Visibility.Collapsed;
+                _view.WindowState = WindowState.Maximized;
+                _view.SimGrid.Visibility = Visibility.Visible;
                 _viewModel.CreateScheduler(openFileDialog.FileName);
             }
         }

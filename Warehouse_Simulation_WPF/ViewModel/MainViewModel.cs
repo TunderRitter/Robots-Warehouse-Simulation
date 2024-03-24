@@ -106,6 +106,14 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+    private bool canOrder;
+
+    public bool CanOrder
+    {
+        get { return canOrder; }
+        set { canOrder = value; OnPropertyChanged(nameof(CanOrder)); }
+    }
+
 
 
 
@@ -148,10 +156,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_scheduler != null)
         {
-            Row = _scheduler.Map.GetLength(0);
-            Col = _scheduler.Map.GetLength(1);
-            
-            UpdateMap();
+            Application.Current.Dispatcher.Invoke(() => UpdateMap());
         }
     }
     public void CreateScheduler(string path)
@@ -161,8 +166,11 @@ public class MainViewModel : INotifyPropertyChanged
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
             CalculateHeight();
-            _scheduler_ChangeOccurred(null, EventArgs.Empty);
+            Row = _scheduler.Map.GetLength(0);
+            Col = _scheduler.Map.GetLength(1);
+            //_scheduler_ChangeOccurred(null, EventArgs.Empty);
             //Debug.WriteLine("scheduler kész");
+            CreateMap();
 
         }
         catch (Exception)
@@ -180,7 +188,7 @@ public class MainViewModel : INotifyPropertyChanged
         CircleSize = CellSize - 10;
         MapWidth = CellSize * _scheduler.Map.GetLength(1);
     }
-    private void UpdateMap()
+    private void CreateMap()
     {
         if (_scheduler == null) return;
         Cells.Clear();
@@ -190,16 +198,49 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 Cell cell = _scheduler.Map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+                
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
                     //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null)? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
-                    Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.Khaki : Brushes.White)) : Brushes.DarkSlateGray,
+                    Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
                     Id = id == null ? String.Empty : id
                 });
+                Cells[^1].TargetPlaced += new EventHandler(_cell_TargetPlaced);
+
             }
+        }
+    }
+    private void _cell_TargetPlaced(object? sender, EventArgs c)
+    {
+        if (_scheduler == null) { return; }
+        if (CanOrder)
+        {
+            if(c is CellCoordinates coordinates)
+            {
+                int i = coordinates.X;
+                int j = coordinates.Y;
+                _scheduler.AddTarget(i, j);
+                
+            }
+        }
+
+    }
+    private void UpdateMap()
+    {
+        if (_scheduler == null) return;
+        //Application.Current.Dispatcher.Invoke(() => );
+        for (int i = 0; i<Cells.Count; i++)
+        {
+            int idx = i;
+            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
+            String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.Khaki : Brushes.White)) : Brushes.DarkSlateGray;
+            Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
+            Cells[idx].Id = id == null ? String.Empty : id;
+
         }
     }
 
@@ -226,9 +267,10 @@ public class MainViewModel : INotifyPropertyChanged
     private void OnSimStart()
     {
         if (_scheduler == null) return;
-        //_scheduler.Steps = _stepValue;
-        //_scheduler.TimeLimit = _intValue;
-        _scheduler.Schedule();
+        _scheduler.MaxSteps = _stepValue;
+        _scheduler.TimeLimit = _intValue;
+        //_scheduler.Schedule();
+        Task.Run(() => _scheduler.Schedule());
     }
 
     private void OnNewSimulation()
