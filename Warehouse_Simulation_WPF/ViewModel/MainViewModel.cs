@@ -204,8 +204,8 @@ public class MainViewModel : INotifyPropertyChanged
                     X = i,
                     Y = j,
                     //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null) ? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue,
-                    Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue,
+                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.Khaki : Brushes.White)) : Brushes.DarkSlateGray,
+                    Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
                     Id = id == null ? String.Empty : id
                 });
                 Cells[^1].TargetPlaced += new EventHandler(_cell_TargetPlaced);
@@ -237,8 +237,8 @@ public class MainViewModel : INotifyPropertyChanged
             int idx = i;
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.Plum : ((floor.Target != null) ? Brushes.DarkSalmon : Brushes.Lavender)) : Brushes.DarkSlateBlue;
-            Cells[idx].Square = (cell is Floor) ? Brushes.Lavender : Brushes.DarkSlateBlue;
+            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.Khaki : Brushes.White)) : Brushes.DarkSlateGray;
+            Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
@@ -267,8 +267,8 @@ public class MainViewModel : INotifyPropertyChanged
     private void OnSimStart()
     {
         if (_scheduler == null) return;
-        //_scheduler.Steps = _stepValue;
-        //_scheduler.TimeLimit = _intValue;
+        _scheduler.MaxSteps = _stepValue;
+        _scheduler.TimeLimit = _intValue;
         //_scheduler.Schedule();
         Task.Run(() => _scheduler.Schedule());
     }

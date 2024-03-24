@@ -11,13 +11,21 @@ public class Scheduler
     private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _strategy;
     private readonly AStar _astar;
-    private readonly double _timeLimit;
+    private double _timeLimit;
     private readonly int _teamSize;
     private bool _robotFreed;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
+    public double TimeLimit
+    {
+        get { return _timeLimit; }
+        set
+        {
+            _timeLimit = value;
+        }
+    }
 
     //Fontos!!!
     public event EventHandler? ChangeOccurred;
