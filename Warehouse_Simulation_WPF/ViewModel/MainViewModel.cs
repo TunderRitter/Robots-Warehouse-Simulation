@@ -1,7 +1,5 @@
-﻿using Microsoft.Win32;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
@@ -69,9 +67,9 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public int ScrollViewHeight => _mapHeight + 20;
+    public int ScrollViewHeight => MapHeight + 20;
 
-    public int ScrollViewWidth => _mapWidth + 20;
+    public int ScrollViewWidth => MapWidth + 20;
 
 
     private int _cellSize;
@@ -174,23 +172,22 @@ public class MainViewModel : INotifyPropertyChanged
         
     }
 
-    private void _scheduler_ChangeOccurred(object? sender, EventArgs e)
+    private void Scheduler_ChangeOccurred(object? sender, EventArgs e)
     {
-        if (_scheduler != null)
-        {
-            Application.Current.Dispatcher.Invoke(() => UpdateMap());
-        }
+        if (_scheduler == null) return;
+        Application.Current.Dispatcher.Invoke(UpdateMap);
     }
+
     public void CreateScheduler(string path)
     {
         try
         {
             _scheduler = new Scheduler(ConfigReader.Read(path));
-            _scheduler.ChangeOccurred += new EventHandler(_scheduler_ChangeOccurred);
+            _scheduler.ChangeOccurred += new EventHandler(Scheduler_ChangeOccurred);
             CalculateHeight();
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
-            //_scheduler_ChangeOccurred(null, EventArgs.Empty);
+            //Scheduler_ChangeOccurred(null, EventArgs.Empty);
             //Debug.WriteLine("scheduler kész");
             CreateMap();
 
@@ -204,8 +201,8 @@ public class MainViewModel : INotifyPropertyChanged
     private void CalculateHeight()
     {
         if (_scheduler == null) return;
-        int height = (int)System.Windows.SystemParameters.PrimaryScreenHeight - 200;
-        int width = (int)System.Windows.SystemParameters.PrimaryScreenWidth - 450;
+        int height = (int)SystemParameters.PrimaryScreenHeight - 200;
+        int width = (int)SystemParameters.PrimaryScreenWidth - 450;
         if (height * ((double)_scheduler.Map.GetLength(1) / _scheduler.Map.GetLength(0)) > width)
         {
             // width is max
@@ -220,6 +217,7 @@ public class MainViewModel : INotifyPropertyChanged
         MapWidth = width;
         CellSize = MapHeight / _scheduler.Map.GetLength(0);
     }
+
     private void CreateMap()
     {
         if (_scheduler == null) return;
@@ -240,14 +238,14 @@ public class MainViewModel : INotifyPropertyChanged
                     Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
                     Id = id == null ? String.Empty : id
                 });
-                Cells[^1].TargetPlaced += new EventHandler(_cell_TargetPlaced);
-
+                Cells[^1].TargetPlaced += new EventHandler(Cell_TargetPlaced);
             }
         }
     }
-    private void _cell_TargetPlaced(object? sender, EventArgs c)
+
+    private void Cell_TargetPlaced(object? sender, EventArgs c)
     {
-        if (_scheduler == null) { return; }
+        if (_scheduler == null) return;
         if (CanOrder)
         {
             if(c is CellCoordinates coordinates)
@@ -255,11 +253,10 @@ public class MainViewModel : INotifyPropertyChanged
                 int i = coordinates.X;
                 int j = coordinates.Y;
                 _scheduler.AddTarget(i, j);
-                
             }
         }
-
     }
+
     private void UpdateMap()
     {
         if (_scheduler == null) return;
