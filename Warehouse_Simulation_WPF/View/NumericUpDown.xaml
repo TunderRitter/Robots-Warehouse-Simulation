@@ -90,7 +90,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Width="37" Height="24">
+    <Grid Width="50" Height="24">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -103,7 +103,7 @@
         <TextBox x:Name="numericTextBox"
                  Style="{StaticResource NumericTextBoxStyle}"
                  Height="24" 
-                 Width="25"
+                 Width="38"
                  Grid.Column="0"
                  Grid.Row="0"
                  Grid.RowSpan="2"

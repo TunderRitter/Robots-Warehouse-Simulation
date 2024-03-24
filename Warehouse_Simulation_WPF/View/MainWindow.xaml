@@ -42,7 +42,7 @@
     </Window.Resources>
 
     <Grid>
-        <Grid x:Name="MenuGrid" Grid.Row="0" Background="LightGray">
+        <Grid x:Name="MenuGrid" Grid.Row="0" Background="Gainsboro">
             <TextBlock Name="Title" Text="Warehouse simulator"
                         FontSize="20"
                        VerticalAlignment="Top" HorizontalAlignment="Center"
@@ -51,7 +51,7 @@
                     Height="40" Width="120" 
                     HorizontalAlignment="Left" VerticalAlignment="Top"
                     Margin="120,120,0,0"
-                    Click="SimulationButton_Click"
+                    
                     Command="{Binding Path=NewSimulation}"
                     />
             <Button Name="Replay" Content="Start replay"
@@ -60,7 +60,7 @@
                     Click="ReplayButton_Click"
                     Command="{Binding Path=LoadReplay}"/>
         </Grid>
-        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="LightGray">
+        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="Gainsboro">
             
             <Grid.RowDefinitions>
                 <RowDefinition Height="75"/>
@@ -74,7 +74,7 @@
             
             <Button Content="+" Command="{Binding Path=Zoom}"
                 CommandParameter="Up" Width="30"
-                Margin="30,30,0,0"
+                Margin="50,30,0,0"
                     Grid.Row="0"
                     Grid.Column="0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
@@ -112,7 +112,7 @@
                                       Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
                                       MaxWidth="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
                                       MaxHeight="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
-                                      Background="Black">
+                                      Background="Thistle" BorderBrush="DarkSlateGray" BorderThickness="2">
                             
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -124,6 +124,9 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Height="auto" Width="auto">
+                                        <Grid.InputBindings>
+                                            <MouseBinding Gesture="LeftClick" Command="{Binding OnlineOrder}" />
+                                        </Grid.InputBindings>
                                         <Rectangle
                                             Grid.Row="0"
                                             Fill="{Binding Square}"
@@ -156,9 +159,10 @@
                 
             </Grid>
             <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0" Visibility="Collapsed"></Slider>
-            <Grid Grid.Row="1" Grid.Column="1" Background="Thistle"
-                  Width="300" Height="150">
-                <TextBlock Text="Number of steps:"
+            <Grid x:Name="StartGrid" Grid.Row="1" Grid.Column="1" Background="LightGray"
+                  Width="300" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Margin="10,10,0,0">
+                <TextBlock Text="NUMBER OF STEPS:"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
                            Margin="30,30,0,0"/>
@@ -169,7 +173,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="240,30,0,0"/>
-                <TextBlock Text="Interval of steps (in milliseconds):"
+                <TextBlock Text="INTERVAL OF STEPS (milliseconds):"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
                            Margin="30,60,0,0"/>
@@ -184,10 +188,51 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="45,90,0,0"
-                        Command="{Binding Path=StartSim}"/>
+                        Command="{Binding Path=StartSim}"
+                        Click="HideStartGrid"/>
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="0"
+                  Margin="50,0,0,0"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Width="{Binding Path=MapWidth}"
+                  >
+
+                <ToggleButton
+                    IsChecked="{Binding Path=CanOrder, Mode=TwoWay}"
+                    Width="100" Height="30" Content="ONLINE ORDER"
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Left"
+                    
+                    >
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                            Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center"                  
+                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="DarkSeaGreen" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Background" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
             </Grid>
             
-
         </Grid>
         
         
