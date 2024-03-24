@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -83,6 +84,7 @@ public class Scheduler
 
     public void Schedule()
     {
+        Debug.WriteLine(MaxSteps);
         DateTime startTime, endTime;
         startTime = DateTime.Now;
 
@@ -100,7 +102,7 @@ public class Scheduler
 
             for (int i = 0; i < _robots.Length; i++)
             {
-                CalculateStep(i);
+                if (_routes[i].Any()) CalculateStep(i);
                 _robots[i].CheckPos();
             }
 
@@ -119,6 +121,7 @@ public class Scheduler
             }
 
             Step++;
+            Debug.WriteLine(Step);
             startTime = DateTime.Now;
         }
     }

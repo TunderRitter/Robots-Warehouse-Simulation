@@ -183,10 +183,15 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_scheduler == null) return;
         int height = (int)System.Windows.SystemParameters.PrimaryScreenHeight - 200;
-        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0);
+        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0) + 15;
         CellSize = MapHeight / _scheduler.Map.GetLength(0);
         CircleSize = CellSize - 10;
-        MapWidth = CellSize * _scheduler.Map.GetLength(1);
+        MapWidth = CellSize * _scheduler.Map.GetLength(1) + 15;
+
+        Debug.WriteLine("Mapheight:" + MapHeight);
+        Debug.WriteLine("Cellsize: " + CellSize);
+        Debug.WriteLine("Circle: " + CircleSize);
+        Debug.WriteLine("MapWidth" + MapWidth);
     }
     private void CreateMap()
     {
