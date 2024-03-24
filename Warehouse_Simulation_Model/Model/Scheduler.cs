@@ -138,7 +138,11 @@ public class Scheduler
         }
 
         _strategy.Assign(free, targets);
-    }
+		for (int i = 0; i < len; i++)
+		{
+			((Floor)Map[targets[i].Pos.row, targets[i].Pos.col]).Target = targets[i];
+		}
+	}
 
     public void CalculateStep(int i)
     {
