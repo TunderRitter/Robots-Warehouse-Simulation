@@ -49,30 +49,44 @@ public class MainViewModel : INotifyPropertyChanged
     public int MapHeight
     {
         get { return _mapHeight; }
-        set { _mapHeight = value; OnPropertyChanged(nameof(MapHeight)); }
+        set
+        {
+            _mapHeight = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ScrollViewHeight));
+        }
     }
-    private int _mapWidth;
 
+    private int _mapWidth;
     public int MapWidth
     {
         get { return _mapWidth; }
-        set { _mapWidth = value; OnPropertyChanged(nameof(MapWidth)); }
+        set
+        {
+            _mapWidth = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ScrollViewWidth));
+        }
     }
 
+    public int ScrollViewHeight => _mapHeight + 20;
 
-    private int _cellSize;
-    public int CellSize
-    {
-        get { return _cellSize; }
-        set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
-    }
-    private int _circleSize;
-    public int CircleSize
-    {
-        get { return _circleSize; }
-        set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
-    }
-    private int _zoomValue;
+    public int ScrollViewWidth => _mapWidth + 20;
+
+
+	private int _cellSize;
+	public int CellSize
+	{
+		get { return _cellSize; }
+		set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
+	}
+	private int _circleSize;
+	public int CircleSize
+	{
+		get { return _circleSize; }
+		set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
+	}
+	private int _zoomValue;
     public int ZoomValue
     {
         get { return _zoomValue; }
@@ -183,15 +197,20 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_scheduler == null) return;
         int height = (int)System.Windows.SystemParameters.PrimaryScreenHeight - 200;
-        MapHeight = (height / _scheduler.Map.GetLength(0)) * _scheduler.Map.GetLength(0) + 15;
+        int width = (int)System.Windows.SystemParameters.PrimaryScreenWidth - 450;
+        if (height * ((double)_scheduler.Map.GetLength(1) / _scheduler.Map.GetLength(0)) > width)
+        {
+            // width is max
+            height = (int)(width * ((double)_scheduler.Map.GetLength(0) / _scheduler.Map.GetLength(1)));
+        }
+        else
+        {
+            // height is max
+            width = (int)(height * ((double)_scheduler.Map.GetLength(1) / _scheduler.Map.GetLength(0)));
+        }
+        MapHeight = height;
+        MapWidth = width;
         CellSize = MapHeight / _scheduler.Map.GetLength(0);
-        CircleSize = CellSize - 10;
-        MapWidth = CellSize * _scheduler.Map.GetLength(1) + 15;
-
-        Debug.WriteLine("Mapheight:" + MapHeight);
-        Debug.WriteLine("Cellsize: " + CellSize);
-        Debug.WriteLine("Circle: " + CircleSize);
-        Debug.WriteLine("MapWidth" + MapWidth);
     }
     private void CreateMap()
     {
