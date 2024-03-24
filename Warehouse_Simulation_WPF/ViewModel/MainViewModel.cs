@@ -18,13 +18,13 @@ public class MainViewModel : INotifyPropertyChanged
     private int _row;
     public int Row
     {
-        get { return _row; }
+        get => _row;
         set
         {
             if (_row != value)
             {
                 _row = value;
-                OnPropertyChanged(nameof(Row));
+                OnPropertyChanged();
             }
         }
     }
@@ -32,13 +32,13 @@ public class MainViewModel : INotifyPropertyChanged
     private int _col;
     public int Col
     {
-        get { return _col; }
+        get => _col;
         set
         {
             if (_col != value)
             {
                 _col = value;
-                OnPropertyChanged(nameof(Col));
+                OnPropertyChanged();
             }
         }
     }
@@ -48,7 +48,7 @@ public class MainViewModel : INotifyPropertyChanged
     private int _mapHeight;
     public int MapHeight
     {
-        get { return _mapHeight; }
+        get => _mapHeight;
         set
         {
             _mapHeight = value;
@@ -60,7 +60,7 @@ public class MainViewModel : INotifyPropertyChanged
     private int _mapWidth;
     public int MapWidth
     {
-        get { return _mapWidth; }
+        get => _mapWidth;
         set
         {
             _mapWidth = value;
@@ -74,44 +74,48 @@ public class MainViewModel : INotifyPropertyChanged
     public int ScrollViewWidth => _mapWidth + 20;
 
 
-	private int _cellSize;
-	public int CellSize
-	{
-		get { return _cellSize; }
-		set { _cellSize = value; OnPropertyChanged(nameof(CellSize)); }
-	}
-	private int _circleSize;
-	public int CircleSize
-	{
-		get { return _circleSize; }
-		set { _circleSize = value; OnPropertyChanged(nameof(CircleSize)); }
-	}
-	private int _zoomValue;
+    private int _cellSize;
+    public int CellSize
+    {
+        get => _cellSize;
+        set
+        {
+            _cellSize = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(CircleSize));
+        }
+    }
+
+    public int CircleSize => CellSize - 10;
+
+    private int _zoomValue;
     public int ZoomValue
     {
-        get { return _zoomValue; }
-        set { _zoomValue = value; OnPropertyChanged(nameof(ZoomValue)); }
+        get => _zoomValue;
+        set
+        {
+            _zoomValue = value;
+            OnPropertyChanged();
+        }
     }
 
     private int _intValue;
-
     public string IntValue
     {
-        get { return _intValue.ToString(); }
+        get => _intValue.ToString();
         set {
             if (int.TryParse(value, out int val) && val != _intValue)
             {
                 _intValue = val;
-                Debug.WriteLine(val);
                 OnPropertyChanged();
             }
         }
     }
-    private int _stepValue;
 
+    private int _stepValue;
     public string StepValue
     {
-        get { return _stepValue.ToString(); }
+        get => _stepValue.ToString();
         set {
             if (int.TryParse(value, out int val) && val != _stepValue)
             {
@@ -120,12 +124,16 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
-    private bool canOrder;
 
+    private bool _canOrder;
     public bool CanOrder
     {
-        get { return canOrder; }
-        set { canOrder = value; OnPropertyChanged(nameof(CanOrder)); }
+        get => _canOrder;
+        set
+        {
+            _canOrder = value;
+            OnPropertyChanged();
+        }
     }
 
 
