@@ -187,8 +187,6 @@ public class MainViewModel : INotifyPropertyChanged
             CalculateHeight();
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
-            //Scheduler_ChangeOccurred(null, EventArgs.Empty);
-            //Debug.WriteLine("scheduler kész");
             CreateMap();
 
         }
@@ -233,7 +231,6 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     X = i,
                     Y = j,
-                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MistyRose : Brushes.White) : Brushes.Black,
                     Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.Khaki : Brushes.White)) : Brushes.DarkSlateGray,
                     Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
                     Id = id == null ? String.Empty : id
@@ -260,8 +257,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateMap()
     {
         if (_scheduler == null) return;
-        //Application.Current.Dispatcher.Invoke(() => );
-        for (int i = 0; i<Cells.Count; i++)
+        for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
@@ -298,7 +294,6 @@ public class MainViewModel : INotifyPropertyChanged
         if (_scheduler == null) return;
         _scheduler.MaxSteps = _stepValue;
         _scheduler.TimeLimit = _intValue;
-        //_scheduler.Schedule();
         Task.Run(() => _scheduler.Schedule());
     }
 
