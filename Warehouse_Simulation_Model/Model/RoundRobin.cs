@@ -3,11 +3,10 @@
 
 public class RoundRobin : ITaskAssigner
 {
-    public void Assign(Robot[] robots, Target[] targets)
+    public void Assign(List<Robot> robots, List<Target> targets)
     {
-        if (robots.Length != targets.Length) throw new ArgumentException("Robots and targets are different size");
-
-        for (int i = 0; i < robots.Length; i++)
+        int len = Math.Min(robots.Count, targets.Count);
+        for (int i = 0; i < len; i++)
         {
             robots[i].TargetPos = targets[i].Pos;
             targets[i].Id = robots[i].Id;
