@@ -27,6 +27,13 @@ public partial class MainWindow : Window
     {
         StartGrid.Visibility = Visibility.Collapsed;
     }
+    private void CloseSim(object sender, EventArgs e)
+    {
+        SimGrid.Visibility = Visibility.Collapsed;
+        StartGrid.Visibility = Visibility.Visible;
+        MenuGrid.Visibility = Visibility.Visible;
+        this.WindowState = WindowState.Normal;
+    }
 
 
 }

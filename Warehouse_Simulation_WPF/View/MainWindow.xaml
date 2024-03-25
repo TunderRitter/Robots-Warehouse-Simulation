@@ -71,7 +71,11 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto" MaxWidth="{Binding MapWidth, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid.ColumnDefinitions>
-            
+            <Button Content="BACK TO MENU" Command="{Binding BackToMenu}"
+                    Click="CloseSim" Width="150"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,10,10,0"/>
             <Button Content="+" Command="{Binding Path=Zoom}"
                 CommandParameter="Up" Width="30"
                 Margin="50,10,0,0"

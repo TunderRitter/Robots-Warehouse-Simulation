@@ -151,6 +151,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand Zoom { get; private set; }
     public DelegateCommand StepCommand { get; init; }
     public DelegateCommand IntCommand { get; init; }
+    public DelegateCommand BackToMenu { get; init; }
 
 
 
@@ -167,6 +168,7 @@ public class MainViewModel : INotifyPropertyChanged
         Exit = new DelegateCommand(param => OnExitGame());
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
+        BackToMenu = new DelegateCommand(OnBackToMenu);
 
         Cells = new ObservableCollection<CellState>();
         
@@ -181,7 +183,16 @@ public class MainViewModel : INotifyPropertyChanged
         }
         catch (Exception) { }
     }
+    private void OnBackToMenu(object? parameter)
+    {
+        Cells.Clear();
+        IntValue = "1000";
+        StepValue = "100";
+        CanOrder = false;
+        ZoomValue = 1;
+        _scheduler = null;
 
+    }
     public void CreateScheduler(string path)
     {
         try
