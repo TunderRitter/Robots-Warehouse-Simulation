@@ -3,5 +3,5 @@
 
 public interface ITaskAssigner
 {
-    public void Assign(Robot[] robots, Target[] targets);
+    public void Assign(List<Robot> robots, List<Target> targets);
 }

@@ -7,14 +7,17 @@ namespace Warehouse_Simulation_Model.Model;
 public class Scheduler
 {
     private readonly Robot[] _robots;
-    private readonly Queue<Target> _targets;
+    private readonly List<Target> _targets;
     private readonly Log _log;
     private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _strategy;
     private readonly AStar _astar;
     private double _timeLimit;
     private readonly int _teamSize;
+    private readonly int _targetsSeen;
     private bool _robotFreed;
+
+    private const bool _passThrough = true;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int MaxSteps { get; set; }
@@ -28,7 +31,6 @@ public class Scheduler
         }
     }
 
-    //Fontos!!!
     public event EventHandler? ChangeOccurred;
 
 
@@ -56,12 +58,12 @@ public class Scheduler
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             robot.Finished += Robot_Finished;
         }
-        _targets = new Queue<Target>();
+        _targets = new List<Target>();
         foreach ((int row, int col) targetPos in data.Targets)
         {
             Target target = new(targetPos);
-            _targets.Enqueue(target);
-            ((Floor)Map[targetPos.row, targetPos.col]).Target = target;
+            _targets.Add(target);
+            ((Floor)Map[target.Pos.row, target.Pos.col]).Target = target;
         }
 
         _log = new Log();
@@ -75,7 +77,7 @@ public class Scheduler
         _astar = new AStar(data.Map);
 
         _timeLimit = 1000; // !!!
-        _teamSize = Math.Min(data.TeamSize, data.Robots.Length);
+        _targetsSeen = data.TasksSeen;
         _robotFreed = false;
 
         MaxSteps = 10000; // !!!
@@ -88,13 +90,16 @@ public class Scheduler
         DateTime startTime, endTime;
         startTime = DateTime.Now;
 
+        AddTargets();
         AssignTasks();
         CalculateRoutes();
+        ChangeOccurred?.Invoke(this, EventArgs.Empty);
 
         while(Step <= MaxSteps) 
         {
             if (_robotFreed)
             {
+                AddTargets();
                 AssignTasks();
                 CalculateRoutes();
                 _robotFreed = false;
@@ -126,6 +131,15 @@ public class Scheduler
         }
     }
 
+    private void AddTargets()
+    {
+        for (int i = _targets.Count - 1; i >= 0; i--)
+        {
+            _targets[i].Active = i < _targetsSeen;
+            ((Floor)Map[_targets[i].Pos.row, _targets[i].Pos.col]).Target = _targets[i];
+        }
+    }
+
     private static void TurnRobotLeft(Robot robot) => robot.TurnLeft();
 
     private static void TurnRobotRight(Robot robot) => robot.TurnRight();
@@ -134,28 +148,18 @@ public class Scheduler
     {
         _robotFreed = true;
         if (sender is Robot robot)
+        {
+            _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
+        }
     }
 
     public void AssignTasks()
     {
-        Robot[] freeAll = _robots.Where(e => e.TargetPos == null).ToArray();
-        int len = Math.Min(_targets.Count, Math.Min(_teamSize, freeAll.Length));
-        Robot[] free = new Robot[len];
-        Array.Copy(freeAll, free, len);
-
-        Target[] targets = new Target[len];
-        for (int i = 0; i < len; i++)
-        {
-            targets[i] = _targets.Dequeue();
-        }
-
-        _strategy.Assign(free, targets);
-		for (int i = 0; i < len; i++)
-		{
-			((Floor)Map[targets[i].Pos.row, targets[i].Pos.col]).Target = targets[i];
-		}
-	}
+        List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
+        List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
+        _strategy.Assign(free, assignable);
+    }
 
     public void CalculateStep(int i)
     {
@@ -178,7 +182,7 @@ public class Scheduler
                     _ => throw new Exception(),
                 };
 
-                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.col + 1 == posTo.col)
             {
@@ -191,7 +195,7 @@ public class Scheduler
                     _ => throw new Exception(),
                 };
 
-                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
         else if (posFrom.col == posTo.col)
@@ -207,7 +211,7 @@ public class Scheduler
                     _ => throw new Exception(),
                 };
 
-                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.row + 1 == posTo.row)
             {
@@ -220,7 +224,7 @@ public class Scheduler
                     _ => throw new Exception(),
                 };
 
-                if (move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
 
@@ -269,10 +273,10 @@ public class Scheduler
 
     public void AddTarget(int row, int col)
     {
-        if (Map[row, col] is Wall || (Map[row, col] is Floor floor && floor.Target != null)) return;
+        if (Map[row, col] is Wall) return;
 
         Target target = new((row, col));
-        _targets.Enqueue(target);
+        _targets.Add(target);
         ((Floor)Map[row, col]).Target = target;
     }
 }
