@@ -175,7 +175,11 @@ public class MainViewModel : INotifyPropertyChanged
     private void Scheduler_ChangeOccurred(object? sender, EventArgs e)
     {
         if (_scheduler == null) return;
-        Application.Current.Dispatcher.Invoke(UpdateMap);
+        try
+        {
+            Application.Current.Dispatcher.Invoke(UpdateMap);
+        }
+        catch (Exception) { }
     }
 
     public void CreateScheduler(string path)
