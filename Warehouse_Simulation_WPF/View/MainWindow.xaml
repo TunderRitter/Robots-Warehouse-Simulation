@@ -98,8 +98,8 @@
                     Background="LightGray" Height="auto" Width="auto"
                     Margin="50,0,0,0" HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    MaxHeight="{Binding MapHeight, UpdateSourceTrigger=PropertyChanged}"
-                    MaxWidth="{Binding MapWidth, UpdateSourceTrigger=PropertyChanged}">
+                    MaxHeight="{Binding ScrollViewHeight, UpdateSourceTrigger=PropertyChanged}"
+                    MaxWidth="{Binding ScrollViewWidth, UpdateSourceTrigger=PropertyChanged}">
                 
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
 
