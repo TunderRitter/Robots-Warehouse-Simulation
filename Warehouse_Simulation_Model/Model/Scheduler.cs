@@ -16,7 +16,7 @@ public class Scheduler
     private readonly int _targetsSeen;
     private bool _robotFreed;
 
-    private const bool _passThrough = true;
+    private const bool _passThrough = false;
 
     public Cell[,] Map { get; private set; } // Encapsulation!
     public int MaxSteps { get; set; }
