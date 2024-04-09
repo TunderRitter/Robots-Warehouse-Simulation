@@ -1,0 +1,21 @@
+stages:
+    - build
+    #- test
+
+variables:
+    solution: "Warehouse_Simulation.sln"
+    #test: "Tests"
+
+before_script:
+    - nuget restore
+
+build:
+    stage: build
+    script:
+        - msbuild /p:Configuration=Release $solution
+
+#test:
+    #stage: test
+    #script:
+        #- msbuild /p:Configuration=Release $solution
+        #- mono ./packages/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe ./$test/bin/Release/$test.dll
