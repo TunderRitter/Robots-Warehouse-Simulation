@@ -179,6 +179,9 @@ public class Scheduler
                 break;
             case "W":
                 break;
+            case "WW":
+                _routes[i].Dequeue();
+                break;
             default:
                 throw new InvalidOperationException("Invalid move");
         }
