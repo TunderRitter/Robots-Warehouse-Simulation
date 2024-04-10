@@ -106,7 +106,7 @@ public class Scheduler
 
             for (int i = 0; i < _robots.Length; i++)
             {
-                if (_routes[i].Any()) CalculateStep(i);
+                if (_routes[i].Any()) ExecuteStep(_controller.CalculateStep(_robots[i], _routes[i], _passThrough, Map, i));
                 _robots[i].CheckPos();
             }
 
@@ -229,8 +229,10 @@ public class Scheduler
         ExecuteStep(i, move);
     }
 
-    public void ExecuteStep(int i, string move)
+    public void ExecuteStep((int i, String move) step)
     {
+        int i = step.i;
+        String move = step.move;
         Robot robot = _robots[i];
         switch (move)
         {
