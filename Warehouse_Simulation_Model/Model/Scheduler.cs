@@ -78,7 +78,7 @@ public class Scheduler
         _timeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
-        _controller = new Controller(_robots, new AStar(data.Map));
+        _controller = new Controller(new AStar(data.Map));
 
         MaxSteps = 10000; // !!!
         Step = 1;
