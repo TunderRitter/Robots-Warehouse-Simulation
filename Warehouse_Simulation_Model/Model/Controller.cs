@@ -22,7 +22,8 @@ namespace Warehouse_Simulation_Model.Model
 
             string move = "";
 
-            if (posFrom.row == posTo.row)
+            if (posFrom == posTo) move = "WW";
+            else if (posFrom.row == posTo.row)
             {
                 if (posFrom.col - 1 == posTo.col)
                 {
