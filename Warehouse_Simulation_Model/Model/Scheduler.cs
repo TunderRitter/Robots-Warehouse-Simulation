@@ -15,6 +15,7 @@ public class Scheduler
     private readonly int _teamSize;
     private readonly int _targetsSeen;
     private bool _robotFreed;
+    private Controller _controller;
 
     private const bool _passThrough = false;
 
@@ -73,11 +74,11 @@ public class Scheduler
         }
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-        _astar = new AStar(data.Map);
 
         _timeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
+        _controller = new Controller(_robots, new AStar(data.Map));
 
         MaxSteps = 10000; // !!!
         Step = 1;
