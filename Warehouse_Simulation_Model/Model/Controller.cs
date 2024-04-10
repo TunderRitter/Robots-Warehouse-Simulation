@@ -84,5 +84,9 @@ namespace Warehouse_Simulation_Model.Model
             return (i, move);
         }
 
+        public Queue<(int, int)> CalculateRoutes(Robot robot)
+        {
+            return _astar.AStarSearch(robot);
+        }
     }
 }
