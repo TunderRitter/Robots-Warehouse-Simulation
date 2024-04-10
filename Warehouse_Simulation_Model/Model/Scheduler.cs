@@ -259,7 +259,7 @@ public class Scheduler
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
             {
-                _routes[i] = _astar.AStarSearch(_robots[i]);
+                _routes[i] = _controller.CalculateRoutes(_robots[i]);
             }
         }
     }
