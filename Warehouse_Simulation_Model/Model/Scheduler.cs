@@ -128,6 +128,7 @@ public class Scheduler
             }
 
             Step++;
+            WriteLogPlannerTimes(elapsedMillisecs);
             startTime = DateTime.Now;
         }
     }
@@ -202,13 +203,18 @@ public class Scheduler
         }
     }
 
-    public void WriteLogStart()
+    private void WriteLogStart()
     {
         for (int i = 0; i < _robots.Length; i++)
         {
             Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
             _log.start.Add(data);
         }
+    }
+
+    private void WriteLogPlannerTimes(double time)
+    {
+        _log.plannerTimes.Add(time);
     }
 
     public void WriteLog()
