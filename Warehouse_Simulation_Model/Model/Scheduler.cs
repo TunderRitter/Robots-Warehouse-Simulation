@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -15,6 +16,7 @@ public class Scheduler
     private readonly int _teamSize;
     private readonly int _targetsSeen;
     private bool _robotFreed;
+    private Controller _controller;
 
     private const bool _passThrough = false;
 
@@ -66,6 +68,8 @@ public class Scheduler
         }
 
         _log = new Log();
+        WriteLogStart();
+
         _routes = new Queue<(int, int)>[data.Robots.Length];
         for (int i = 0; i < data.Robots.Length; i++)
         {
@@ -73,11 +77,11 @@ public class Scheduler
         }
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-        _astar = new AStar(data.Map);
 
         _timeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
+        _controller = new Controller(new AStar(data.Map));
 
         MaxSteps = 10000; // !!!
         Step = 1;
@@ -105,7 +109,7 @@ public class Scheduler
 
             for (int i = 0; i < _robots.Length; i++)
             {
-                if (_routes[i].Any()) CalculateStep(i);
+                if (_routes[i].Any()) ExecuteStep(_controller.CalculateStep(_robots[i], _routes[i], _passThrough, Map, i));
                 _robots[i].CheckPos();
             }
 
@@ -124,6 +128,7 @@ public class Scheduler
             }
 
             Step++;
+            WriteLogPlannerTimes(elapsedMillisecs);
             startTime = DateTime.Now;
         }
     }
@@ -158,78 +163,10 @@ public class Scheduler
         _strategy.Assign(free, assignable);
     }
 
-    public void CalculateStep(int i)
+    public void ExecuteStep((int i, String move) step)
     {
-        Robot robot = _robots[i];
-        (int row, int col) posTo = _routes[i].Peek();
-        (int row, int col) posFrom = robot.Pos;
-
-        string move = "";
-
-        if (posFrom.row == posTo.row)
-        {
-            if (posFrom.col - 1 == posTo.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "C",
-                    Direction.E => "R",
-                    Direction.S => "R",
-                    Direction.W => "F",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-            else if (posFrom.col + 1 == posTo.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "F",
-                    Direction.S => "C",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-        }
-        else if (posFrom.col == posTo.col)
-        {
-            if (posFrom.row - 1 == posTo.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "F",
-                    Direction.E => "C",
-                    Direction.S => "R",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-            else if (posFrom.row + 1 == posTo.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "R",
-                    Direction.S => "F",
-                    Direction.W => "C",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-        }
-
-        ExecuteStep(i, move);
-    }
-
-    public void ExecuteStep(int i, string move)
-    {
+        int i = step.i;
+        String move = step.move;
         Robot robot = _robots[i];
         switch (move)
         {
@@ -246,6 +183,9 @@ public class Scheduler
                 break;
             case "W":
                 break;
+            case "WW":
+                _routes[i].Dequeue();
+                break;
             default:
                 throw new InvalidOperationException("Invalid move");
         }
@@ -258,9 +198,23 @@ public class Scheduler
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
             {
-                _routes[i] = _astar.AStarSearch(_robots[i]);
+                _routes[i] = _controller.CalculateRoutes(_robots[i]);
             }
         }
+    }
+
+    private void WriteLogStart()
+    {
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            _log.start.Add(data);
+        }
+    }
+
+    private void WriteLogPlannerTimes(double time)
+    {
+        _log.plannerTimes.Add(time);
     }
 
     public void WriteLog()
