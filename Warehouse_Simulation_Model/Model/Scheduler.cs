@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -67,6 +68,8 @@ public class Scheduler
         }
 
         _log = new Log();
+        WriteLogStart();
+
         _routes = new Queue<(int, int)>[data.Robots.Length];
         for (int i = 0; i < data.Robots.Length; i++)
         {
@@ -196,6 +199,15 @@ public class Scheduler
             {
                 _routes[i] = _controller.CalculateRoutes(_robots[i]);
             }
+        }
+    }
+
+    public void WriteLogStart()
+    {
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            _log.start.Add(data);
         }
     }
 
