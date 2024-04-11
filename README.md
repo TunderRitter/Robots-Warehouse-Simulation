@@ -6,7 +6,7 @@ This repository contains a simulation program for optimizing the routes of robot
 The simulation operates on a grid-based warehouse layout where robots navigate to assigned destinations while avoiding conflicts. The robots move in discrete time steps, following instructions from a central scheduler. They can move to adjacent cells, turn 90 degrees clockwise or counterclockwise, or remain stationary. Obstacles such as warehouse racks and walls restrict robot movement.
 
 ## Features
-- **Basic Functionality**: Robots can execute tasks, manage conflicts by waiting, and generate a log file.
+- **Basic Functionality**: Robots can execute tasksand manage conflicts by waiting. The program generates a log file.
 - **Configurability**: Users can specify warehouse layout, number of robots, starting positions, task destinations, and scheduling strategy.
 - **Interactive Order Assignment**: Allows users to designate task destinations interactively during simulation.
 - **Pathfinding Algorithms**: Utilizes advanced pathfinding algorithms like A* or Cooperative A* for efficient route planning.
@@ -19,15 +19,10 @@ The simulation operates on a grid-based warehouse layout where robots navigate t
 3. Run the simulation program.
 4. Analyze the generated log file for simulation results.
 
-## Installation
-Clone the repository to your local machine:
 
 ## Dependencies
 - C#
 - [Additional dependencies, if any]
 
 ## Configuration
-Edit the configuration file (`config.json`) to customize warehouse layout, robot settings, task assignments, etc.
-
-## Running the Simulation
-Execute the simulation program with:
+Write a configuration file (`.json`), map file (`.map`), agents file (`.agents`) and tasks file (`.tasks`) to customize warehouse layout, robots' starting positions, tasks' positions, etc.
