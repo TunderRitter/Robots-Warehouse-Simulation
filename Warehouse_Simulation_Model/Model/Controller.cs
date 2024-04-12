@@ -39,8 +39,6 @@ public class Controller
         return steps;
     }
 
-    
-
     private static string CalculateStep(Robot robot, Queue<(int, int)> route)
     {
         if (route.Count == 0) return "W";
@@ -115,6 +113,121 @@ public class Controller
         }
 
         if (move == "F")
+            route.Dequeue();
+
+        return move;
+    }
+
+
+
+    // HANDLE DUPLICATE COORDINATES
+    private static string CalculateStep2(Robot robot, Queue<(int, int)> route)
+    {
+        (int row, int col) posFrom = robot.Pos;
+        (int row, int col)? posTo = route.ElementAtOrDefault(0);
+
+        string move = "";
+        int wait = 0;
+
+        if (posTo == null)
+        {
+            move = "W";
+        }
+        else if (posFrom == posTo)
+        {
+            posTo = route.ElementAtOrDefault(1);
+            if (posTo == null)
+            {
+                move = "W";
+            }
+            else if (posFrom == posTo)
+            {
+                posTo = route.ElementAtOrDefault(2);
+                wait = 2;
+                if (posTo == null || posFrom == posTo)
+                {
+                    move = "W";
+                }
+            }
+            else
+            {
+                wait = 1;
+            }
+        }
+        if (move == "W") return move;
+
+        if (posFrom.row == posTo?.row)
+        {
+            if (posFrom.col - 1 == posTo?.col)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "C",
+                    Direction.E => "R",
+                    Direction.S => "R",
+                    Direction.W => "F",
+                    _ => throw new Exception(),
+                };
+
+                if (move == "R" && wait != 2)
+                    move = "W";
+                else if ((move == "R" || move == "C") && wait != 1)
+                    move = "W";
+            }
+            else if (posFrom.col + 1 == posTo?.col)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "R",
+                    Direction.E => "F",
+                    Direction.S => "C",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
+
+                if (move == "R" && wait != 2)
+                    move = "W";
+                else if ((move == "R" || move == "C") && wait != 1)
+                    move = "W";
+            }
+        }
+        else if (posFrom.col == posTo?.col)
+        {
+            if (posFrom.row - 1 == posTo?.row)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "F",
+                    Direction.E => "C",
+                    Direction.S => "R",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
+
+                if (move == "R" && wait != 2)
+                    move = "W";
+                else if ((move == "R" || move == "C") && wait != 1)
+                    move = "W";
+            }
+            else if (posFrom.row + 1 == posTo?.row)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "R",
+                    Direction.E => "R",
+                    Direction.S => "F",
+                    Direction.W => "C",
+                    _ => throw new Exception(),
+                };
+
+                if (move == "R" && wait != 2)
+                    move = "W";
+                else if ((move == "R" || move == "C") && wait != 1)
+                    move = "W";
+            }
+        }
+
+        if (move != "W")
             route.Dequeue();
 
         return move;
