@@ -7,22 +7,24 @@ public class Replay
 {
     private readonly Robot[] _robots;
     private readonly Target[] _targets;
+    private readonly Cell[,] _initMap;
     private double _speed;
     private bool _paused;
-    public Cell[][,] Maps { get; private set; }
+    public Cell[][,] Maps { get; init; }
 
 
-    public Replay(string logPath)
+    public Replay(string logPath, string mapPath)
     {
         Log log = Log.Read(logPath);
         _robots = GetRobots(log);
-        _targets = GetTargets(log, 0);
+        bool[,] mapBool = ConfigReader.ReadMap(mapPath);
+        _targets = GetTargets(log, mapBool.GetLength(1));
+        _initMap = GetMap(mapBool, _robots, _targets);
+        _speed = 1.0;
+        _paused = true;
+        Maps = new Cell[log.sumOfCost / log.plannerPaths.Count][,];
     }
 
-    public void Read(Log log)
-    {
-
-    }
 
     public void Play()
     {
@@ -105,6 +107,33 @@ public class Replay
         }
 
         return targets;
+    }
+
+    private static Cell[,] GetMap(bool[,] mapBool, Robot[] robots, Target[] targets)
+    {
+        int height = mapBool.GetLength(0);
+        int width = mapBool.GetLength(1);
+        Cell[,] map = new Cell[height, width];
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                if (mapBool[i, j])
+                    map[i, j] = new Wall();
+                else
+                    map[i, j] = new Floor();
+            }
+        }
+        for (int i = 0; i < robots.Length; i++)
+        {
+            ((Floor)map[robots[i].Pos.row, robots[i].Pos.col]).Robot = robots[i];
+        }
+        for (int i = targets.Length - 1; i >= 0; i--)
+        {
+            ((Floor)map[targets[i].Pos.row, targets[i].Pos.col]).Target = targets[i];
+        }
+
+        return map;
     }
 
     private static (int, int) ConvertCoordinates(int coor, int width) => (coor / width, coor % width);
