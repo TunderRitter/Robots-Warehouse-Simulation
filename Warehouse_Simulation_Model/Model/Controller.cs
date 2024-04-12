@@ -1,93 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Warehouse_Simulation_Model.Model;
 
-namespace Warehouse_Simulation_Model.Model
+
+public class Controller
 {
-    public class Controller
+    private readonly Robot[] _robots;
+    private readonly Queue<(int, int)>[] _routes;
+    private AStar _astar;
+
+
+    public Controller(bool[,] map, Robot[] robots)
     {
-        AStar _astar;
-        public Controller(AStar astar)
+        _astar = new AStar(map);
+        _robots = robots;
+        _routes = new Queue<(int, int)>[robots.Length];
+        for (int i = 0; i < robots.Length; i++)
         {
-            _astar = astar;
+            _routes[i] = new Queue<(int, int)>();
         }
+    }
 
-        public (int, String) CalculateStep(Robot robot, Queue<(int, int)> route, bool _passThrough, Cell[,] Map, int i)
+
+    public void CalculateRoutes()
+    {
+        for (int i = 0; i < _robots.Length; i++)
         {
-            (int row, int col) posTo = route.Peek();
-            (int row, int col) posFrom = robot.Pos;
+            if (_robots[i].TargetPos != null && _routes[i].Count == 0)
+                _routes[i] = _astar.AStarSearch(_robots[i]);
+        }
+    }
 
-            string move = "";
+    public string[] CalculateSteps()
+    {
+        string[] steps = new string[_robots.Length];
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            steps[i] = CalculateStep(_robots[i], _routes[i]);
+        }
+        return steps;
+    }
 
-            if (posFrom == posTo) move = "WW";
-            else if (posFrom.row == posTo.row)
+    
+
+    private static string CalculateStep(Robot robot, Queue<(int, int)> route)
+    {
+        if (route.Count == 0) return "W";
+        
+        (int row, int col) posTo = route.Peek();
+        (int row, int col) posFrom = robot.Pos;
+
+        string move = "";
+
+        if (posFrom == posTo)
+        {
+            move = "W";
+            route.Dequeue();
+        }
+        else if (posFrom.row == posTo.row)
+        {
+            if (posFrom.col - 1 == posTo.col)
             {
-                if (posFrom.col - 1 == posTo.col)
+                move = robot.Direction switch
                 {
-                    move = robot.Direction switch
-                    {
-                        Direction.N => "C",
-                        Direction.E => "R",
-                        Direction.S => "R",
-                        Direction.W => "F",
-                        _ => throw new Exception(),
-                    };
+                    Direction.N => "C",
+                    Direction.E => "R",
+                    Direction.S => "R",
+                    Direction.W => "F",
+                    _ => throw new Exception(),
+                };
 
-                    if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-                }
-                else if (posFrom.col + 1 == posTo.col)
-                {
-                    move = robot.Direction switch
-                    {
-                        Direction.N => "R",
-                        Direction.E => "F",
-                        Direction.S => "C",
-                        Direction.W => "R",
-                        _ => throw new Exception(),
-                    };
-
-                    if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-                }
+                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
-            else if (posFrom.col == posTo.col)
+            else if (posFrom.col + 1 == posTo.col)
             {
-                if (posFrom.row - 1 == posTo.row)
+                move = robot.Direction switch
                 {
-                    move = robot.Direction switch
-                    {
-                        Direction.N => "F",
-                        Direction.E => "C",
-                        Direction.S => "R",
-                        Direction.W => "R",
-                        _ => throw new Exception(),
-                    };
+                    Direction.N => "R",
+                    Direction.E => "F",
+                    Direction.S => "C",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
 
-                    if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-                }
-                else if (posFrom.row + 1 == posTo.row)
-                {
-                    move = robot.Direction switch
-                    {
-                        Direction.N => "R",
-                        Direction.E => "R",
-                        Direction.S => "F",
-                        Direction.W => "C",
-                        _ => throw new Exception(),
-                    };
-
-                    if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-                }
+                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
-
-            return (i, move);
         }
-
-        public Queue<(int, int)> CalculateRoutes(Robot robot)
+        else if (posFrom.col == posTo.col)
         {
-            return _astar.AStarSearch(robot);
+            if (posFrom.row - 1 == posTo.row)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "F",
+                    Direction.E => "C",
+                    Direction.S => "R",
+                    Direction.W => "R",
+                    _ => throw new Exception(),
+                };
+
+                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+            }
+            else if (posFrom.row + 1 == posTo.row)
+            {
+                move = robot.Direction switch
+                {
+                    Direction.N => "R",
+                    Direction.E => "R",
+                    Direction.S => "F",
+                    Direction.W => "C",
+                    _ => throw new Exception(),
+                };
+
+                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
+            }
         }
+
+        if (move == "F")
+            route.Dequeue();
+
+        return move;
     }
 }

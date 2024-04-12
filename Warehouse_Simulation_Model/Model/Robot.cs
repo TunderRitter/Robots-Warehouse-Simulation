@@ -21,15 +21,15 @@ public class Robot
 
     public void Move()
     {
-		Pos = Direction switch
-		{
-			Direction.N => (Pos.row - 1, Pos.col),
-			Direction.E => (Pos.row, Pos.col + 1),
-			Direction.S => (Pos.row + 1, Pos.col),
-			Direction.W => (Pos.row, Pos.col - 1),
-			_ => throw new Exception(),
-		};
-	}
+        Pos = Direction switch
+        {
+            Direction.N => (Pos.row - 1, Pos.col),
+            Direction.E => (Pos.row, Pos.col + 1),
+            Direction.S => (Pos.row + 1, Pos.col),
+            Direction.W => (Pos.row, Pos.col - 1),
+            _ => throw new Exception(),
+        };
+    }
 
     public void TurnRight()
     {

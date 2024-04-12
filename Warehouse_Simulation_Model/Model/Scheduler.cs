@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Warehouse_Simulation_Model.Persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -9,9 +8,7 @@ public class Scheduler
     private readonly Robot[] _robots;
     private readonly List<Target> _targets;
     private readonly Log _log;
-    private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _strategy;
-    private readonly AStar _astar;
     private double _timeLimit;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
@@ -20,7 +17,7 @@ public class Scheduler
 
     private const bool _passThrough = false;
 
-    public Cell[,] Map { get; private set; } // Encapsulation!
+    public Cell[,] Map { get; private set; }
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
     public double TimeLimit
@@ -70,18 +67,12 @@ public class Scheduler
         _log = new Log();
         WriteLogStart();
 
-        _routes = new Queue<(int, int)>[data.Robots.Length];
-        for (int i = 0; i < data.Robots.Length; i++)
-        {
-            _routes[i] = new Queue<(int, int)>();
-        }
-
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
         _timeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
-        _controller = new Controller(new AStar(data.Map));
+        _controller = new Controller(data.Map, _robots);
 
         MaxSteps = 10000; // !!!
         Step = 1;
@@ -94,7 +85,7 @@ public class Scheduler
 
         AddTargets();
         AssignTasks();
-        CalculateRoutes();
+        _controller.CalculateRoutes();
         ChangeOccurred?.Invoke(this, EventArgs.Empty);
 
         while(Step <= MaxSteps) 
@@ -103,13 +94,14 @@ public class Scheduler
             {
                 AddTargets();
                 AssignTasks();
-                CalculateRoutes();
+                _controller.CalculateRoutes();
                 _robotFreed = false;
             }
 
-            for (int i = 0; i < _robots.Length; i++)
+            string[] steps = _controller.CalculateSteps();
+            for (int i = 0; i < steps.Length; i++)
             {
-                if (_routes[i].Any()) ExecuteStep(_controller.CalculateStep(_robots[i], _routes[i], _passThrough, Map, i));
+                ExecuteStep(i, steps[i]);
                 _robots[i].CheckPos();
             }
 
@@ -142,6 +134,8 @@ public class Scheduler
         }
     }
 
+    private static void MoveRobot(Robot robot) => robot.Move();
+
     private static void TurnRobotLeft(Robot robot) => robot.TurnLeft();
 
     private static void TurnRobotRight(Robot robot) => robot.TurnRight();
@@ -163,16 +157,14 @@ public class Scheduler
         _strategy.Assign(free, assignable);
     }
 
-    public void ExecuteStep((int i, String move) step)
+    public void ExecuteStep(int robotId, string move)
     {
-        int i = step.i;
-        String move = step.move;
-        Robot robot = _robots[i];
+        Robot robot = _robots[robotId];
         switch (move)
         {
             case "F":
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
-                robot.Pos = _routes[i].Dequeue();
+                MoveRobot(robot);
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
                 break;
             case "C":
@@ -183,24 +175,10 @@ public class Scheduler
                 break;
             case "W":
                 break;
-            case "WW":
-                _routes[i].Dequeue();
-                break;
             default:
                 throw new InvalidOperationException("Invalid move");
         }
         //write to log??
-    }
-
-    public void CalculateRoutes()
-    {
-        for (int i = 0; i < _robots.Length; i++)
-        {
-            if (_robots[i].TargetPos != null && _routes[i].Count == 0)
-            {
-                _routes[i] = _controller.CalculateRoutes(_robots[i]);
-            }
-        }
     }
 
     private void WriteLogStart()
