@@ -61,11 +61,27 @@ public class Replay
 
     private Robot[] GetRobots(Log log)
     {
-        if (log.teamSize != log.start.Count)
+		Robot[] robots = new Robot[log.teamSize];
+        try
         {
-            // exception
+			if (log.teamSize != log.start.Count) throw new InvalidDataException("Invalid number of robots");
+
+			for (int i = 0; i < robots.Length; i++)
+			{
+				if (log.start[i][0] is int row
+					&& log.start[i][1] is int col
+					&& log.start[i][2] is string directionStr)
+				{
+					if (!Enum.TryParse<Direction>(directionStr, out Direction direction)) throw new InvalidDataException("Invalid direction");
+					robots[i] = new Robot(i, (row, col), direction);
+				}
+				else throw new InvalidDataException("Invalid robot start states");
+			}
+		}
+        catch (Exception)
+        {
+            throw;
         }
-        Robot[] robots = new Robot[log.teamSize];
 
         return robots;
     }
