@@ -10,12 +10,14 @@ public class Target
         set => _id ??= value;
     }
     public (int row, int col) Pos { get; init; }
-    public bool Active;
+    public bool Active { get; set; }
+    public int InitId { get; init; }
 
 
-    public Target((int, int) pos)
+    public Target((int, int) pos, int initId)
     {
         Pos = pos;
         Active = false;
+        InitId = initId;
     }
 }

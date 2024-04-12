@@ -15,6 +15,7 @@ public class Scheduler
     private double _timeLimit;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
+    private int _targetCount;
     private bool _robotFreed;
     private Controller _controller;
 
@@ -59,15 +60,16 @@ public class Scheduler
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             robot.Finished += Robot_Finished;
         }
-        _targets = new List<Target>();
-        foreach ((int row, int col) targetPos in data.Targets)
+        _targets = [];
+        for (int i = 0; i < data.Targets.Length; i++)
         {
-            Target target = new(targetPos);
+            Target target = new(data.Targets[i], i);
             _targets.Add(target);
             ((Floor)Map[target.Pos.row, target.Pos.col]).Target = target;
         }
+        _targetCount = data.Targets.Length;
 
-        _log = new Log();
+		_log = new Log();
         WriteLogStart();
 
         _routes = new Queue<(int, int)>[data.Robots.Length];
@@ -226,8 +228,9 @@ public class Scheduler
     {
         if (Map[row, col] is Wall) return;
 
-        Target target = new((row, col));
+        Target target = new((row, col), _targetCount);
         _targets.Add(target);
+        _targetCount++;
         ((Floor)Map[row, col]).Target = target;
     }
 }
