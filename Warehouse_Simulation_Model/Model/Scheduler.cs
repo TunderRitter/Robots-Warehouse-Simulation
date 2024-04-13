@@ -199,6 +199,9 @@ public class Scheduler
                 throw new InvalidOperationException("Invalid move");
         }
         //write to log??
+        if (move == "W") WriteLogPlannerpaths(robotId, "T");
+        else WriteLogPlannerpaths(robotId, move);
+        WriteLogActualPaths(robotId, move);
     }
 
     private void WriteLogStart()
@@ -218,6 +221,11 @@ public class Scheduler
     private void WriteLogTeamSize()
     {
         _log.teamSize = _robots.Length;
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            _log.plannerPaths.Add("");
+            _log.actualPaths.Add("");
+        }
     }
 
     private void WriteLogNumTaskFinished()
@@ -238,8 +246,24 @@ public class Scheduler
     private void WriteLogEvents(int id, int step, String _event)
     {
         _log.events.Add(new object[] { id, step, _event });
-        Debug.WriteLine(id + " " +  step + " " + _event);
     }
+
+    private void WriteLogActualPaths(int i, String move)
+    {
+        if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
+        else _log.actualPaths[i] += "," + move;
+
+        Debug.WriteLine(_log.actualPaths[i]);
+    }
+
+    private void WriteLogPlannerpaths(int i, String move)
+    {
+        if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
+        else _log.plannerPaths[i] += "," + move;
+
+        Debug.WriteLine(_log.plannerPaths[i]);
+    }
+
     public void WriteLog()
     {
 
