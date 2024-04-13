@@ -66,4 +66,40 @@ public class CAStar
         return lowest;
     }
     
+    public Queue<(int, int)> GetPath(CASCell? Cell)
+    {
+        List<(int, int)> path = [];
+        while (Cell != null)
+        {
+            path.Insert(0, (Cell.I, Cell.J));
+            if (!Reservations.ContainsKey((Cell.I, Cell.J)))
+                Reservations.Add((Cell.I, Cell.J), new List<int>());
+            if (Reservations[(Cell.I, Cell.J)].Contains(Cell.Time))
+            {
+                Debug.WriteLine("már foglalt!!!!");
+            }
+            Reservations[(Cell.I, Cell.J)].Add(Cell.Time);
+
+
+
+            if (Cell.Parent != null)
+            {
+                if (!Reservations.ContainsKey((Cell.Parent.I, Cell.Parent.J)))
+                    Reservations.Add((Cell.Parent.I, Cell.Parent.J), new List<int>());
+                for (int i = Cell.Parent.Time + 1; i < Cell.Time; i++)
+                {
+                    if (Reservations[(Cell.Parent.I, Cell.Parent.J)].Contains(i))
+                    {
+                        Debug.WriteLine("már foglalt!!!!");
+                    }
+                    Reservations[(Cell.Parent.I, Cell.Parent.J)].Add(i);
+                }
+            }
+            Cell = Cell.Parent;
+        }
+
+        Queue<(int, int)> Path = new Queue<(int, int)>(path);
+        Path.Dequeue();
+        return Path;
+    }
 }
