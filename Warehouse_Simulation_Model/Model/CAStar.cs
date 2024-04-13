@@ -36,3 +36,25 @@ public class CASCell
     }
 }
 
+public class CAStar
+{
+    public int TimeStep;
+    /// <summary>
+    /// Adott (i,j) cella mely időpillanatokban lett már lefoglalva
+    /// </summary>
+    private Dictionary<(int I, int J), List<int>> Reservations;
+    private bool[,] Map;
+    private int Row;
+    private int Col;
+
+    public CAStar(bool[,] m)
+    {
+        TimeStep = 0;
+        Reservations = new();
+        Map = m;
+        Row = Map.GetLength(0);
+        Col = Map.GetLength(1);
+    }
+
+    
+}
