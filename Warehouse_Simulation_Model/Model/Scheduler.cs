@@ -68,6 +68,7 @@ public class Scheduler
 
 		_log = new Log();
         WriteLogStart();
+        WriteLogTeamSize();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
@@ -195,6 +196,11 @@ public class Scheduler
     private void WriteLogPlannerTimes(double time)
     {
         _log.plannerTimes.Add(time);
+    }
+
+    private void WriteLogTeamSize()
+    {
+        _log.teamSize = _robots.Length;
     }
 
     public void WriteLog()
