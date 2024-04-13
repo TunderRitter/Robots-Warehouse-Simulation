@@ -124,6 +124,7 @@ public class Scheduler
 
             Step++;
             WriteLogPlannerTimes(elapsedMillisecs);
+            WriteLogSumOfCost();
             startTime = DateTime.Now;
         }
     }
@@ -207,9 +208,13 @@ public class Scheduler
 
     private void WriteLogNumTaskFinished()
     {
-        _log.numTaskFinished = _log.numTaskFinished + 1;
+        _log.numTaskFinished += 1;
     }
 
+    private void WriteLogSumOfCost()
+    {
+        _log.sumOfCost += _robots.Length;
+    }
     public void WriteLog()
     {
 
