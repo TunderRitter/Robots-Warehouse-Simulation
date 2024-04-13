@@ -123,6 +123,7 @@ public class Scheduler
             }
 
             Step++;
+            WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();
             startTime = DateTime.Now;
@@ -214,6 +215,11 @@ public class Scheduler
     private void WriteLogSumOfCost()
     {
         _log.sumOfCost += _robots.Length;
+    }
+
+    private void WriteLogMakespan()
+    {
+        _log.makespan += 1;
     }
     public void WriteLog()
     {
