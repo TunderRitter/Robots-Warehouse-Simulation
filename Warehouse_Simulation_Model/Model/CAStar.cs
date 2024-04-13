@@ -56,5 +56,14 @@ public class CAStar
         Col = Map.GetLength(1);
     }
 
+    public static int Lowest_f_cost(List<CASCell> list)
+    {
+        int lowest = 0;
+        for (int i = 1; i < list.Count; i++)
+        {
+            if (list[i].f < list[lowest].f) lowest = i;
+        }
+        return lowest;
+    }
     
 }
