@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -150,6 +151,9 @@ public class Scheduler
         _robotFreed = true;
         if (sender is Robot robot)
         {
+            Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
+            if(target != null) WriteLogEvents(target.InitId, Step, "finished");
+
             _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
         }
@@ -161,6 +165,15 @@ public class Scheduler
     {
         List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
         List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
+
+        for (int i = 0; i < free.Count; i++)
+        {
+            if(assignable.Count >= i)
+            {
+                WriteLogEvents(assignable[i].InitId, Step, "assigned");
+            }
+        }
+
         _strategy.Assign(free, assignable);
     }
 
@@ -220,6 +233,12 @@ public class Scheduler
     private void WriteLogMakespan()
     {
         _log.makespan += 1;
+    }
+
+    private void WriteLogEvents(int id, int step, String _event)
+    {
+        _log.events.Add(new object[] { id, step, _event });
+        Debug.WriteLine(id + " " +  step + " " + _event);
     }
     public void WriteLog()
     {
