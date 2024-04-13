@@ -151,6 +151,8 @@ public class Scheduler
             _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
         }
+
+        WriteLogNumTaskFinished();
     }
 
     public void AssignTasks()
@@ -201,6 +203,11 @@ public class Scheduler
     private void WriteLogTeamSize()
     {
         _log.teamSize = _robots.Length;
+    }
+
+    private void WriteLogNumTaskFinished()
+    {
+        _log.numTaskFinished = _log.numTaskFinished + 1;
     }
 
     public void WriteLog()
