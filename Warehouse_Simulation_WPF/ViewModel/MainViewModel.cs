@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
@@ -134,6 +135,16 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
+    LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
+    LinearGradientBrush East = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 0.0);
+    LinearGradientBrush West = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 0.0);
+
+    LinearGradientBrush Target = new LinearGradientBrush(Colors.Salmon, Colors.Salmon, 0.0);
+    LinearGradientBrush InactiveTarget = new LinearGradientBrush(Colors.LightGray, Colors.LightGray, 0.0);
+
+    LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
+    LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
 
 
 
@@ -241,17 +252,17 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 Cell cell = _scheduler.Map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-                
+
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.LightGray : Brushes.White)) : Brushes.DarkSlateGray,
-                    Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
-                    Id = id == null ? String.Empty : id,
-                    Direction = (cell is Floor floor2 && floor2.Robot != null) ? 
-                        ((floor2.Robot.Direction == Direction.N) ? "N" : (floor2.Robot.Direction == Direction.S ? "S" : (floor2.Robot.Direction == Direction.E ? "E" : "W"))) : ""
-                });
+                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? InactiveTarget : Floor)) : Wall,
+                    Circle = CircleColor(cell),
+                    Square = (cell is Floor) ? Floor : Wall,
+                    Id = id == null ? String.Empty : id
+
+                }) ;
                 Cells[^1].TargetPlaced += new EventHandler(Cell_TargetPlaced);
             }
         }
@@ -279,11 +290,36 @@ public class MainViewModel : INotifyPropertyChanged
             int idx = i;
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? (floor.Target.Active ? Brushes.Salmon : Brushes.LightGray) : Brushes.White)) : Brushes.DarkSlateGray;
+            Cells[idx].Circle = CircleColor(cell);
             Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
+    }
+
+    private LinearGradientBrush CircleColor(Cell cell)
+    {
+        if (cell is Wall)
+        {
+            return Wall;
+        }
+        if (cell is Floor floor)
+        {
+            if (floor.Robot != null)
+            {
+                if (floor.Robot.Direction == Direction.N) return North;
+                if (floor.Robot.Direction == Direction.S) return South;
+                if (floor.Robot.Direction == Direction.E) return East;
+                if (floor.Robot.Direction == Direction.W) return West;
+            }
+            if (floor.Target != null)
+            {
+                if (floor.Target.Active) return Target;
+                return InactiveTarget;
+            }
+            return Floor;
+        }
+        return Floor;
     }
 
     private void ZoomMethod(object? parameter)
