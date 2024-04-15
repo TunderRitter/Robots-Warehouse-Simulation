@@ -4,17 +4,15 @@ stages:
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
-  TIMEZONE: "CET"
 
 before_script:
   - apt-get update -qy
-  - apt-get install -y nuget
+  - apt-get install -y --no-install-recommend nuget
   - nuget restore $SOLUTION
 
 build:
   stage: build
   script:
-    - export TZ=$TIMEZONE
     - msbuild /p:Configuration=Release $SOLUTION
 
 #test:
