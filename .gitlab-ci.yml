@@ -4,6 +4,7 @@ stages:
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
+  TIMEZONE: "CET"
 
 before_script:
   - apt-get update -qy
@@ -13,6 +14,7 @@ before_script:
 build:
   stage: build
   script:
+    - export TZ=$TIMEZONE
     - msbuild /p:Configuration=Release $SOLUTION
 
 #test:
