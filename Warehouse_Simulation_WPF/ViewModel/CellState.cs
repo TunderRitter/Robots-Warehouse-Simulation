@@ -83,6 +83,14 @@ namespace Warehouse_Simulation_WPF.ViewModel
                 }
             }
         }
+        private string _direction;
+
+        public string Direction
+        {
+            get { return _direction; }
+            set { _direction = value; OnPropertyChanged(nameof(Direction)); }
+        }
+
         public CellState()
         {
             OnlineOrder = new DelegateCommand(OrderMethod);

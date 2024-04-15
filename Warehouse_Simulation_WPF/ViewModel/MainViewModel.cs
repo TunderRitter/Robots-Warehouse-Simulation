@@ -248,7 +248,9 @@ public class MainViewModel : INotifyPropertyChanged
                     Y = j,
                     Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.LightGray : Brushes.White)) : Brushes.DarkSlateGray,
                     Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
-                    Id = id == null ? String.Empty : id
+                    Id = id == null ? String.Empty : id,
+                    Direction = (cell is Floor floor2 && floor2.Robot != null) ? 
+                        ((floor2.Robot.Direction == Direction.N) ? "N" : (floor2.Robot.Direction == Direction.S ? "S" : (floor2.Robot.Direction == Direction.E ? "E" : "W"))) : ""
                 });
                 Cells[^1].TargetPlaced += new EventHandler(Cell_TargetPlaced);
             }
