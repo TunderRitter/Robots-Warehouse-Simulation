@@ -17,7 +17,7 @@ before_script:
 build:
   stage: build
   script:
-    - “C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\msbuild.exe” $SOLUTION
+    - /usr/share/dotnet/msbuild /p:Configuration=Release $SOLUTION
 
 #test:
   #stage: test
