@@ -10,7 +10,7 @@ before_script:
   - export GIT_ASKPASS=""
   - apt-get update -qy
   - apt-get install -y --no-install-recommends nuget
-  - apt-get install -y dotnet-sdk-8.0.1
+  - apt-get install -y dotnet-sdk-8.0
   - export PATH=$PATH:/usr/share/dotnet
   - nuget restore $SOLUTION
 
