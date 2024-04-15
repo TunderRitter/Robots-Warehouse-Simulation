@@ -9,7 +9,7 @@ before_script:
   - export GIT_TERMINAL_PROMPT=0
   - export GIT_ASKPASS=""
   - apt-get update -qy
-  - apt-get install -y nuget
+  - apt-get install -y --no-install-recommends nuget
   - nuget restore $SOLUTION
 
 build:
