@@ -45,7 +45,7 @@ public partial class App : Application
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = e.title;
-            openFileDialog.Filter = "Json Files|*.json";
+            openFileDialog.Filter = "Map Files|*.map";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             
@@ -57,6 +57,9 @@ public partial class App : Application
                 if (e.type == "config")
                 {
                     _viewModel.CreateScheduler(openFileDialog.FileName);
+                    _view.MenuGrid.Visibility = Visibility.Collapsed;
+                    _view.WindowState = WindowState.Maximized;
+                    _view.SimGrid.Visibility = Visibility.Visible;
                 }
                 if (e.type == "log")
                 {
@@ -67,13 +70,13 @@ public partial class App : Application
                     if (mapDialog.ShowDialog() == true)
                     {
                         _viewModel.CreateReplay(openFileDialog.FileName, mapDialog.FileName);
+                        _view.MenuGrid.Visibility = Visibility.Collapsed;
+                        _view.WindowState = WindowState.Maximized;
+                        _view.SimGrid.Visibility = Visibility.Visible;
                     }
                     
                 }
                 
-                _view.MenuGrid.Visibility = Visibility.Collapsed;
-                _view.WindowState = WindowState.Maximized;
-                _view.SimGrid.Visibility = Visibility.Visible;
             }
         }
         catch (Exception)
