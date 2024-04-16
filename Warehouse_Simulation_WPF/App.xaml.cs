@@ -45,7 +45,7 @@ public partial class App : Application
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = e.title;
-            openFileDialog.Filter = "Map Files|*.map";
+            openFileDialog.Filter = "Json Files|*.json";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             
@@ -65,7 +65,7 @@ public partial class App : Application
                 {
                     OpenFileDialog mapDialog = new OpenFileDialog();
                     mapDialog.Title = "Choose map file";
-                    mapDialog.Filter = "Json Files|*.json";
+                    mapDialog.Filter = "Map files|*.map";
                     mapDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                     if (mapDialog.ShowDialog() == true)
                     {
