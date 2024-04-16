@@ -13,6 +13,7 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 public class MainViewModel : INotifyPropertyChanged
 {
     Scheduler? _scheduler;
+    Replay? _replayer;
 
     private int _row;
     public int Row
@@ -157,6 +158,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand LoadReplay { get; private set; }
 
     public DelegateCommand StartSim { get; private set; }
+    public DelegateCommand StartReplay { get; private set; }
     public DelegateCommand Exit { get; private set; }
 
     public DelegateCommand Zoom { get; private set; }
@@ -175,6 +177,7 @@ public class MainViewModel : INotifyPropertyChanged
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
         StartSim = new DelegateCommand(param => OnSimStart());
+        StartReplay = new DelegateCommand(param => OnReplayStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
         Exit = new DelegateCommand(param => OnExitGame());
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
@@ -215,6 +218,18 @@ public class MainViewModel : INotifyPropertyChanged
             Col = _scheduler.Map.GetLength(1);
             CreateMap();
 
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public void CreateReplay(string logPath, string mapPath)
+    {
+        try
+        {
+            _replayer = new Replay(logPath, mapPath);
+           
         }
         catch (Exception)
         {
@@ -352,10 +367,15 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnNewSimulation()
     {
-        NewSimulationStarted?.Invoke(this, EventArgs.Empty);
+        NewSimulationStarted?.Invoke(this, ("Choose config file","config"));
     }
 
     private void OnReplay()
+    {
+        Replay?.Invoke(this, ("Choose log file","log"));
+    }
+
+    private void OnReplayStart()
     {
 
     }
@@ -366,7 +386,8 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    public event EventHandler? NewSimulationStarted;
+    public event EventHandler<(string, string)>? NewSimulationStarted;
+    public event EventHandler<(string, string)>? Replay;
     
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
