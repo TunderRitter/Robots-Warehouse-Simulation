@@ -12,6 +12,7 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
+    #region properties
     Scheduler? _scheduler;
     Replay? _replayer;
 
@@ -136,6 +137,29 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private int _stepCount;
+
+    public string StepCount
+    {
+        get { return _stepCount.ToString(); }
+        set { _stepCount = int.Parse(value); OnPropertyChanged(nameof(StepCount)); }
+    }
+    private int _robotNumber;
+
+    public string RobotNumber
+    {
+        get { return _robotNumber.ToString(); }
+        set { _robotNumber = int.Parse(value); OnPropertyChanged(nameof(RobotNumber)); }
+    }
+    private int _targetLeft;
+
+    public string TargetLeft
+    {
+        get { return _targetLeft.ToString(); }
+        set { _targetLeft = int.Parse(value); OnPropertyChanged(nameof(TargetLeft)); }
+    }
+
+
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
     LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
     LinearGradientBrush East = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 0.0);
@@ -166,8 +190,14 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand IntCommand { get; init; }
     public DelegateCommand BackToMenu { get; init; }
 
+    #endregion
 
+    #region events
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler<(string, string)>? NewSimulationStarted;
+    public event EventHandler<(string, string)>? Replay;
 
+    #endregion
     public MainViewModel()
     {
         ZoomValue = 1;
@@ -260,6 +290,9 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateMap()
     {
         if (_scheduler == null) return;
+        StepCount = _scheduler.Step.ToString();
+        RobotNumber = "0";
+        TargetLeft = "0";
         Cells.Clear();
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
@@ -300,6 +333,9 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateMap()
     {
         if (_scheduler == null) return;
+        StepCount = _scheduler.Step.ToString();
+        RobotNumber = "0";
+        TargetLeft = "0";
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
@@ -385,9 +421,7 @@ public class MainViewModel : INotifyPropertyChanged
         ExitGame?.Invoke(this, EventArgs.Empty);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public event EventHandler<(string, string)>? NewSimulationStarted;
-    public event EventHandler<(string, string)>? Replay;
+    
     
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
