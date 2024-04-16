@@ -72,7 +72,7 @@ public class Replay
             for (int i = 0; i < robots.Length; i++)
             {
                 if (log.start[i].Length == 3
-                    &&log.start[i][0] is int row
+                    && log.start[i][0] is int row
                     && log.start[i][1] is int col
                     && log.start[i][2] is string directionStr)
                 {
