@@ -88,7 +88,7 @@
                 <ColumnDefinition Width="Auto"
                                   MaxWidth="{Binding MapWidth, UpdateSourceTrigger=PropertyChanged}" />
             </Grid.ColumnDefinitions>
-            
+
             <Button Content="BACK TO MENU"
                     Command="{Binding BackToMenu}"
                     Click="CloseSim"
@@ -172,8 +172,7 @@
                                         <Rectangle Grid.Row="0"
                                                    Fill="{Binding Square}" />
                                         <Ellipse Grid.Row="0"
-                                                 Fill="{Binding Circle}"
-                                                 />
+                                                 Fill="{Binding Circle}" />
                                         <TextBlock Grid.Row="0"
                                                    Text="{Binding Id}"
                                                    HorizontalAlignment="Center"
@@ -194,18 +193,39 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
-            
+
             <Grid x:Name="ReplayButtons"
                   Grid.Row="1"
                   Grid.Column="1">
 
             </Grid>
-            
-            <Slider x:Name="ReplaySLider"
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    ></Slider>
-            
+
+            <Grid Grid.Row="2"
+                  Grid.Column="0"
+                  Margin="50,0,0,0"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Width="{Binding Path=MapWidth}">
+
+                <Slider x:Name="ReplaySLider"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,0"
+                        />
+
+                <Button Content="&#x00AB;"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30" />
+                <Button Content="&#x7C7C;"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30" />
+                <Button Content="&#x00BB;"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30" />
+            </Grid>
+
+
+
             <Grid x:Name="ReplayStartGrid"
                   Visibility="Hidden"
                   Grid.Row="1"
