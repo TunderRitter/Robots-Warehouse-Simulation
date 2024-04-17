@@ -234,6 +234,7 @@ public class MainViewModel : INotifyPropertyChanged
         StepValue = "100";
         CanOrder = false;
         ZoomValue = 1;
+        _scheduler.runs = false;
         _scheduler = null;
 
     }

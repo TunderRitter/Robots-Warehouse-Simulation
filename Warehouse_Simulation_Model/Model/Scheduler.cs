@@ -18,7 +18,9 @@ public class Scheduler
 
     private const bool _passThrough = false;
 
-    public Cell[,] Map { get; private set; }
+    public bool runs { get; set; }
+
+    public Cell[,] Map { get; private set; } // Encapsulation!
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
     public double TimeLimit
@@ -75,6 +77,8 @@ public class Scheduler
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
+
+        runs = true;
 
         MaxSteps = 10000; // !!!
         Step = 1;
