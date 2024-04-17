@@ -4,7 +4,7 @@
 public class Robot
 {
     public int Id { get; init; }
-    public (int row, int col) Pos { get; set; }
+    public (int row, int col) Pos { get; private set; }
     public (int row, int col)? TargetPos { get; set; }
     public Direction Direction { get; private set; }
     public event EventHandler? Finished;
@@ -16,6 +16,19 @@ public class Robot
         Pos = pos;
         TargetPos = null;
         Direction = direction;
+    }
+
+
+    public void Move()
+    {
+        Pos = Direction switch
+        {
+            Direction.N => (Pos.row - 1, Pos.col),
+            Direction.E => (Pos.row, Pos.col + 1),
+            Direction.S => (Pos.row + 1, Pos.col),
+            Direction.W => (Pos.row, Pos.col - 1),
+            _ => throw new Exception(),
+        };
     }
 
     public void TurnRight()
@@ -58,7 +71,8 @@ public class Robot
 
     public void CheckPos()
     {
-        if (Pos == TargetPos) OnFinished();
+        if (Pos == TargetPos)
+            OnFinished();
     }
 
     private void OnFinished()

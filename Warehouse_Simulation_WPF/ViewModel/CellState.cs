@@ -56,8 +56,8 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
-        private Brush _circle;
-        public Brush Circle
+        private LinearGradientBrush _circle;
+        public LinearGradientBrush Circle
         {
             get { return _circle; }
             set
@@ -83,6 +83,7 @@ namespace Warehouse_Simulation_WPF.ViewModel
                 }
             }
         }
+
         public CellState()
         {
             OnlineOrder = new DelegateCommand(OrderMethod);

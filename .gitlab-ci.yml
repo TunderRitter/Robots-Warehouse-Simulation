@@ -1,21 +1,26 @@
 stages:
-    - build
-    #- test
+  - build
+  #- test
 
 variables:
-    solution: "Warehouse_Simulation.sln"
-    #test: "Tests"
+  SOLUTION: "Warehouse_Simulation.sln"
 
 before_script:
-    - nuget restore
+  - export GIT_TERMINAL_PROMPT=0
+  - export GIT_ASKPASS=""
+  - apt-get update -qy
+  - apt-get install -y --no-install-recommends nuget
+  - apt-get install -y dotnet-sdk-8.0
+  - export PATH=$PATH:/usr/share/dotnet
+  - nuget restore $SOLUTION
 
 build:
-    stage: build
-    script:
-        - msbuild /p:Configuration=Release $solution
+  stage: build
+  script:
+    - /usr/share/dotnet/msbuild /p:Configuration=Release $SOLUTION
 
 #test:
-    #stage: test
-    #script:
-        #- msbuild /p:Configuration=Release $solution
-        #- mono ./packages/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe ./$test/bin/Release/$test.dll
+  #stage: test
+  #script:
+    #- dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+

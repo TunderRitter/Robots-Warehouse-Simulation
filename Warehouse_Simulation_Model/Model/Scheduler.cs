@@ -8,13 +8,13 @@ public class Scheduler
     private readonly Robot[] _robots;
     private readonly List<Target> _targets;
     private readonly Log _log;
-    private readonly Queue<(int, int)>[] _routes;
     private readonly ITaskAssigner _strategy;
-    private readonly AStar _astar;
     private double _timeLimit;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
+    private int _targetCount;
     private bool _robotFreed;
+    private Controller _controller;
 
     private const bool _passThrough = false;
 
@@ -59,27 +59,24 @@ public class Scheduler
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             robot.Finished += Robot_Finished;
         }
-        _targets = new List<Target>();
-        foreach ((int row, int col) targetPos in data.Targets)
+        _targets = [];
+        for (int i = 0; i < data.Targets.Length; i++)
         {
-            Target target = new(targetPos);
+            Target target = new(data.Targets[i], i);
             _targets.Add(target);
             ((Floor)Map[target.Pos.row, target.Pos.col]).Target = target;
         }
+        _targetCount = data.Targets.Length;
 
-        _log = new Log();
-        _routes = new Queue<(int, int)>[data.Robots.Length];
-        for (int i = 0; i < data.Robots.Length; i++)
-        {
-            _routes[i] = new Queue<(int, int)>();
-        }
+		_log = new Log();
+        WriteLogStart();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-        _astar = new AStar(data.Map);
 
         _timeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
+        _controller = new Controller(data.Map, _robots);
 
         runs = true;
 
@@ -94,7 +91,7 @@ public class Scheduler
 
         AddTargets();
         AssignTasks();
-        CalculateRoutes();
+        _controller.CalculateRoutes();
         ChangeOccurred?.Invoke(this, EventArgs.Empty);
 
         while(Step <= MaxSteps) 
@@ -103,13 +100,14 @@ public class Scheduler
             {
                 AddTargets();
                 AssignTasks();
-                CalculateRoutes();
+                _controller.CalculateRoutes();
                 _robotFreed = false;
             }
 
-            for (int i = 0; i < _robots.Length; i++)
+            string[] steps = _controller.CalculateSteps();
+            for (int i = 0; i < steps.Length; i++)
             {
-                if (_routes[i].Any()) CalculateStep(i);
+                ExecuteStep(i, steps[i]);
                 _robots[i].CheckPos();
             }
 
@@ -128,6 +126,7 @@ public class Scheduler
             }
 
             Step++;
+            WriteLogPlannerTimes(elapsedMillisecs);
             startTime = DateTime.Now;
         }
     }
@@ -140,6 +139,8 @@ public class Scheduler
             ((Floor)Map[_targets[i].Pos.row, _targets[i].Pos.col]).Target = _targets[i];
         }
     }
+
+    private static void MoveRobot(Robot robot) => robot.Move();
 
     private static void TurnRobotLeft(Robot robot) => robot.TurnLeft();
 
@@ -162,84 +163,14 @@ public class Scheduler
         _strategy.Assign(free, assignable);
     }
 
-    public void CalculateStep(int i)
+    public void ExecuteStep(int robotId, string move)
     {
-        Robot robot = _robots[i];
-        (int row, int col) posTo = _routes[i].Peek();
-        (int row, int col) posFrom = robot.Pos;
-
-        string move = "";
-
-        if (posFrom.row == posTo.row)
-        {
-            if (posFrom.col - 1 == posTo.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "C",
-                    Direction.E => "R",
-                    Direction.S => "R",
-                    Direction.W => "F",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-            else if (posFrom.col + 1 == posTo.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "F",
-                    Direction.S => "C",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-        }
-        else if (posFrom.col == posTo.col)
-        {
-            if (posFrom.row - 1 == posTo.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "F",
-                    Direction.E => "C",
-                    Direction.S => "R",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-            else if (posFrom.row + 1 == posTo.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "R",
-                    Direction.S => "F",
-                    Direction.W => "C",
-                    _ => throw new Exception(),
-                };
-
-                if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
-            }
-        }
-
-        ExecuteStep(i, move);
-    }
-
-    public void ExecuteStep(int i, string move)
-    {
-        Robot robot = _robots[i];
+        Robot robot = _robots[robotId];
         switch (move)
         {
             case "F":
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
-                robot.Pos = _routes[i].Dequeue();
+                MoveRobot(robot);
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
                 break;
             case "C":
@@ -256,15 +187,18 @@ public class Scheduler
         //write to log??
     }
 
-    public void CalculateRoutes()
+    private void WriteLogStart()
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            if (_robots[i].TargetPos != null && _routes[i].Count == 0)
-            {
-                _routes[i] = _astar.AStarSearch(_robots[i]);
-            }
+            Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            _log.start.Add(data);
         }
+    }
+
+    private void WriteLogPlannerTimes(double time)
+    {
+        _log.plannerTimes.Add(time);
     }
 
     public void WriteLog()
@@ -276,8 +210,9 @@ public class Scheduler
     {
         if (Map[row, col] is Wall) return;
 
-        Target target = new((row, col));
+        Target target = new((row, col), _targetCount);
         _targets.Add(target);
+        _targetCount++;
         ((Floor)Map[row, col]).Target = target;
     }
 }
