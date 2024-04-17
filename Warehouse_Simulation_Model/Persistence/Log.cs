@@ -62,11 +62,11 @@ public class Log
             {
                 for (int j = 0; j < log.events[i].Count; j++)
                 {
-					log.events[i][j][0] = ((JsonElement)log.events[i][j][0]).GetInt32();
-					log.events[i][j][1] = ((JsonElement)log.events[i][j][1]).GetInt32();
-					log.events[i][j][2] = ((JsonElement)log.events[i][j][2]).GetString()
-						?? throw new InvalidDataException();
-				}
+                    log.events[i][j][0] = ((JsonElement)log.events[i][j][0]).GetInt32();
+                    log.events[i][j][1] = ((JsonElement)log.events[i][j][1]).GetInt32();
+                    log.events[i][j][2] = ((JsonElement)log.events[i][j][2]).GetString()
+                        ?? throw new InvalidDataException();
+                }
             }
             return log;
         }

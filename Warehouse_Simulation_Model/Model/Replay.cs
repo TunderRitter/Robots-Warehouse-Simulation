@@ -124,20 +124,20 @@ public class Replay
                     map[i, j] = new Floor();
             }
         }
-		for (int i = 0; i < robots.Length; i++)
-		{
-			if (map[robots[i].Pos.row, robots[i].Pos.col] is Floor floor)
-				floor.Robot = robots[i];
-			else { } // ERROR
-		}
-		for (int i = targets.Length - 1; i >= 0; i--)
-		{
-			if (map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
-				floor.Target = targets[i];
-			else { } // ERROR
-		}
+        for (int i = 0; i < robots.Length; i++)
+        {
+            if (map[robots[i].Pos.row, robots[i].Pos.col] is Floor floor)
+                floor.Robot = robots[i];
+            else { } // ERROR
+        }
+        for (int i = targets.Length - 1; i >= 0; i--)
+        {
+            if (map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
+                floor.Target = targets[i];
+            else { } // ERROR
+        }
 
-		return map;
+        return map;
     }
 
     private static (int, int) ConvertCoordinates(int coor, int width) => (coor / width, coor % width);
