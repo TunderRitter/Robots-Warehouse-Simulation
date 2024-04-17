@@ -108,11 +108,7 @@ public class Scheduler
             }
 
             string[] steps = _controller.CalculateSteps();
-            for (int i = 0; i < steps.Length; i++)
-            {
-                ExecuteStep(i, steps[i]);
-                _robots[i].CheckPos();
-            }
+            ExecuteSteps(steps);
 
             //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
 
@@ -182,26 +178,35 @@ public class Scheduler
         _strategy.Assign(free, assignable);
     }
 
-    public void ExecuteStep(int robotId, string move)
+    public void ExecuteSteps(string[] steps)
     {
-        Robot robot = _robots[robotId];
-        switch (move)
+        for (int i = 0; i < _robots.Length; i++)
         {
-            case "F":
-                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
-                MoveRobot(robot);
+            Robot robot = _robots[i];
+            switch (steps[i])
+            {
+                case "F":
+                    ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
+                    MoveRobot(robot);
+                    break;
+                case "C":
+                    TurnRobotLeft(robot);
+                    break;
+                case "R":
+                    TurnRobotRight(robot);
+                    break;
+                case "W":
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid move");
+            }
+        }
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            Robot robot = _robots[i];
+            if (steps[i] == "F")
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
-                break;
-            case "C":
-                TurnRobotLeft(robot);
-                break;
-            case "R":
-                TurnRobotRight(robot);
-                break;
-            case "W":
-                break;
-            default:
-                throw new InvalidOperationException("Invalid move");
+            _robots[i].CheckPos();
         }
         //write to log??
         if (move == "W") WriteLogPlannerpaths(robotId, "T");
