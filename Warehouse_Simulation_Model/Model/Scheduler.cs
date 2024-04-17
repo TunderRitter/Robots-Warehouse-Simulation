@@ -200,6 +200,12 @@ public class Scheduler
                 default:
                     throw new InvalidOperationException("Invalid move");
             }
+
+            //write log
+
+            if (steps[i] == "W") WriteLogPlannerpaths(robot.Id, "T");
+            else WriteLogPlannerpaths(robot.Id, steps[i]);
+            WriteLogActualPaths(robot.Id, steps[i]);
         }
         for (int i = 0; i < _robots.Length; i++)
         {
@@ -208,10 +214,7 @@ public class Scheduler
                 ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             _robots[i].CheckPos();
         }
-        //write to log??
-        if (move == "W") WriteLogPlannerpaths(robotId, "T");
-        else WriteLogPlannerpaths(robotId, move);
-        WriteLogActualPaths(robotId, move);
+        
     }
 
     private void WriteLogStart()

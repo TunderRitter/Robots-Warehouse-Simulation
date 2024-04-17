@@ -9,7 +9,7 @@ public class Replay
     private readonly Target[] _targets;
     private double _speed;
     private bool _paused;
-    public Cell[,] InitMap { get; init; };
+    public Cell[,] InitMap { get; init; }
     public Cell[][,] Maps { get; init; }
 
 
