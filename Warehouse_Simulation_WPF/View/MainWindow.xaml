@@ -3,157 +3,189 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        
-        
         xmlns:local="clr-namespace:Warehouse_Simulation_WPF.View"
         mc:Ignorable="d"
-        Width="500" Height="300"
+        Width="500"
+        Height="300"
         Title="MainWindow">
 
     <Window.Resources>
-        <LinearGradientBrush x:Key="GradientBrush1"  
-                            StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="Gray" Offset="0"/>
-            <GradientStop Color="LightGray" Offset="0.5"/>
-            <GradientStop Color="Gray" Offset="1"/>
-        </LinearGradientBrush>
         <Style TargetType="Button">
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Height"
+                    Value="30" />
+            <Setter Property="FontSize"
+                    Value="14" />
+            <Setter Property="Padding"
+                    Value="5" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="15" Background="White" BorderThickness="1" Padding="2">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border CornerRadius="15"
+                                Background="White"
+                                BorderThickness="1"
+                                Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <Style TargetType="Rectangle">
-            <Setter Property="Height" Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}"/>
-            <Setter Property="Width" Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}"/>
+            <Setter Property="Height"
+                    Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}" />
+            <Setter Property="Width"
+                    Value="{Binding Path=CellSize, UpdateSourceTrigger=PropertyChanged}" />
         </Style>
         <Style TargetType="Ellipse">
-            <Setter Property="Height" Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}"/>
-            <Setter Property="Width" Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}"/>
+            <Setter Property="Height"
+                    Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}" />
+            <Setter Property="Width"
+                    Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}" />
         </Style>
     </Window.Resources>
 
     <Grid>
-        <Grid x:Name="MenuGrid" Grid.Row="0" Background="Gainsboro">
-            <TextBlock Name="Title" Text="Warehouse simulator"
-                        FontSize="20"
-                       VerticalAlignment="Top" HorizontalAlignment="Center"
-                       Margin="0,60,0,0"/>
-            <Button x:Name="Simulation" Content="New simulation"
-                    Height="40" Width="120" 
-                    HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Grid x:Name="MenuGrid"
+              Grid.Row="0"
+              Background="Gainsboro">
+            <TextBlock Name="Title"
+                       Text="Warehouse simulator"
+                       FontSize="20"
+                       VerticalAlignment="Top"
+                       HorizontalAlignment="Center"
+                       Margin="0,60,0,0" />
+            <Button x:Name="Simulation"
+                    Content="New simulation"
+                    Height="40"
+                    Width="120"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
                     Margin="120,120,0,0"
-                    
-                    Command="{Binding Path=NewSimulation}"
-                    />
-            <Button Name="Replay" Content="Start replay"
-                    Height="40" Width="120" Margin="0,120,120,0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Click="ReplayButton_Click"
-                    Command="{Binding Path=LoadReplay}"/>
-        </Grid>
-        <Grid x:Name="SimGrid" Grid.Row="0" Visibility="Collapsed" Background="Gainsboro">
-            
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="40"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" MaxWidth="{Binding MapWidth, UpdateSourceTrigger=PropertyChanged}"/>
-            </Grid.ColumnDefinitions>
-            <Button Content="BACK TO MENU" Command="{Binding BackToMenu}"
-                    Click="CloseSim" Width="150"
+                    Command="{Binding Path=NewSimulation}" />
+            <Button Name="Replay"
+                    Content="Start replay"
+                    Height="40"
+                    Width="120"
+                    Margin="0,120,120,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Margin="0,10,10,0"/>
-            <Button Content="+" Command="{Binding Path=Zoom}"
-                CommandParameter="Up" Width="30"
-                Margin="50,10,0,0"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <Button Content="-" Command="{Binding Path=Zoom}"
-                CommandParameter="Down" Width="30"
-                Margin="100,10,0,0"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    Click="ReplayButton_Click"
+                    Command="{Binding Path=LoadReplay}" />
+        </Grid>
+        <Grid x:Name="SimGrid"
+              Grid.Row="0"
+              Visibility="Collapsed"
+              Background="Gainsboro">
 
-            <TextBlock
-                Text="Loading map..."
-                Grid.Row="1" Grid.Column="0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Margin="100,100,0,0"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="70" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"
+                                  MaxWidth="{Binding MapWidth, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid.ColumnDefinitions>
 
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Background="LightGray" Height="auto" Width="auto"
-                    Margin="50,0,0,0" HorizontalAlignment="Left"
+            <Button Content="BACK TO MENU"
+                    Command="{Binding BackToMenu}"
+                    Click="CloseSim"
+                    Width="150"
+                    HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    MaxHeight="{Binding ScrollViewHeight, UpdateSourceTrigger=PropertyChanged}"
-                    MaxWidth="{Binding ScrollViewWidth, UpdateSourceTrigger=PropertyChanged}">
-                
-                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+                    Margin="0,10,10,0" />
+            <Button Content="+"
+                    Command="{Binding Path=Zoom}"
+                    CommandParameter="Up"
+                    Width="30"
+                    Margin="50,10,0,0"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top" />
+            <Button Content="-"
+                    Command="{Binding Path=Zoom}"
+                    CommandParameter="Down"
+                    Width="30"
+                    Margin="100,10,0,0"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top" />
+
+            <TextBlock Text="Loading map..."
+                       Grid.Row="1"
+                       Grid.Column="0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Margin="100,100,0,0" />
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Grid.Row="1"
+                          Grid.Column="0"
+                          Background="LightGray"
+                          Height="auto"
+                          Width="auto"
+                          Margin="50,0,0,0"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          MaxHeight="{Binding ScrollViewHeight, UpdateSourceTrigger=PropertyChanged}"
+                          MaxWidth="{Binding ScrollViewWidth, UpdateSourceTrigger=PropertyChanged}">
+
+                <StackPanel HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
 
                     <StackPanel.LayoutTransform>
-                        <ScaleTransform ScaleX="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}" ScaleY="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}" />
+                        <ScaleTransform ScaleX="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}"
+                                        ScaleY="{Binding Path=ZoomValue, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel.LayoutTransform>
 
                     <Grid x:Name="SimulationGrid">
 
-                        <ItemsControl ItemsSource="{Binding Path=Cells}" 
+                        <ItemsControl ItemsSource="{Binding Path=Cells}"
                                       Width="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
                                       Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
                                       MaxWidth="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
                                       MaxHeight="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
-                                      Background="Thistle" BorderBrush="DarkSlateGray" BorderThickness="2">
-                            
+                                      Background="Thistle"
+                                      BorderBrush="DarkSlateGray"
+                                      BorderThickness="2">
+
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="{Binding Path=Row, UpdateSourceTrigger=PropertyChanged}"
-                                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}"/>
+                                                 Columns="{Binding Path=Col, UpdateSourceTrigger=PropertyChanged}" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
-                            
+
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Height="auto" Width="auto">
+                                    <Grid Height="auto"
+                                          Width="auto">
                                         <Grid.InputBindings>
-                                            <MouseBinding Gesture="LeftClick" Command="{Binding OnlineOrder}" />
+                                            <MouseBinding Gesture="LeftClick"
+                                                          Command="{Binding OnlineOrder}" />
                                         </Grid.InputBindings>
-                                        <Rectangle
-                                            Grid.Row="0"
-                                            Fill="{Binding Square}"
-                                            />
-                                        <Ellipse
-                                            Grid.Row="0"
-                                            Fill="{Binding Circle}"
-                                            />
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Text="{Binding Id}"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            />
+                                        <Rectangle Grid.Row="0"
+                                                   Fill="{Binding Square}" />
+                                        <Ellipse Grid.Row="0"
+                                                 Fill="{Binding Circle}" />
+                                        <TextBlock Grid.Row="0"
+                                                   Text="{Binding Id}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                             <ItemsControl.ItemContainerStyle>
                                 <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding X}" />
-                                    <Setter Property="Grid.Column" Value="{Binding Y}" />
+                                    <Setter Property="Grid.Row"
+                                            Value="{Binding X}" />
+                                    <Setter Property="Grid.Column"
+                                            Value="{Binding Y}" />
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 
@@ -161,87 +193,189 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
-            <Grid x:Name="ReplayButtons" Grid.Row="1" Grid.Column="1">
-                
+
+            <Grid x:Name="ReplayButtons"
+                  Grid.Row="1"
+                  Grid.Column="1">
+
             </Grid>
-            <Slider x:Name="ReplaySLider" Grid.Row="2" Grid.Column="0" Visibility="Collapsed"></Slider>
-            <Grid x:Name="StartGrid" Grid.Row="1" Grid.Column="1" Background="LightGray"
-                  Width="300" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"
+
+            <Grid Grid.Row="2"
+                  Grid.Column="0"
+                  Margin="50,0,0,0"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Width="{Binding Path=MapWidth}">
+
+                <Slider x:Name="ReplaySLider"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,0" />
+
+                <Button Content="&#x00AB;"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Center"
+                        Margin="0,20,100,0"/>
+                <Button Content="||"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Center"
+                        Margin="0,20,0,0"/>
+                <Button Content="&#x00BB;"
+                        FontFamily="Segoe UI Symbol"
+                        Width="30" 
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Center"
+                        Margin="100,20,0,0"/>
+            </Grid>
+
+
+
+            <Grid x:Name="ReplayStartGrid"
+                  Visibility="Hidden"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  Background="LightGray"
+                  Width="300"
+                  Height="150"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="10,10,0,0">
+                <Button Content="START"
+                        Width="100"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="150,75,0,0"
+                        Command="{Binding Path=StartReplay}"
+                        Click="HideReplayStartGrid" />
+
+            </Grid>
+            <Grid x:Name="StartGrid"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  Background="LightGray"
+                  Width="300"
+                  Height="150"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
                   Margin="10,10,0,0">
                 <TextBlock Text="NUMBER OF STEPS:"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
-                           Margin="30,30,0,0"/>
+                           Margin="30,30,0,0" />
                 <local:NumericUpDown x:Name="stepNum"
-                     Default="100"
-                     Value="{Binding StepValue, Mode=TwoWay}"
-                     Command="{Binding StepCommand}" 
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="240,30,0,0"/>
+                                     Default="100"
+                                     Value="{Binding StepValue, Mode=TwoWay}"
+                                     Command="{Binding StepCommand}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Margin="240,30,0,0" />
                 <TextBlock Text="INTERVAL OF STEPS (milliseconds):"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
-                           Margin="30,60,0,0"/>
+                           Margin="30,60,0,0" />
                 <local:NumericUpDown x:Name="intervalNum"
-                     Default="1000"
-                     Value="{Binding IntValue, Mode=TwoWay}"
-                     Command="{Binding IntCommand}" 
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="240,60,0,0"/>
-                <Button Content="START" Width="100"
+                                     Default="1000"
+                                     Value="{Binding IntValue, Mode=TwoWay}"
+                                     Command="{Binding IntCommand}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Margin="240,60,0,0" />
+                <Button Content="START"
+                        Width="100"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="45,90,0,0"
                         Command="{Binding Path=StartSim}"
-                        Click="HideStartGrid"/>
+                        Click="HideStartGrid" />
             </Grid>
-            <Grid Grid.Row="2" Grid.Column="0"
+            <Grid x:Name="InfoGrid"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  Visibility="Collapsed"
+                  Background="LightGray"
+                  Width="300"
+                  Height="120"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="10,10,0,0">
+                <TextBlock Text="NUMBER OF STEP:"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="30,30,0,0" />
+                <TextBlock Text="{Binding StepCount, UpdateSourceTrigger=PropertyChanged}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="240,30,0,0" />
+                <TextBlock Text="NUMBER OF ROBOTS:"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="30,60,0,0" />
+                <TextBlock Text="{Binding RobotNumber, UpdateSourceTrigger=PropertyChanged}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="240,60,0,0" />
+                <TextBlock Text="TARGETS LEFT:"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="30,90,0,0" />
+                <TextBlock Text="{Binding TargetLeft, UpdateSourceTrigger=PropertyChanged}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Margin="240,90,0,0" />
+
+            </Grid>
+            <Grid Grid.Row="2"
+                  Grid.Column="0"
                   Margin="50,0,0,0"
                   VerticalAlignment="Top"
                   HorizontalAlignment="Left"
-                  Width="{Binding Path=MapWidth}"
-                  >
+                  Width="{Binding Path=MapWidth}">
 
-                <ToggleButton
-                    IsChecked="{Binding Path=CanOrder, Mode=TwoWay}"
-                    Width="100" Height="30" Content="ONLINE ORDER"
-                    Margin="0,0,0,0"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Left"
-                    
-                    >
+                <ToggleButton IsChecked="{Binding Path=CanOrder, Mode=TwoWay}"
+                              Width="100"
+                              Height="30"
+                              Content="ONLINE ORDER"
+                              Margin="0,0,0,0"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left">
                     <ToggleButton.Style>
                         <Style TargetType="ToggleButton">
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
-                                            Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center"                  
-                                              VerticalAlignment="Center"/>
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
                                         </Border>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
-                            
+
                             <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="DarkSeaGreen" />
+                                <Trigger Property="IsChecked"
+                                         Value="True">
+                                    <Setter Property="Background"
+                                            Value="DarkSeaGreen" />
                                 </Trigger>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Background" Value="White" />
+                                <Trigger Property="IsChecked"
+                                         Value="False">
+                                    <Setter Property="Background"
+                                            Value="White" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
                     </ToggleButton.Style>
                 </ToggleButton>
             </Grid>
-            
+
         </Grid>
-        
-        
-            
+
+
+
     </Grid>
 </Window>

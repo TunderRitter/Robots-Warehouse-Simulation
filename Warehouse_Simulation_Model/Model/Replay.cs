@@ -126,11 +126,15 @@ public class Replay
         }
         for (int i = 0; i < robots.Length; i++)
         {
-            ((Floor)map[robots[i].Pos.row, robots[i].Pos.col]).Robot = robots[i];
+            if (map[robots[i].Pos.row, robots[i].Pos.col] is Floor floor)
+                floor.Robot = robots[i];
+            else { } // ERROR
         }
         for (int i = targets.Length - 1; i >= 0; i--)
         {
-            ((Floor)map[targets[i].Pos.row, targets[i].Pos.col]).Target = targets[i];
+            if (map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
+                floor.Target = targets[i];
+            else { } // ERROR
         }
 
         return map;

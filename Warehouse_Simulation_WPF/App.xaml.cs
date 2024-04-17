@@ -25,7 +25,8 @@ public partial class App : Application
     private void App_Startup(object? sender, StartupEventArgs e)
     {
         _viewModel = new MainViewModel();
-        _viewModel.NewSimulationStarted += new EventHandler(NewSimulation);
+        _viewModel.NewSimulationStarted += new EventHandler<(string,string)>(LoadFile);
+        _viewModel.Replay += new EventHandler<(string, string)>(LoadFile);
 
         _view = new MainWindow();
         _view.DataContext = _viewModel;
@@ -33,25 +34,49 @@ public partial class App : Application
         _view.Show();
     }
 
+    private void NewReplay(object? sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
 
-
-    private void NewSimulation(object? sender, System.EventArgs e)
+    private void LoadFile(object? sender, (string title, string type) e)
     {
         try
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "Load config file";
+            openFileDialog.Title = e.title;
             openFileDialog.Filter = "Json Files|*.json";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            
+
             if (openFileDialog.ShowDialog() == true)
             {
 
                 //_model = new Scheduler(ConfigReader.Read(openFileDialog.FileName));
+                if (e.type == "config")
+                {
+                    _viewModel.CreateScheduler(openFileDialog.FileName);
+                    _view.MenuGrid.Visibility = Visibility.Collapsed;
+                    _view.WindowState = WindowState.Maximized;
+                    _view.SimGrid.Visibility = Visibility.Visible;
+                }
+                if (e.type == "log")
+                {
+                    OpenFileDialog mapDialog = new OpenFileDialog();
+                    mapDialog.Title = "Choose map file";
+                    mapDialog.Filter = "Map files|*.map";
+                    mapDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    if (mapDialog.ShowDialog() == true)
+                    {
+                        _viewModel.CreateReplay(openFileDialog.FileName, mapDialog.FileName);
+                        _view.MenuGrid.Visibility = Visibility.Collapsed;
+                        _view.WindowState = WindowState.Maximized;
+                        _view.SimGrid.Visibility = Visibility.Visible;
+                    }
+                    
+                }
                 
-                _viewModel.CreateScheduler(openFileDialog.FileName);
-                _view.MenuGrid.Visibility = Visibility.Collapsed;
-                _view.WindowState = WindowState.Maximized;
-                _view.SimGrid.Visibility = Visibility.Visible;
             }
         }
         catch (Exception)

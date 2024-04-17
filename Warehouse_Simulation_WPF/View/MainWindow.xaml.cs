@@ -16,6 +16,7 @@ public partial class MainWindow : Window
         //MenuGrid.Visibility = Visibility.Collapsed;
         //this.WindowState = WindowState.Maximized;
         //SimGrid.Visibility = Visibility.Visible;
+        ReplayStartGrid.Visibility = Visibility.Visible;
     }
     private void SimulationButton_Click(object sender, EventArgs e)
     {
@@ -26,6 +27,12 @@ public partial class MainWindow : Window
     private void HideStartGrid(object sender, EventArgs e)
     {
         StartGrid.Visibility = Visibility.Collapsed;
+        InfoGrid.Visibility = Visibility.Visible;
+    }
+    private void HideReplayStartGrid(object sender, EventArgs e)
+    {
+        ReplayStartGrid.Visibility = Visibility.Collapsed;
+        InfoGrid.Visibility = Visibility.Visible;
     }
     private void CloseSim(object sender, EventArgs e)
     {

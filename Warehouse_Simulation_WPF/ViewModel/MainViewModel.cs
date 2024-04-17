@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
@@ -11,7 +12,9 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
+    #region properties
     Scheduler? _scheduler;
+    Replay? _replayer;
 
     private int _row;
     public int Row
@@ -134,6 +137,39 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private int _stepCount;
+
+    public string StepCount
+    {
+        get { return _stepCount.ToString(); }
+        set { _stepCount = int.Parse(value); OnPropertyChanged(nameof(StepCount)); }
+    }
+    private int _robotNumber;
+
+    public string RobotNumber
+    {
+        get { return _robotNumber.ToString(); }
+        set { _robotNumber = int.Parse(value); OnPropertyChanged(nameof(RobotNumber)); }
+    }
+    private int _targetLeft;
+
+    public string TargetLeft
+    {
+        get { return _targetLeft.ToString(); }
+        set { _targetLeft = int.Parse(value); OnPropertyChanged(nameof(TargetLeft)); }
+    }
+
+
+    LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
+    LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
+    LinearGradientBrush East = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 0.0);
+    LinearGradientBrush West = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 0.0);
+
+    LinearGradientBrush Target = new LinearGradientBrush(Colors.Salmon, Colors.Salmon, 0.0);
+    LinearGradientBrush InactiveTarget = new LinearGradientBrush(Colors.LightGray, Colors.LightGray, 0.0);
+
+    LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
+    LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
 
 
 
@@ -146,6 +182,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand LoadReplay { get; private set; }
 
     public DelegateCommand StartSim { get; private set; }
+    public DelegateCommand StartReplay { get; private set; }
     public DelegateCommand Exit { get; private set; }
 
     public DelegateCommand Zoom { get; private set; }
@@ -153,8 +190,14 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand IntCommand { get; init; }
     public DelegateCommand BackToMenu { get; init; }
 
+    #endregion
 
+    #region events
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler<(string, string)>? NewSimulationStarted;
+    public event EventHandler<(string, string)>? Replay;
 
+    #endregion
     public MainViewModel()
     {
         ZoomValue = 1;
@@ -164,6 +207,7 @@ public class MainViewModel : INotifyPropertyChanged
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
         StartSim = new DelegateCommand(param => OnSimStart());
+        StartReplay = new DelegateCommand(param => OnReplayStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
         Exit = new DelegateCommand(param => OnExitGame());
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
@@ -210,6 +254,18 @@ public class MainViewModel : INotifyPropertyChanged
             throw;
         }
     }
+    public void CreateReplay(string logPath, string mapPath)
+    {
+        try
+        {
+            _replayer = new Replay(logPath, mapPath);
+           
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 
     private void CalculateHeight()
     {
@@ -234,6 +290,9 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateMap()
     {
         if (_scheduler == null) return;
+        StepCount = _scheduler.Step.ToString();
+        RobotNumber = "0";
+        TargetLeft = "0";
         Cells.Clear();
         for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
         {
@@ -241,15 +300,17 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 Cell cell = _scheduler.Map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-                
+
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
-                    Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? Brushes.LightGray : Brushes.White)) : Brushes.DarkSlateGray,
-                    Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray,
+                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? InactiveTarget : Floor)) : Wall,
+                    Circle = CircleColor(cell),
+                    Square = (cell is Floor) ? Floor : Wall,
                     Id = id == null ? String.Empty : id
-                });
+
+                }) ;
                 Cells[^1].TargetPlaced += new EventHandler(Cell_TargetPlaced);
             }
         }
@@ -272,16 +333,44 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateMap()
     {
         if (_scheduler == null) return;
+        StepCount = _scheduler.Step.ToString();
+        RobotNumber = "0";
+        TargetLeft = "0";
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-            Cells[idx].Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? (floor.Target.Active ? Brushes.Salmon : Brushes.LightGray) : Brushes.White)) : Brushes.DarkSlateGray;
+            Cells[idx].Circle = CircleColor(cell);
             Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
+    }
+
+    private LinearGradientBrush CircleColor(Cell cell)
+    {
+        if (cell is Wall)
+        {
+            return Wall;
+        }
+        if (cell is Floor floor)
+        {
+            if (floor.Robot != null)
+            {
+                if (floor.Robot.Direction == Direction.N) return North;
+                if (floor.Robot.Direction == Direction.S) return South;
+                if (floor.Robot.Direction == Direction.E) return East;
+                if (floor.Robot.Direction == Direction.W) return West;
+            }
+            if (floor.Target != null)
+            {
+                if (floor.Target.Active) return Target;
+                return InactiveTarget;
+            }
+            return Floor;
+        }
+        return Floor;
     }
 
     private void ZoomMethod(object? parameter)
@@ -314,10 +403,15 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnNewSimulation()
     {
-        NewSimulationStarted?.Invoke(this, EventArgs.Empty);
+        NewSimulationStarted?.Invoke(this, ("Choose config file","config"));
     }
 
     private void OnReplay()
+    {
+        Replay?.Invoke(this, ("Choose log file","log"));
+    }
+
+    private void OnReplayStart()
     {
 
     }
@@ -327,8 +421,7 @@ public class MainViewModel : INotifyPropertyChanged
         ExitGame?.Invoke(this, EventArgs.Empty);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public event EventHandler? NewSimulationStarted;
+    
     
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
