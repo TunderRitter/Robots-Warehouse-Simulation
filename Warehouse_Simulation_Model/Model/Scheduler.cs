@@ -70,6 +70,7 @@ public class Scheduler
 		_log = new Log();
         WriteLogStart();
         WriteLogTeamSize();
+        WriteLogTasks();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
@@ -264,9 +265,29 @@ public class Scheduler
         Debug.WriteLine(_log.plannerPaths[i]);
     }
 
-    public void WriteLog()
+    private void WriteLogTasks()
+    {
+        for (int i = 0; i < _targets.Count; i++)
+        {
+            int[] trg = { _targets[i].InitId, _targets[i].Pos.Item1, _targets[i].Pos.Item2 };
+            _log.tasks.Add(trg);
+        }
+    }
+
+    private void WriteLogErrors()
     {
 
+    }
+
+    private void WriteLogAllValid()
+    {
+        if (_log.errors.Count > 0) _log.AllValid = "No";
+        else _log.AllValid = "Yes";
+    }
+
+    public void WriteLog()
+    {
+        WriteLogAllValid();
     }
 
     public void AddTarget(int row, int col)
