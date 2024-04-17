@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -70,6 +71,8 @@ public class Scheduler
 
 		_log = new Log();
         WriteLogStart();
+        WriteLogTeamSize();
+        WriteLogTasks();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
@@ -126,7 +129,9 @@ public class Scheduler
             }
 
             Step++;
+            WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
+            WriteLogSumOfCost();
             startTime = DateTime.Now;
         }
     }
@@ -151,15 +156,29 @@ public class Scheduler
         _robotFreed = true;
         if (sender is Robot robot)
         {
+            Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
+            if(target != null) WriteLogEvents(target.InitId, Step, "finished");
+
             _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
         }
+
+        WriteLogNumTaskFinished();
     }
 
     public void AssignTasks()
     {
         List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
         List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
+
+        for (int i = 0; i < free.Count; i++)
+        {
+            if(assignable.Count >= i)
+            {
+                WriteLogEvents(assignable[i].InitId, Step, "assigned");
+            }
+        }
+
         _strategy.Assign(free, assignable);
     }
 
@@ -185,6 +204,9 @@ public class Scheduler
                 throw new InvalidOperationException("Invalid move");
         }
         //write to log??
+        if (move == "W") WriteLogPlannerpaths(robotId, "T");
+        else WriteLogPlannerpaths(robotId, move);
+        WriteLogActualPaths(robotId, move);
     }
 
     private void WriteLogStart()
@@ -201,9 +223,75 @@ public class Scheduler
         _log.plannerTimes.Add(time);
     }
 
-    public void WriteLog()
+    private void WriteLogTeamSize()
+    {
+        _log.teamSize = _robots.Length;
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            _log.plannerPaths.Add("");
+            _log.actualPaths.Add("");
+        }
+    }
+
+    private void WriteLogNumTaskFinished()
+    {
+        _log.numTaskFinished += 1;
+    }
+
+    private void WriteLogSumOfCost()
+    {
+        _log.sumOfCost += _robots.Length;
+    }
+
+    private void WriteLogMakespan()
+    {
+        _log.makespan += 1;
+    }
+
+    private void WriteLogEvents(int id, int step, String _event)
+    {
+        _log.events.Add(new object[] { id, step, _event });
+    }
+
+    private void WriteLogActualPaths(int i, String move)
+    {
+        if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
+        else _log.actualPaths[i] += "," + move;
+
+        Debug.WriteLine(_log.actualPaths[i]);
+    }
+
+    private void WriteLogPlannerpaths(int i, String move)
+    {
+        if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
+        else _log.plannerPaths[i] += "," + move;
+
+        Debug.WriteLine(_log.plannerPaths[i]);
+    }
+
+    private void WriteLogTasks()
+    {
+        for (int i = 0; i < _targets.Count; i++)
+        {
+            int[] trg = { _targets[i].InitId, _targets[i].Pos.Item1, _targets[i].Pos.Item2 };
+            _log.tasks.Add(trg);
+        }
+    }
+
+    private void WriteLogErrors()
     {
 
+    }
+
+    private void WriteLogAllValid()
+    {
+        if (_log.errors.Count > 0) _log.AllValid = "No";
+        else _log.AllValid = "Yes";
+    }
+
+    public void WriteLog()
+    {
+        WriteLogAllValid();
     }
 
     public void AddTarget(int row, int col)
