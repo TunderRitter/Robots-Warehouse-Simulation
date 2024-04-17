@@ -244,10 +244,10 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(Scheduler_ChangeOccurred);
-            CalculateHeight();
+            CalculateHeight(_scheduler.Map);
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
-            CreateMap();
+            CreateSimMap();
 
         }
         catch (Exception)
@@ -260,6 +260,10 @@ public class MainViewModel : INotifyPropertyChanged
         try
         {
             _replayer = new Replay(logPath, mapPath);
+            CalculateHeight(_replayer.InitMap);
+            Row = _replayer.InitMap.GetLength(0);
+            Col = _replayer.InitMap.GetLength(1);
+            CreateReplayMap();
            
         }
         catch (Exception)
@@ -268,55 +272,61 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private void CalculateHeight()
+    private void CalculateHeight(Cell[,] map)
     {
-        if (_scheduler == null) return;
         int height = (int)SystemParameters.PrimaryScreenHeight - 200;
         int width = (int)SystemParameters.PrimaryScreenWidth - 450;
-        if (height * ((double)_scheduler.Map.GetLength(1) / _scheduler.Map.GetLength(0)) > width)
+        if (height * ((double)map.GetLength(1) / map.GetLength(0)) > width)
         {
             // width is max
-            height = (int)(width * ((double)_scheduler.Map.GetLength(0) / _scheduler.Map.GetLength(1)));
+            height = (int)(width * ((double)map.GetLength(0) / map.GetLength(1)));
         }
         else
         {
             // height is max
-            width = (int)(height * ((double)_scheduler.Map.GetLength(1) / _scheduler.Map.GetLength(0)));
+            width = (int)(height * ((double)map.GetLength(1) / map.GetLength(0)));
         }
         MapHeight = height;
         MapWidth = width;
-        CellSize = MapHeight / _scheduler.Map.GetLength(0);
+        CellSize = MapHeight / map.GetLength(0);
     }
 
-    private void CreateMap()
+    private void CreateMap(Cell[,] map)
     {
-        if (_scheduler == null) return;
-        StepCount = _scheduler.Step.ToString();
-        RobotNumber = "0";
-        TargetLeft = "0";
         Cells.Clear();
-        for (int i = 0; i < _scheduler.Map.GetLength(0); i++)
+        for (int i = 0; i < map.GetLength(0); i++)
         {
-            for (int j = 0; j < _scheduler.Map.GetLength(1); j++)
+            for (int j = 0; j < map.GetLength(1); j++)
             {
-                Cell cell = _scheduler.Map[i, j];
+                Cell cell = map[i, j];
                 String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
 
                 Cells.Add(new CellState
                 {
                     X = i,
                     Y = j,
-                    //Circle = (cell is Floor floor) ? ((floor.Robot != null) ? Brushes.MediumAquamarine : ((floor.Target != null) ? InactiveTarget : Floor)) : Wall,
                     Circle = CircleColor(cell),
                     Square = (cell is Floor) ? Floor : Wall,
                     Id = id == null ? String.Empty : id
-
-                }) ;
-                Cells[^1].TargetPlaced += new EventHandler(Cell_TargetPlaced);
+                });
             }
         }
     }
 
+    private void CreateSimMap()
+    {
+        if (_scheduler == null) return;
+        StepCount = _scheduler.Step.ToString();
+        RobotNumber = "0";
+        TargetLeft = "0";
+        CreateMap(_scheduler.Map);
+    }
+
+    private void CreateReplayMap()
+    {
+        if (_replayer == null) return;
+        CreateMap(_replayer.InitMap);
+    }
     private void Cell_TargetPlaced(object? sender, EventArgs c)
     {
         if (_scheduler == null) return;
