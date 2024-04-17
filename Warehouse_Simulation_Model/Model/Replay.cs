@@ -7,9 +7,9 @@ public class Replay
 {
     private readonly Robot[] _robots;
     private readonly Target[] _targets;
-    private readonly Cell[,] _initMap;
     private double _speed;
     private bool _paused;
+    public Cell[,] InitMap { get; init; };
     public Cell[][,] Maps { get; init; }
 
 
@@ -19,7 +19,7 @@ public class Replay
         _robots = GetRobots(log);
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
         _targets = GetTargets(log, mapBool.GetLength(1));
-        _initMap = GetMap(mapBool, _robots, _targets);
+        InitMap = GetMap(mapBool, _robots, _targets);
         _speed = 1.0;
         _paused = true;
         Maps = new Cell[log.sumOfCost / log.plannerPaths.Count][,];
@@ -72,7 +72,7 @@ public class Replay
             for (int i = 0; i < robots.Length; i++)
             {
                 if (log.start[i].Length == 3
-                    &&log.start[i][0] is int row
+                    && log.start[i][0] is int row
                     && log.start[i][1] is int col
                     && log.start[i][2] is string directionStr)
                 {
