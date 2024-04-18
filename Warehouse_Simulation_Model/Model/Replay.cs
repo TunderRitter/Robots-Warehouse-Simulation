@@ -13,7 +13,9 @@ public class Replay
     private bool _paused;
     public Cell[,] InitMap { get; init; }
     public Cell[][,] Maps { get; init; }
-    public int Step { get; set; }
+    public int Step { get; private set; }
+
+    public event EventHandler<int>? ChangeOccurred;
 
 
     public Replay(string logPath, string mapPath)
@@ -32,32 +34,45 @@ public class Replay
 
     public void Play()
     {
-
+        _paused = false;
+        Task.Run(Playing);
     }
 
     public void Pause()
     {
-
+        _paused = true;
     }
 
     public void ChangeSpeed(double speed)
     {
-         
+         _speed = speed;
     }
 
     public void StepFwd()
     {
-
+        Step = Math.Min(Step + 1, _log.sumOfCost / _log.plannerPaths.Count - 1);
+        OnChangeOccured();
     }
 
     public void StepBack()
     {
-
+        Step = Math.Max(Step - 1, 0);
+        OnChangeOccured();
     }
 
     public void SkipTo(int step)
     {
+        Step = Math.Clamp(step, 0, _log.sumOfCost / _log.plannerPaths.Count - 1);
+        OnChangeOccured();
+    }
 
+    public void Playing()
+    {
+        while (!_paused)
+        {
+            Thread.Sleep(1000); // TODO: speed
+            StepFwd();
+        }
     }
 
     public void GenerateMaps()
@@ -184,4 +199,6 @@ public class Replay
 
         return map;
     }
+
+    private void OnChangeOccured() => ChangeOccurred?.Invoke(this, Step);
 }
