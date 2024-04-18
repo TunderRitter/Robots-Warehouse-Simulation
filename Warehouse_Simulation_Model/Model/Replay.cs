@@ -5,6 +5,7 @@ namespace Warehouse_Simulation_Model.Model;
 
 public class Replay
 {
+    private readonly Log _log;
     private readonly Robot[] _robots;
     private readonly Target[] _targets;
     private double _speed;
@@ -15,14 +16,14 @@ public class Replay
 
     public Replay(string logPath, string mapPath)
     {
-        Log log = Log.Read(logPath);
-        _robots = GetRobots(log);
+        _log = Log.Read(logPath);
+        _robots = GetRobots(_log);
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
-        _targets = GetTargets(log, mapBool.GetLength(1));
+        _targets = GetTargets(_log);
         InitMap = GetMap(mapBool, _robots, _targets);
         _speed = 1.0;
         _paused = true;
-        Maps = new Cell[log.sumOfCost / log.plannerPaths.Count][,];
+        Maps = new Cell[_log.sumOfCost / _log.plannerPaths.Count][,];
     }
 
 
@@ -90,7 +91,7 @@ public class Replay
         return robots;
     }
 
-    private static Target[] GetTargets(Log log, int mapWidth)
+    private static Target[] GetTargets(Log log)
     {
         Target[] targets = new Target[log.tasks.Count];
         try
@@ -98,7 +99,7 @@ public class Replay
             for (int i = 0; i < log.tasks.Count; i++)
             {
                 if (log.tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
-                targets[i] = new Target(ConvertCoordinates(log.tasks[i][2], mapWidth), log.tasks[i][0]);
+                targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0]);
             }
         }
         catch (Exception)
@@ -128,17 +129,13 @@ public class Replay
         {
             if (map[robots[i].Pos.row, robots[i].Pos.col] is Floor floor)
                 floor.Robot = robots[i];
-            else { } // ERROR
         }
         for (int i = targets.Length - 1; i >= 0; i--)
         {
             if (map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
                 floor.Target = targets[i];
-            else { } // ERROR
         }
 
         return map;
     }
-
-    private static (int, int) ConvertCoordinates(int coor, int width) => (coor / width, coor % width);
 }
