@@ -303,7 +303,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void Replayer_ChangeOccured(object? sender, int e)
     {
-        throw new NotImplementedException();
+        UpdateReplayMap(_replayer.Maps[_stepCount]);
     }
 
     private void CalculateHeight(Cell[,] map)
@@ -395,10 +395,16 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateReplayMap(int[,] map)
     {
         if (_replayer == null) return;
+        StepCount = _replayer.Step.ToString();
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
-
+            int x = Cells[idx].X; int y = Cells[idx].Y;
+            String? id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y]  / 10) - 2).ToString() : String.Empty);
+            Cells[idx].Square = map[x, y] == 0 ? Wall : Floor;
+            Cells[idx].Circle = map[x, y] == 0 ? Wall : (map[x, y] == 1 ? Floor : (map[x, y] == -1 ? Target :
+                (map[x, y] % 10 == 0 ? North : (map[x, y] % 10 == 1 ? East : (map[x, y] % 10 == 2 ? South : West)))));
+            Cells[idx].Id = id == null ? String.Empty : id;
         }
     }
 
@@ -467,7 +473,8 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnReplayStart()
     {
-
+        if (_replayer == null) return;
+        _replayer.Start();
     }
 
     private void OnExitGame()
