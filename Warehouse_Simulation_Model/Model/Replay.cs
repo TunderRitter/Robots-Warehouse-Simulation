@@ -9,11 +9,12 @@ public class Replay
     private readonly Robot[] _robots;
     private readonly Target[] _targets;
     private readonly List<string>[] _steps;
-    private double _speed;
-    private bool _paused;
-    public Cell[,] InitMap { get; init; }
-    public Cell[][,] Maps { get; init; }
+    public double Speed { get; private set; }
+    public bool Paused { get; private set; }
+    public Cell[,] Map { get; init; }
+    public int[][,] Maps { get; init; }
     public int Step { get; private set; }
+    public int MaxSteps { get; init; }
 
     public event EventHandler<int>? ChangeOccurred;
 
@@ -25,32 +26,38 @@ public class Replay
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
         _targets = GetTargets(_log);
         _steps = GetSteps(_log);
-        InitMap = GetMap(mapBool, _robots, _targets);
-        _speed = 1.0;
-        _paused = true;
-        Maps = new Cell[_log.sumOfCost / _log.plannerPaths.Count][,];
+        Map = GetMap(mapBool, _robots, _targets);
+        Speed = 1.0;
+        Paused = true;
+        MaxSteps = _log.sumOfCost / _log.plannerPaths.Count - 1;
+        Maps = new int[MaxSteps + 1][,];
     }
 
+    public void Start()
+    {
+        GenerateMaps();
+        Play();
+    }
 
     public void Play()
     {
-        _paused = false;
+        Paused = false;
         Task.Run(Playing);
     }
 
     public void Pause()
     {
-        _paused = true;
+        Paused = true;
     }
 
     public void ChangeSpeed(double speed)
     {
-         _speed = speed;
+         Speed = speed;
     }
 
     public void StepFwd()
     {
-        Step = Math.Min(Step + 1, _log.sumOfCost / _log.plannerPaths.Count - 1);
+        Step = Math.Min(Step + 1, MaxSteps);
         OnChangeOccured();
     }
 
@@ -62,22 +69,22 @@ public class Replay
 
     public void SkipTo(int step)
     {
-        Step = Math.Clamp(step, 0, _log.sumOfCost / _log.plannerPaths.Count - 1);
+        Step = Math.Clamp(step, 0, MaxSteps);
         OnChangeOccured();
     }
 
     public void Playing()
     {
-        while (!_paused)
+        while (!Paused)
         {
-            Thread.Sleep(1000); // TODO: speed
+            Thread.Sleep((int)(1000 * Speed));
             StepFwd();
         }
     }
 
     public void GenerateMaps()
     {
-        Maps[0] = InitMap;
+        Maps[0] = CompressMap(Map);
         for (int i = 1; i < Maps.Length; i++)
         {
             for (int j = 0; j < _robots.Length; j++)
@@ -86,7 +93,7 @@ public class Replay
                 switch (_steps[j][i - 1])
                 {
                     case "F":
-                        ((Floor)Maps[i][robot.Pos.row, robot.Pos.col]).Robot = null;
+                        ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = null;
                         robot.Move();
                         break;
                     case "C":
@@ -105,9 +112,53 @@ public class Replay
             {
                 Robot robot = _robots[j];
                 if (_steps[j][i - 1] == "F")
-                    ((Floor)Maps[i][robot.Pos.row, robot.Pos.col]).Robot = robot;
+                    ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
+            }
+
+            Maps[i] = CompressMap(Map);
+        }
+    }
+
+    private static int[,] CompressMap(Cell[,] cellMap)
+    {
+        int rows = cellMap.GetLength(0);
+        int cols = cellMap.GetLength(1);
+        
+        int[,] map = new int[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if (cellMap[i, j] is Wall)
+                {
+                    map[i, j] = 0;
+                }
+                else
+                {
+                    Floor cellFloor = (Floor)cellMap[i, j];
+                    if (cellFloor.Robot != null)
+                    {
+                        int direction = cellFloor.Robot.Direction switch
+                        {
+                            Direction.N => 0,
+                            Direction.E => 1,
+                            Direction.S => 2,
+                            Direction.W => 3,
+                            _ => throw new Exception(),
+                        };
+                        map[i, j] = (cellFloor.Robot.Id + 3) * 10 + direction;
+                    }
+                    else if (cellFloor.Target != null && cellFloor.Target.Active)
+                        map[i, j] = -2;
+                    else if (cellFloor.Target != null)
+                        map[i, j] = -1;
+                    else
+                        map[i, j] = -(cellFloor.Target!.Id!.Value + 3);
+                }
             }
         }
+
+        return map;
     }
 
     private static List<string>[] GetSteps(Log log)
