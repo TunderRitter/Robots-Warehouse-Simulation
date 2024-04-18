@@ -270,6 +270,7 @@ public class MainViewModel : INotifyPropertyChanged
             Row = _replayer.Map.GetLength(0);
             Col = _replayer.Map.GetLength(1);
             CreateReplayMap();
+            MaxMap = _replayer.Maps.Length;
            
         }
         catch (Exception)
