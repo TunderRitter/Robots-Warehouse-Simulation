@@ -14,7 +14,7 @@ public class Replay
     public Cell[,] Map { get; init; }
     public int[][,] Maps { get; init; }
     public int Step { get; private set; }
-    public int MaxSteps { get; init; }
+    public int MaxStep { get; init; }
 
     public event EventHandler<int>? ChangeOccurred;
 
@@ -29,8 +29,8 @@ public class Replay
         Map = GetMap(mapBool, _robots, _targets);
         Speed = 1.0;
         Paused = true;
-        MaxSteps = _log.sumOfCost / _log.plannerPaths.Count - 1;
-        Maps = new int[MaxSteps + 1][,];
+        MaxStep = _log.sumOfCost / _log.plannerPaths.Count - 1;
+        Maps = new int[MaxStep + 1][,];
     }
 
     public void Start()
@@ -50,14 +50,21 @@ public class Replay
         Paused = true;
     }
 
-    public void ChangeSpeed(double speed)
+    public void FasterSpeed()
     {
-         Speed = speed;
+        if (Speed >= 8) return;
+        Speed *= 2;
+    }
+
+    public void SlowerSpeed()
+    {
+        if (Speed <= 0.125) return;
+        Speed *= 0.5;
     }
 
     public void StepFwd()
     {
-        Step = Math.Min(Step + 1, MaxSteps);
+        Step = Math.Min(Step + 1, MaxStep);
         OnChangeOccured();
     }
 
@@ -69,7 +76,7 @@ public class Replay
 
     public void SkipTo(int step)
     {
-        Step = Math.Clamp(step, 0, MaxSteps);
+        Step = Math.Clamp(step, 0, MaxStep);
         OnChangeOccured();
     }
 
@@ -77,7 +84,7 @@ public class Replay
     {
         while (!Paused)
         {
-            Thread.Sleep((int)(1000 * Speed));
+            Thread.Sleep((int)(1000 / Speed));
             StepFwd();
         }
     }

@@ -178,7 +178,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public int MaxMap => _replayer?.Maps.Length ?? 10;
+    public int MaxMap => _replayer?.MaxStep ?? 10;
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
