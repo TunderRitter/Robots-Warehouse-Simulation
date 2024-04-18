@@ -8,10 +8,12 @@ public class Replay
     private readonly Log _log;
     private readonly Robot[] _robots;
     private readonly Target[] _targets;
+    private readonly List<string>[] _steps;
     private double _speed;
     private bool _paused;
     public Cell[,] InitMap { get; init; }
     public Cell[][,] Maps { get; init; }
+    public int Step { get; set; }
 
 
     public Replay(string logPath, string mapPath)
@@ -20,6 +22,7 @@ public class Replay
         _robots = GetRobots(_log);
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
         _targets = GetTargets(_log);
+        _steps = GetSteps(_log);
         InitMap = GetMap(mapBool, _robots, _targets);
         _speed = 1.0;
         _paused = true;
@@ -59,7 +62,50 @@ public class Replay
 
     public void GenerateMaps()
     {
+        Maps[0] = InitMap;
+        for (int i = 1; i < Maps.Length; i++)
+        {
+            for (int j = 0; j < _robots.Length; j++)
+            {
+                Robot robot = _robots[j];
+                switch (_steps[j][i - 1])
+                {
+                    case "F":
+                        ((Floor)Maps[i][robot.Pos.row, robot.Pos.col]).Robot = null;
+                        robot.Move();
+                        break;
+                    case "C":
+                        robot.TurnLeft();
+                        break;
+                    case "R":
+                        robot.TurnRight();
+                        break;
+                    case "W":
+                        break;
+                    default:
+                        throw new InvalidOperationException("Invalid move");
+                }
+            }
+            for (int j = 0; j < _robots.Length; j++)
+            {
+                Robot robot = _robots[j];
+                if (_steps[j][i - 1] == "F")
+                    ((Floor)Maps[i][robot.Pos.row, robot.Pos.col]).Robot = robot;
+            }
+        }
+    }
 
+    private static List<string>[] GetSteps(Log log)
+    {
+        List<string>[] steps = new List<string>[log.start.Count];
+        for (int i = 0; i < steps.Length; i++)
+        {
+            steps[i] = [];
+            string[] moves = log.actualPaths[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
+            steps[i].AddRange(moves);
+        }
+
+        return steps;
     }
 
 
