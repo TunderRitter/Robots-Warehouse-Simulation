@@ -10,7 +10,6 @@ public class Scheduler
     private readonly List<Target> _targets;
     private readonly Log _log;
     private readonly ITaskAssigner _strategy;
-    private double _timeLimit;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
     private int _targetCount;
@@ -21,17 +20,13 @@ public class Scheduler
 
     public bool runs { get; set; }
 
-    public Cell[,] Map { get; private set; } // Encapsulation!
+    public Cell[,] Map { get; private set; }
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
-    public double TimeLimit
-    {
-        get { return _timeLimit; }
-        set
-        {
-            _timeLimit = value;
-        }
-    }
+    public double TimeLimit { get; set; }
+
+    public int RobotNum => _robots.Length;
+    public int TargetNum => _targets.Count;
 
     public event EventHandler? ChangeOccurred;
 
@@ -69,14 +64,14 @@ public class Scheduler
         }
         _targetCount = data.Targets.Length;
 
-		_log = new Log();
+        _log = new Log();
         WriteLogStart();
         WriteLogTeamSize();
         WriteLogTasks();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
-        _timeLimit = 1000; // !!!
+        TimeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
@@ -114,9 +109,9 @@ public class Scheduler
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
-            int waitTime = (int)(elapsedMillisecs / _timeLimit);
+            int waitTime = (int)(elapsedMillisecs / TimeLimit);
 
-            Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
+            Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
             
             for (int i = 0; i < waitTime; i++)
@@ -221,7 +216,7 @@ public class Scheduler
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
             _log.start.Add(data);
         }
     }
@@ -258,7 +253,7 @@ public class Scheduler
 
     private void WriteLogEvents(int id, int step, String _event)
     {
-        _log.events.Add(new object[] { id, step, _event });
+        //_log.events.Add(new object[] { id, step, _event });
     }
 
     private void WriteLogActualPaths(int i, String move)
