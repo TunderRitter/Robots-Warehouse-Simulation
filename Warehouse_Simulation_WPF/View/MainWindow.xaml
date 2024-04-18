@@ -211,7 +211,9 @@
                 <Slider x:Name="ReplaySLider"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Stretch"
-                        Margin="0,0,0,0" />
+                        Margin="0,0,0,0" 
+                        AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0"
+                        Value="{Binding Steps, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 
                 <Button Content="&#x00AB;"
                         FontFamily="Segoe UI Symbol"
