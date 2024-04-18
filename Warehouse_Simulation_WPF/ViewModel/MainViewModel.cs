@@ -303,7 +303,13 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void Replayer_ChangeOccured(object? sender, int e)
     {
-        UpdateReplayMap(_replayer.Maps[_stepCount]);
+        try
+        {
+            Application.Current?.Dispatcher?.Invoke(() => UpdateReplayMap(_replayer.Maps[_stepCount]));
+        }
+        catch { }
+        
+        
     }
 
     private void CalculateHeight(Cell[,] map)
@@ -474,7 +480,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void OnReplayStart()
     {
         if (_replayer == null) return;
-        _replayer.Start();
+        Task.Run(() => _replayer.Start());
     }
 
     private void OnExitGame()
