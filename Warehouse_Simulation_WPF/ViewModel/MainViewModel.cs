@@ -158,7 +158,12 @@ public class MainViewModel : INotifyPropertyChanged
         get { return _targetLeft.ToString(); }
         set { _targetLeft = int.Parse(value); OnPropertyChanged(nameof(TargetLeft)); }
     }
-
+    private int _maxMap;
+    public int MaxMap
+    {
+        get { return _replayer == null ? 10 : _replayer.Maps.Length; }
+        set { _maxMap = (int)(value); OnPropertyChanged(nameof(MaxMap)); }
+    }
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
     LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
@@ -261,9 +266,9 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _replayer = new Replay(logPath, mapPath);
             
-            CalculateHeight(_replayer.InitMap);
-            Row = _replayer.InitMap.GetLength(0);
-            Col = _replayer.InitMap.GetLength(1);
+            CalculateHeight(_replayer.Map);
+            Row = _replayer.Map.GetLength(0);
+            Col = _replayer.Map.GetLength(1);
             CreateReplayMap();
            
         }
@@ -326,7 +331,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateReplayMap()
     {
         if (_replayer == null) return;
-        CreateMap(_replayer.InitMap);
+        CreateMap(_replayer.Map);
     }
     private void Cell_TargetPlaced(object? sender, EventArgs c)
     {
