@@ -89,6 +89,32 @@ public class Replay
         {
             for (int j = 0; j < _robots.Length; j++)
             {
+                foreach (object[] targetEvent in _log.events[j])
+                {
+                    if ((int)targetEvent[1] == Step - 1)
+                    {
+                        Target target = _targets.First(e => e.InitId == (int)targetEvent[0]);
+                        if ((string)targetEvent[2] == "assigned")
+                        {
+                            target.Id = j;
+                        }
+                        else if ((string)targetEvent[2] == "finished")
+                        {
+                            target.Active = false;
+                            if (Map[target.Pos.row, target.Pos.col] is Floor floor)
+                                floor.Target = null;
+                        }
+                    }
+                }
+            }
+            for (int j = _targets.Length - 1; j >= 0; j--)
+            {
+                if (_targets[j].Active && Map[_targets[j].Pos.row, _targets[j].Pos.col] is Floor floor)
+                    floor.Target = _targets[j];
+            }
+
+            for (int j = 0; j < _robots.Length; j++)
+            {
                 Robot robot = _robots[j];
                 switch (_steps[j][i - 1])
                 {
@@ -146,14 +172,14 @@ public class Replay
                             Direction.W => 3,
                             _ => throw new Exception(),
                         };
-                        map[i, j] = (cellFloor.Robot.Id + 3) * 10 + direction;
+                        map[i, j] = (cellFloor.Robot.Id + 2) * 10 + direction;
                     }
-                    else if (cellFloor.Target != null && cellFloor.Target.Active)
-                        map[i, j] = -2;
+                    else if (cellFloor.Target != null && cellFloor.Target.Id != null)
+                        map[i, j] = -(cellFloor.Target!.Id!.Value + 2);
                     else if (cellFloor.Target != null)
                         map[i, j] = -1;
                     else
-                        map[i, j] = -(cellFloor.Target!.Id!.Value + 3);
+                        map[i, j] = 1;
                 }
             }
         }
@@ -173,7 +199,6 @@ public class Replay
 
         return steps;
     }
-
 
     private static Robot[] GetRobots(Log log)
     {
@@ -212,6 +237,7 @@ public class Replay
             {
                 if (log.tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
                 targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0]);
+                targets[i].Active = true;
             }
         }
         catch (Exception)
@@ -237,15 +263,15 @@ public class Replay
                     map[i, j] = new Floor();
             }
         }
+        for (int i = targets.Length - 1; i >= 0; i--)
+        {
+            if (targets[i].Active && map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
+                floor.Target = targets[i];
+        }
         for (int i = 0; i < robots.Length; i++)
         {
             if (map[robots[i].Pos.row, robots[i].Pos.col] is Floor floor)
                 floor.Robot = robots[i];
-        }
-        for (int i = targets.Length - 1; i >= 0; i--)
-        {
-            if (map[targets[i].Pos.row, targets[i].Pos.col] is Floor floor)
-                floor.Target = targets[i];
         }
 
         return map;
