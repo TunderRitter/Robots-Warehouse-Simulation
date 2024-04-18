@@ -213,7 +213,8 @@
                         HorizontalAlignment="Stretch"
                         Margin="0,0,0,0" 
                         AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0"
-                        Value="{Binding Steps, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        Value="{Binding Step, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                        Maximum="{Binding MaxMap, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Button Content="&#x00AB;"
                         FontFamily="Segoe UI Symbol"
