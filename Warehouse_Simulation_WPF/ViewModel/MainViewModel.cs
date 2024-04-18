@@ -129,38 +129,57 @@ public class MainViewModel : INotifyPropertyChanged
         get => _canOrder;
         set
         {
-            _canOrder = value;
-            OnPropertyChanged();
+            if (value != _canOrder)
+            {
+                _canOrder = value;
+                OnPropertyChanged();
+            }
         }
     }
 
     private int _stepCount;
-
     public string StepCount
     {
-        get { return _stepCount.ToString(); }
-        set { _stepCount = int.Parse(value); OnPropertyChanged(nameof(StepCount)); StepMethod(value); }
+        get => _stepCount.ToString();
+        set 
+        {
+            if (int.TryParse(value, out int val) && val != _stepCount)
+            {
+                _stepCount = int.Parse(value);
+                OnPropertyChanged(nameof(StepCount));
+                StepMethod(value);
+            }
+        }
     }
-    private int _robotNumber;
 
+    private int _robotNumber;
     public string RobotNumber
     {
-        get { return _robotNumber.ToString(); }
-        set { _robotNumber = int.Parse(value); OnPropertyChanged(nameof(RobotNumber)); }
+        get => _robotNumber.ToString();
+        set
+        {
+            if (int.TryParse(value, out int val) && val != _robotNumber)
+            _robotNumber = val; 
+            OnPropertyChanged();
+        }
     }
-    private int _targetLeft;
 
+    private int _targetLeft;
     public string TargetLeft
     {
-        get { return _targetLeft.ToString(); }
-        set { _targetLeft = int.Parse(value); OnPropertyChanged(nameof(TargetLeft)); }
+        get => _targetLeft.ToString();
+        set
+        {
+            if (int.TryParse(value, out int val) && val != _targetLeft)
+            {
+                _targetLeft = val;
+                OnPropertyChanged();
+            }
+        }
     }
-    private int _maxMap;
-    public int MaxMap
-    {
-        get { return _replayer == null ? 10 : _replayer.Maps.Length; }
-        set { _maxMap = (int)(value); OnPropertyChanged(nameof(MaxMap)); }
-    }
+
+    public int MaxMap => _replayer?.Maps.Length ?? 10;
+
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
     LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
@@ -238,7 +257,7 @@ public class MainViewModel : INotifyPropertyChanged
         StepValue = "100";
         CanOrder = false;
         ZoomValue = 1;
-        _scheduler.runs = false;
+        _scheduler!.runs = false;
         _scheduler = null;
     }
 
@@ -292,7 +311,6 @@ public class MainViewModel : INotifyPropertyChanged
             Row = _replayer.Map.GetLength(0);
             Col = _replayer.Map.GetLength(1);
             CreateReplayMap();
-            MaxMap = _replayer.Maps.Length;
            
         }
         catch (Exception)
