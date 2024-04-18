@@ -223,7 +223,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (_scheduler == null) return;
         try
         {
-            Application.Current?.Dispatcher?.Invoke(UpdateMap);
+            Application.Current?.Dispatcher?.Invoke(UpdateSimMap);
         }
         catch { }
     }
@@ -260,6 +260,7 @@ public class MainViewModel : INotifyPropertyChanged
         try
         {
             _replayer = new Replay(logPath, mapPath);
+            
             CalculateHeight(_replayer.InitMap);
             Row = _replayer.InitMap.GetLength(0);
             Col = _replayer.InitMap.GetLength(1);
@@ -341,7 +342,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private void UpdateMap()
+    private void UpdateSimMap()
     {
         if (_scheduler == null) return;
         StepCount = _scheduler.Step.ToString();
@@ -355,6 +356,15 @@ public class MainViewModel : INotifyPropertyChanged
             Cells[idx].Circle = CircleColor(cell);
             Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null ? String.Empty : id;
+
+        }
+    }
+    private void UpdateReplayMap(int[,] map)
+    {
+        if (_replayer == null) return;
+        for (int i = 0; i < Cells.Count; i++)
+        {
+            int idx = i;
 
         }
     }

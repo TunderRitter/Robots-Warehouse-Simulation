@@ -331,12 +331,15 @@
             </Grid>
             <Grid Grid.Row="2"
                   Grid.Column="0"
+                  x:Name="OnlineGrid"
                   Margin="50,0,0,0"
                   VerticalAlignment="Top"
                   HorizontalAlignment="Left"
+                  Visibility="Hidden"
                   Width="{Binding Path=MapWidth}">
 
                 <ToggleButton IsChecked="{Binding Path=CanOrder, Mode=TwoWay}"
+                              
                               Width="100"
                               Height="30"
                               Content="ONLINE ORDER"
