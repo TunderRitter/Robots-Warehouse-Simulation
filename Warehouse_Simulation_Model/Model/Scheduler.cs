@@ -68,6 +68,7 @@ public class Scheduler
         WriteLogStart();
         WriteLogTeamSize();
         WriteLogTasks();
+        InitLogEvents();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
@@ -148,7 +149,7 @@ public class Scheduler
         if (sender is Robot robot)
         {
             Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
-            if(target != null) WriteLogEvents(target.InitId, Step, "finished");
+            if(target != null) WriteLogEvents(target.InitId, robot.Id, Step, "finished");
 
             _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
@@ -166,7 +167,7 @@ public class Scheduler
         {
             if(assignable.Count >= i)
             {
-                WriteLogEvents(assignable[i].InitId, Step, "assigned");
+                WriteLogEvents(assignable[i].InitId, free[i].Id, Step, "assigned");
             }
         }
 
@@ -251,25 +252,29 @@ public class Scheduler
         _log.makespan += 1;
     }
 
-    private void WriteLogEvents(int id, int step, String _event)
+    private void InitLogEvents()
     {
-        //_log.events.Add(new object[] { id, step, _event });
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            _log.events.Add(new List<object[]>());
+        }
+    }
+
+    private void WriteLogEvents(int taskId, int robotId,  int step, String _event)
+    {
+        _log.events[robotId].Add(new object[] { taskId, step, _event });
     }
 
     private void WriteLogActualPaths(int i, String move)
     {
         if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
         else _log.actualPaths[i] += "," + move;
-
-        Debug.WriteLine(_log.actualPaths[i]);
     }
 
     private void WriteLogPlannerpaths(int i, String move)
     {
         if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
         else _log.plannerPaths[i] += "," + move;
-
-        Debug.WriteLine(_log.plannerPaths[i]);
     }
 
     private void WriteLogTasks()
