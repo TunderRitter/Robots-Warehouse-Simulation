@@ -43,7 +43,6 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
-
     public int HeightOfWIndow { get; set; }
 
     private int _mapHeight;
@@ -71,9 +70,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public int ScrollViewHeight => MapHeight + 20;
-
     public int ScrollViewWidth => MapWidth + 20;
-
 
     private int _cellSize;
     public int CellSize
@@ -142,7 +139,7 @@ public class MainViewModel : INotifyPropertyChanged
     public string StepCount
     {
         get { return _stepCount.ToString(); }
-        set { _stepCount = int.Parse(value); OnPropertyChanged(nameof(StepCount)); }
+        set { _stepCount = int.Parse(value); OnPropertyChanged(nameof(StepCount)); StepMethod(value); }
     }
     private int _robotNumber;
 
@@ -194,6 +191,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand StepCommand { get; init; }
     public DelegateCommand IntCommand { get; init; }
     public DelegateCommand BackToMenu { get; init; }
+    public DelegateCommand StepTo { get; init; }
 
     #endregion
 
@@ -218,6 +216,7 @@ public class MainViewModel : INotifyPropertyChanged
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
         BackToMenu = new DelegateCommand(OnBackToMenu);
+        StepTo = new DelegateCommand(param => StepMethod(param));
 
         Cells = new ObservableCollection<CellState>();
         
@@ -241,7 +240,30 @@ public class MainViewModel : INotifyPropertyChanged
         ZoomValue = 1;
         _scheduler.runs = false;
         _scheduler = null;
+    }
 
+    private void StepMethod(object? parameter)
+    {
+        if (parameter != null && _replayer != null)
+        {
+            string? p = parameter.ToString();
+            if (p != null)
+            {
+                switch (p)
+                {
+                    case "+":
+                        _replayer.StepFwd();
+                        break;
+                    case "-":
+                        _replayer.StepBack();
+                        break;
+                    default:
+                        int s = int.Parse(p);
+                        _replayer.SkipTo(s);
+                        break;
+                }
+            }
+        }
     }
     public void CreateScheduler(string path)
     {
@@ -265,7 +287,7 @@ public class MainViewModel : INotifyPropertyChanged
         try
         {
             _replayer = new Replay(logPath, mapPath);
-            
+            _replayer.ChangeOccurred += new EventHandler<int>(Replayer_ChangeOccured);
             CalculateHeight(_replayer.Map);
             Row = _replayer.Map.GetLength(0);
             Col = _replayer.Map.GetLength(1);
@@ -277,6 +299,11 @@ public class MainViewModel : INotifyPropertyChanged
         {
             throw;
         }
+    }
+
+    private void Replayer_ChangeOccured(object? sender, int e)
+    {
+        throw new NotImplementedException();
     }
 
     private void CalculateHeight(Cell[,] map)
