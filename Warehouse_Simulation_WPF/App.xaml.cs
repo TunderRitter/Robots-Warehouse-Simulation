@@ -60,6 +60,7 @@ public partial class App : Application
                     _view.MenuGrid.Visibility = Visibility.Collapsed;
                     _view.WindowState = WindowState.Maximized;
                     _view.SimGrid.Visibility = Visibility.Visible;
+                    _view.StartGrid.Visibility = Visibility.Visible;
                 }
                 if (e.type == "log")
                 {
@@ -73,6 +74,7 @@ public partial class App : Application
                         _view.MenuGrid.Visibility = Visibility.Collapsed;
                         _view.WindowState = WindowState.Maximized;
                         _view.SimGrid.Visibility = Visibility.Visible;
+                        _view.ReplayStartGrid.Visibility = Visibility.Visible;
                     }
                     
                 }
