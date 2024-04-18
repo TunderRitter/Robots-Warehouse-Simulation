@@ -33,6 +33,7 @@ public partial class MainWindow : Window
     {
         ReplayStartGrid.Visibility = Visibility.Collapsed;
         InfoGrid.Visibility = Visibility.Visible;
+        ReplayButtons2.Visibility = Visibility.Visible;
     }
     private void CloseSim(object sender, EventArgs e)
     {

@@ -205,6 +205,7 @@
                   Margin="50,0,0,0"
                   VerticalAlignment="Top"
                   HorizontalAlignment="Left"
+                  Visibility="Collapsed"
                   Width="{Binding Path=MapWidth}">
 
                 <Slider x:Name="ReplaySLider"
