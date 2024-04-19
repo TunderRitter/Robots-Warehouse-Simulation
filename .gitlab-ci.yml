@@ -19,6 +19,8 @@ build:
     - dotnet restore
     - dotnet build
     - echo "Build succes"
+    - pwd
+    - ls
 
 test:
   stage: test
