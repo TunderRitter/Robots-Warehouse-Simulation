@@ -27,6 +27,7 @@ public class Replay
         _targets = GetTargets(_log);
         _steps = GetSteps(_log);
         Map = GetMap(mapBool, _robots, _targets);
+        Step = 0;
         Speed = 1.0;
         Paused = true;
         MaxStep = _log.sumOfCost / _log.plannerPaths.Count - 1;

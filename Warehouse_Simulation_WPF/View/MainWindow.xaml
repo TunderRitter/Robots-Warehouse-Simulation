@@ -200,7 +200,8 @@
 
             </Grid>
 
-            <Grid Grid.Row="2" x:Name="ReplayButtons2"
+            <Grid Grid.Row="2"
+                  x:Name="ReplayButtons2"
                   Grid.Column="0"
                   Margin="50,0,0,0"
                   VerticalAlignment="Top"
@@ -208,13 +209,18 @@
                   Visibility="Collapsed"
                   Width="{Binding Path=MapWidth}">
 
-                <Slider x:Name="ReplaySLider"
+                <Slider x:Name="ReplaySlider"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Stretch"
-                        Margin="0,0,0,0" 
-                        AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0"
-                        Value="{Binding Step, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                        Maximum="{Binding MaxMap, UpdateSourceTrigger=PropertyChanged}"/>
+                        Margin="0,0,0,0"
+                        AutoToolTipPlacement="TopLeft"
+                        AutoToolTipPrecision="0"
+                        Value="{Binding StepCount, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                        Minimum="0"
+                        Maximum="{Binding MaxMap, UpdateSourceTrigger=PropertyChanged}"
+                        IsEnabled="True"
+                        IsMoveToPointEnabled="True"
+                        />
 
                 <Button Content="&#x00AB;"
                         FontFamily="Segoe UI Symbol"
@@ -223,16 +229,16 @@
                         HorizontalAlignment="Center"
                         Margin="0,20,100,0"
                         Command="{Binding StepTo}"
-                        CommandParameter="-"/>
+                        CommandParameter="-" />
                 <Button Content="&#x23F8;"
                         FontFamily="Segoe UI Symbol"
                         Width="30"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center"
-                        Margin="0,20,0,0"/>
+                        Margin="0,20,0,0" />
                 <Button Content="&#x00BB;"
                         FontFamily="Segoe UI Symbol"
-                        Width="30" 
+                        Width="30"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center"
                         Margin="100,20,0,0"
@@ -347,7 +353,6 @@
                   Width="{Binding Path=MapWidth}">
 
                 <ToggleButton IsChecked="{Binding Path=CanOrder, Mode=TwoWay}"
-                              
                               Width="100"
                               Height="30"
                               Content="ONLINE ORDER"
@@ -386,8 +391,5 @@
             </Grid>
 
         </Grid>
-
-
-
     </Grid>
 </Window>

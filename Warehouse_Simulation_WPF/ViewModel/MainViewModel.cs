@@ -13,6 +13,7 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 public class MainViewModel : INotifyPropertyChanged
 {
     #region properties
+
     Scheduler? _scheduler;
     Replay? _replayer;
 
@@ -178,7 +179,19 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public int MaxMap => _replayer?.MaxStep ?? 10;
+    private int _maxMap;
+    //public int MaxMap => _replayer?.MaxStep ?? 10;
+    public int MaxMap
+    {
+        get { return _maxMap; }
+        set
+        {
+            _maxMap = value;
+            OnPropertyChanged(nameof(MaxMap));
+        }
+    }
+
+
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
@@ -307,6 +320,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _replayer = new Replay(logPath, mapPath);
             _replayer.ChangeOccurred += new EventHandler<int>(Replayer_ChangeOccured);
+            MaxMap = _replayer.MaxStep;
             CalculateHeight(_replayer.Map);
             Row = _replayer.Map.GetLength(0);
             Col = _replayer.Map.GetLength(1);
@@ -321,6 +335,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void Replayer_ChangeOccured(object? sender, int e)
     {
+        if (_replayer == null) return;
         try
         {
             Application.Current?.Dispatcher?.Invoke(() => UpdateReplayMap(_replayer.Maps[_stepCount]));
@@ -384,6 +399,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_replayer == null) return;
         CreateMap(_replayer.Map);
+        StepCount = "0";
     }
     private void Cell_TargetPlaced(object? sender, EventArgs c)
     {
@@ -403,8 +419,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_scheduler == null) return;
         StepCount = _scheduler.Step.ToString();
-        RobotNumber = "0";
-        TargetLeft = "0";
+        RobotNumber = _scheduler.RobotNum.ToString();
+        TargetLeft = _scheduler.TargetNum.ToString();
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
