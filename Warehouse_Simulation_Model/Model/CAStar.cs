@@ -114,30 +114,73 @@ public class CAStar
 
                 if (Current.Parent == null)
                 {
-                    if ((Robot.Direction == Direction.N && Current.I > Neighbor.I) ||
-                        (Robot.Direction == Direction.S && Current.I < Neighbor.I) ||
-                        (Robot.Direction == Direction.E && Current.J < Neighbor.J) ||
-                        (Robot.Direction == Direction.W && Current.J > Neighbor.J))
+                    if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)))
                     {
-                        if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
-                            Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
+                        //egyenesen megy tovább
+                        if ((Robot.Direction == Direction.N && Current.I > Neighbor.I) ||
+                            (Robot.Direction == Direction.S && Current.I < Neighbor.I) ||
+                            (Robot.Direction == Direction.E && Current.J < Neighbor.J) ||
+                            (Robot.Direction == Direction.W && Current.J > Neighbor.J))
+                        {
+                            //foglalt a következő lépés idejében a cella
+                            if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
+
+                            if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time)) continue;
+
+                            //most foglalt a cella, valszeg helycsere lenne
+                            if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
+                                Reservations.ContainsKey((Current.I, Current.J)) &&
+                                Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
+                        }
+                        // fordulni kell egyet
+                        else if ((Robot.Direction == Direction.N && Current.J != Neighbor.J) ||
+                            (Robot.Direction == Direction.S && Current.J != Neighbor.J) ||
+                            (Robot.Direction == Direction.E && Current.I != Neighbor.I) ||
+                            (Robot.Direction == Direction.W && Current.I != Neighbor.I))
+                        {
+                            //a következő időegységben foglalt a cellánk, nincs időnk megfordulni
+                            if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
+
+                            if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
+                                Reservations[(Current.I, Current.J)].Contains(time + 1))
+
+                                //két időegység múlva foglalt a szomszéd cella
+                                if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
+
+                            //két időegység múlva foglalt a mi cellánk, egy időegység múlva foglalt a szomszéd:
+                            //helycsere esélye
+                            if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                Reservations[(Current.I, Current.J)].Contains(time + 2) &&
+                                Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
+                        }
+                        //fordulni kell kettőt
+                        else if ((Robot.Direction == Direction.N && Current.I < Neighbor.I) ||
+                            (Robot.Direction == Direction.S && Current.I > Neighbor.I) ||
+                            (Robot.Direction == Direction.E && Current.J > Neighbor.J) ||
+                            (Robot.Direction == Direction.W && Current.J < Neighbor.J))
+                        {
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)))
+                            {
+                                //3 lépés múlva foglalt a szomszéd
+                                if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
+
+                                //foglalt a mi cellánk 1 vagy 2 lépés múlva, nincs idő fordulni
+                                if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                    Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
+                                if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                    Reservations[(Current.I, Current.J)].Contains(time + 2)) continue;
+
+                                //foglalt a mi cellánk 3 lépés múlva, a szomszéd 2 lépés múlva:
+                                //helcsere esélye
+                                if (Reservations.ContainsKey((Current.I, Current.J)) &&
+                                    Reservations[(Current.I, Current.J)].Contains(time + 3) &&
+                                    Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
+                            }
+                        }
                     }
-                    else if ((Robot.Direction == Direction.N && Current.J != Neighbor.J) ||
-                        (Robot.Direction == Direction.S && Current.J != Neighbor.J) ||
-                        (Robot.Direction == Direction.E && Current.I != Neighbor.I) ||
-                        (Robot.Direction == Direction.W && Current.I != Neighbor.I))
-                    {
-                        if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
-                            Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
-                    }
-                    else if ((Robot.Direction == Direction.N && Current.I < Neighbor.I) ||
-                        (Robot.Direction == Direction.S && Current.I > Neighbor.I) ||
-                        (Robot.Direction == Direction.E && Current.J > Neighbor.J) ||
-                        (Robot.Direction == Direction.W && Current.J < Neighbor.J))
-                    {
-                        if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
-                            Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
-                    }
+                    
                 }
                 else
                 {
