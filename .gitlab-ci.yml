@@ -22,8 +22,10 @@ build:
   
 release:
   stage: build
+  only:
+    - master
   script:
-    - dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+    #- dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
     - echo "Publish succes"
     - ls
   
