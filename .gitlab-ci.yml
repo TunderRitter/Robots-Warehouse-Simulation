@@ -17,6 +17,7 @@ before_script:
 build:
   stage: build
   script:
+    - find / -name msbuild
     - /usr/share/dotnet/msbuild /p:Configuration=Release $SOLUTION
 
 #test:
