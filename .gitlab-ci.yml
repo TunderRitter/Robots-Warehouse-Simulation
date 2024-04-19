@@ -27,7 +27,7 @@ build:
     - ls
     - cd Debug
     - ls
-    - net8.0-windows
+    - cd net8.0-windows
     - ls
 
 test:
