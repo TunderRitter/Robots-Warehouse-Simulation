@@ -18,19 +18,28 @@ build:
   script:
     - dotnet restore
     - dotnet build
-    - dotnet publish
     - echo "Build succes"
+  
+release:
+  stage: build
+  script:
+    - dotnet publish
+    - echo "Publish succes"
     - pwd
     - ls
     - cd Warehouse_Simulation_WPF
     - ls
     - cd bin
     - ls
-    - cd Debug
+    - cd Release
     - ls
     - cd net8.0-windows
     - ls
-  
+  artifacts:
+    paths:
+      - Warehouse_Simulation_WPF/bin/Release/net8.0-windows/publish
+    expire_in: 1 week
+
 
 test:
   stage: test
