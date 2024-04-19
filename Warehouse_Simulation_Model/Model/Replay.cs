@@ -85,8 +85,8 @@ public class Replay
     {
         while (!Paused)
         {
-            Thread.Sleep((int)(1000 / Speed));
             StepFwd();
+            Thread.Sleep((int)(1000 / Speed));
         }
     }
 

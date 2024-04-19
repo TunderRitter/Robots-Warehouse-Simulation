@@ -259,9 +259,26 @@ public class MainViewModel : INotifyPropertyChanged
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
         BackToMenu = new DelegateCommand(OnBackToMenu);
         StepTo = new DelegateCommand(param => StepMethod(param));
+        PlayPause = new DelegateCommand(param => PlayPauseMethod());
 
         Cells = new ObservableCollection<CellState>();
         
+    }
+
+    private void PlayPauseMethod()
+    {
+        if (_replayer == null) return;
+        if (_replayer.Paused)
+        {
+            _replayer.Play();
+            PauseText = "\u23F8";
+            return;
+        }
+        if (!_replayer.Paused)
+        {
+            _replayer.Pause();
+            PauseText = "\u25B6";
+        }
     }
 
     private void Scheduler_ChangeOccurred(object? sender, EventArgs e)
@@ -334,6 +351,7 @@ public class MainViewModel : INotifyPropertyChanged
             CalculateHeight(_replayer.Map);
             Row = _replayer.Map.GetLength(0);
             Col = _replayer.Map.GetLength(1);
+            PauseText = "\u23F8";
             CreateReplayMap();
            
         }
