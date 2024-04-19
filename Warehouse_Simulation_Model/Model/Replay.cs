@@ -16,6 +16,9 @@ public class Replay
     public int Step { get; private set; }
     public int MaxStep { get; init; }
 
+    public int RobotNum => _robots.Length;
+    public int TargetNum => _targets.Where(e => e.Active).Count();
+
     public event EventHandler<int>? ChangeOccurred;
 
 
@@ -37,6 +40,7 @@ public class Replay
     public void Start()
     {
         GenerateMaps();
+        Thread.Sleep(1000);
         Play();
     }
 

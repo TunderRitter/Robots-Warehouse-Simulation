@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Warehouse_Simulation_Model.Persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -10,20 +9,17 @@ public class Scheduler
     private readonly List<Target> _targets;
     private readonly Log _log;
     private readonly ITaskAssigner _strategy;
+    private readonly Controller _controller;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
     private int _targetCount;
     private bool _robotFreed;
-    private Controller _controller;
-
-    private const bool _passThrough = false;
-
-    public bool runs { get; set; }
 
     public Cell[,] Map { get; private set; }
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
     public double TimeLimit { get; set; }
+    public bool Running { get; set; }
 
     public int RobotNum => _robots.Length;
     public int TargetNum => _targets.Count;
@@ -77,10 +73,9 @@ public class Scheduler
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
 
-        runs = true;
-
         MaxSteps = 10000; // !!!
         Step = 1;
+        Running = false;
     }
 
     public void Schedule()
@@ -92,8 +87,9 @@ public class Scheduler
         AssignTasks();
         _controller.CalculateRoutes();
         ChangeOccurred?.Invoke(this, EventArgs.Empty);
+        Running = true;
 
-        while(Step <= MaxSteps) 
+        while(Running && Step <= MaxSteps) 
         {
             if (_robotFreed)
             {

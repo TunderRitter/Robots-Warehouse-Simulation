@@ -215,7 +215,7 @@
                         Margin="0,0,0,0"
                         AutoToolTipPlacement="TopLeft"
                         AutoToolTipPrecision="0"
-                        Value="{Binding StepCount, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                        Value="{Binding StepCount, UpdateSourceTrigger=PropertyChanged}"
                         Minimum="0"
                         Maximum="{Binding MaxMap, UpdateSourceTrigger=PropertyChanged}"
                         IsEnabled="True"
@@ -228,8 +228,7 @@
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center"
                         Margin="0,20,100,0"
-                        Command="{Binding StepTo}"
-                        CommandParameter="-" />
+                        Command="{Binding StepBack}"/>
                 <Button Content="{Binding PauseText, UpdateSourceTrigger=PropertyChanged}"
                         FontFamily="Segoe UI Symbol"
                         Width="30"
@@ -243,8 +242,7 @@
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center"
                         Margin="100,20,0,0"
-                        Command="{Binding StepTo}"
-                        CommandParameter="+" />
+                        Command="{Binding StepFwd}"/>
             </Grid>
 
 
