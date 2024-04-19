@@ -21,6 +21,14 @@ build:
     - echo "Build succes"
     - pwd
     - ls
+    - cd Warehouse_Simulation_WPF
+    - ls
+    - cd bin
+    - ls
+    - cd Debug
+    - ls
+    - net8.0-windows
+    - ls
 
 test:
   stage: test
