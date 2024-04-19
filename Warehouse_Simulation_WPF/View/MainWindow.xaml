@@ -230,12 +230,13 @@
                         Margin="0,20,100,0"
                         Command="{Binding StepTo}"
                         CommandParameter="-" />
-                <Button Content="&#x23F8;"
+                <Button Content="{Binding PauseText, UpdateSourceTrigger=PropertyChanged}"
                         FontFamily="Segoe UI Symbol"
                         Width="30"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Center"
-                        Margin="0,20,0,0" />
+                        Margin="0,20,0,0" 
+                        Command="{Binding PlayPause}"/>
                 <Button Content="&#x00BB;"
                         FontFamily="Segoe UI Symbol"
                         Width="30"

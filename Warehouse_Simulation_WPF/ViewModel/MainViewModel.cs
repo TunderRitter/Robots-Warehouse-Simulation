@@ -191,6 +191,15 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private string _pauseText;
+
+    public string PauseText
+    {
+        get { return _pauseText; }
+        set { _pauseText = value; OnPropertyChanged(nameof(PauseText)); }
+    }
+
+
 
 
 
@@ -224,6 +233,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand IntCommand { get; init; }
     public DelegateCommand BackToMenu { get; init; }
     public DelegateCommand StepTo { get; init; }
+    public DelegateCommand PlayPause { get; init; }
 
     #endregion
 
