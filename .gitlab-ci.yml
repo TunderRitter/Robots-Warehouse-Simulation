@@ -23,17 +23,10 @@ build:
 release:
   stage: build
   script:
-    - mkdir Release
-    - dotnet publish --output "./Release" --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+    - dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
     - echo "Publish succes"
-    - pwd
     - ls
-    - cd Release
-    - ls
-  artifacts:
-    paths:
-      - Release
-    expire_in: 1 week
+  
 
 
 test:
