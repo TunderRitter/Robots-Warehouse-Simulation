@@ -91,7 +91,7 @@
 
             <Button Content="BACK TO MENU"
                     Command="{Binding BackToMenu}"
-                    Click="CloseSim"
+                    Click="Back"
                     Width="150"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
@@ -313,7 +313,7 @@
                   Grid.Column="1"
                   Visibility="Collapsed"
                   Background="LightGray"
-                  Width="300"
+                  Width="250"
                   Height="120"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
@@ -325,7 +325,7 @@
                 <TextBlock Text="{Binding StepCount, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
-                           Margin="240,30,0,0" />
+                           Margin="200,30,0,0" />
                 <TextBlock Text="NUMBER OF ROBOTS:"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
@@ -333,7 +333,7 @@
                 <TextBlock Text="{Binding RobotNumber, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
-                           Margin="240,60,0,0" />
+                           Margin="200,60,0,0" />
                 <TextBlock Text="TARGETS LEFT:"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
@@ -341,7 +341,7 @@
                 <TextBlock Text="{Binding TargetLeft, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"
-                           Margin="240,90,0,0" />
+                           Margin="200,90,0,0" />
 
             </Grid>
             <Grid Grid.Row="2"
