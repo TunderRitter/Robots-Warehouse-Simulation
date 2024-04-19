@@ -297,8 +297,17 @@ public class MainViewModel : INotifyPropertyChanged
         StepValue = "100";
         CanOrder = false;
         ZoomValue = 1;
-        _scheduler!.runs = false;
-        _scheduler = null;
+        if (_scheduler != null)
+        {
+            _scheduler.runs = false;
+            _scheduler = null;
+        }
+        if (_replayer != null)
+        {
+            _replayer.Pause();
+            _replayer = null;
+        }
+        
     }
 
     private void StepMethod(object? parameter)
@@ -421,6 +430,10 @@ public class MainViewModel : INotifyPropertyChanged
         RobotNumber = "0";
         TargetLeft = "0";
         CreateMap(_scheduler.Map);
+        foreach (CellState cell in Cells)
+        {
+            cell.TargetPlaced += new EventHandler(Cell_TargetPlaced);
+        }
     }
 
     private void CreateReplayMap()
