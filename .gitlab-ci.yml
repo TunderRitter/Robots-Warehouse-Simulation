@@ -23,7 +23,7 @@ build:
 release:
   stage: build
   script:
-    - dotnet publish
+    - dotnet publish -c Release -r win10-x64
     - echo "Publish succes"
     - pwd
     - ls
