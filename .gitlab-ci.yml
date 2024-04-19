@@ -29,6 +29,10 @@ build:
     - ls
     - cd net8.0-windows
     - ls
+  artifacts:
+    paths:
+      - Warehouse_Simulation_WPF/bin/Debug/net8.0-windows/Warehouse_Simulation_WPF
+    expire_in: 1 week
 
 test:
   stage: test
