@@ -258,7 +258,7 @@ public class Scheduler
 
     private void WriteLogEvents(int id, int step, String _event)
     {
-        _log.events.Add(new object[] { id, step, _event });
+        //_log.events.Add(new object[] { id, step, _event });
     }
 
     private void WriteLogActualPaths(int i, String move)
