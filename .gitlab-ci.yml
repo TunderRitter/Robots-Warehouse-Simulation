@@ -23,21 +23,15 @@ build:
 release:
   stage: build
   script:
-    - dotnet publish -c Release -r win10-x64
+    - dotnet publish --output "./Release" --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
     - echo "Publish succes"
     - pwd
     - ls
-    - cd Warehouse_Simulation_WPF
-    - ls
-    - cd bin
-    - ls
     - cd Release
-    - ls
-    - cd net8.0-windows
     - ls
   artifacts:
     paths:
-      - Warehouse_Simulation_WPF/bin/Release/net8.0-windows/publish
+      - Release
     expire_in: 1 week
 
 
