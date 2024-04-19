@@ -23,6 +23,7 @@ build:
 release:
   stage: build
   script:
+    - mkdir Release
     - dotnet publish --output "./Release" --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
     - echo "Publish succes"
     - pwd
