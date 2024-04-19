@@ -37,6 +37,7 @@ public class Replay
     public void Start()
     {
         GenerateMaps();
+        Thread.Sleep(1000);
         Play();
     }
 

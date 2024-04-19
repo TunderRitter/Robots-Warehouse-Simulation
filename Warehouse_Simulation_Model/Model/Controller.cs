@@ -65,8 +65,6 @@ public class Controller
                     Direction.W => "F",
                     _ => throw new Exception(),
                 };
-
-                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.col + 1 == posTo.col)
             {
@@ -78,8 +76,6 @@ public class Controller
                     Direction.W => "R",
                     _ => throw new Exception(),
                 };
-
-                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
         else if (posFrom.col == posTo.col)
@@ -94,8 +90,6 @@ public class Controller
                     Direction.W => "R",
                     _ => throw new Exception(),
                 };
-
-                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
             else if (posFrom.row + 1 == posTo.row)
             {
@@ -107,8 +101,6 @@ public class Controller
                     Direction.W => "C",
                     _ => throw new Exception(),
                 };
-
-                //if (!_passThrough && move == "F" && Map[posTo.row, posTo.col] is Floor floor && floor.Robot != null) move = "W";
             }
         }
 

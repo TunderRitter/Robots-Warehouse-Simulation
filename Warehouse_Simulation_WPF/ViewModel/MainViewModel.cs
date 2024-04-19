@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Warehouse_Simulation_Model.Model;
 using Warehouse_Simulation_Model.Persistence;
@@ -139,16 +139,15 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     private int _stepCount;
-    public string StepCount
+    public int StepCount
     {
-        get => _stepCount.ToString();
-        set 
+        get => _stepCount;
+        set
         {
-            if (int.TryParse(value, out int val) && val != _stepCount)
+            if (value != _stepCount)
             {
-                _stepCount = int.Parse(value);
-                OnPropertyChanged(nameof(StepCount));
-                StepMethod(value);
+                _stepCount = value;
+                OnPropertyChanged();
             }
         }
     }
@@ -179,28 +178,14 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private int _maxMap;
-    //public int MaxMap => _replayer?.MaxStep ?? 10;
-    public int MaxMap
-    {
-        get { return _maxMap; }
-        set
-        {
-            _maxMap = value;
-            OnPropertyChanged(nameof(MaxMap));
-        }
-    }
+    public int MaxMap => _replayer?.MaxStep ?? 0;
 
     private string _pauseText;
-
     public string PauseText
     {
         get { return _pauseText; }
         set { _pauseText = value; OnPropertyChanged(nameof(PauseText)); }
     }
-
-
-
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
@@ -213,7 +198,6 @@ public class MainViewModel : INotifyPropertyChanged
 
     LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
     LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
-
 
 
     public event EventHandler? ExitGame;
@@ -232,7 +216,8 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand StepCommand { get; init; }
     public DelegateCommand IntCommand { get; init; }
     public DelegateCommand BackToMenu { get; init; }
-    public DelegateCommand StepTo { get; init; }
+    public DelegateCommand StepFwd { get; init; }
+    public DelegateCommand StepBack { get; init; }
     public DelegateCommand PlayPause { get; init; }
 
     #endregion
@@ -241,8 +226,8 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler<(string, string)>? NewSimulationStarted;
     public event EventHandler<(string, string)>? Replay;
-
     #endregion
+
     public MainViewModel()
     {
         ZoomValue = 1;
@@ -258,11 +243,12 @@ public class MainViewModel : INotifyPropertyChanged
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
         BackToMenu = new DelegateCommand(OnBackToMenu);
-        StepTo = new DelegateCommand(param => StepMethod(param));
+        StepFwd = new DelegateCommand(param => _replayer?.StepFwd());
+        StepBack = new DelegateCommand(param => _replayer?.StepBack());
         PlayPause = new DelegateCommand(param => PlayPauseMethod());
 
         Cells = new ObservableCollection<CellState>();
-        
+        _pauseText = "";
     }
 
     private void PlayPauseMethod()
@@ -290,6 +276,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
         catch { }
     }
+
     private void OnBackToMenu(object? parameter)
     {
         Cells.Clear();
@@ -297,33 +284,15 @@ public class MainViewModel : INotifyPropertyChanged
         StepValue = "100";
         CanOrder = false;
         ZoomValue = 1;
-        _scheduler!.runs = false;
         _scheduler = null;
     }
 
-    private void StepMethod(object? parameter)
+    private void StepMethod(int parameter)
     {
-        if (parameter != null && _replayer != null)
-        {
-            string? p = parameter.ToString();
-            if (p != null)
-            {
-                switch (p)
-                {
-                    case "+":
-                        _replayer.StepFwd();
-                        break;
-                    case "-":
-                        _replayer.StepBack();
-                        break;
-                    default:
-                        int s = int.Parse(p);
-                        _replayer.SkipTo(s);
-                        break;
-                }
-            }
-        }
+        if (_replayer == null) return;
+        _replayer.SkipTo(parameter);
     }
+
     public void CreateScheduler(string path)
     {
         try
@@ -331,29 +300,24 @@ public class MainViewModel : INotifyPropertyChanged
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(Scheduler_ChangeOccurred);
             CalculateHeight(_scheduler.Map);
-            Row = _scheduler.Map.GetLength(0);
-            Col = _scheduler.Map.GetLength(1);
             CreateSimMap();
-
         }
         catch (Exception)
         {
             throw;
         }
     }
+
     public void CreateReplay(string logPath, string mapPath)
     {
         try
         {
             _replayer = new Replay(logPath, mapPath);
             _replayer.ChangeOccurred += new EventHandler<int>(Replayer_ChangeOccured);
-            MaxMap = _replayer.MaxStep;
+            OnPropertyChanged(nameof(MaxMap));
             CalculateHeight(_replayer.Map);
-            Row = _replayer.Map.GetLength(0);
-            Col = _replayer.Map.GetLength(1);
             PauseText = "\u23F8";
             CreateReplayMap();
-           
         }
         catch (Exception)
         {
@@ -366,11 +330,9 @@ public class MainViewModel : INotifyPropertyChanged
         if (_replayer == null) return;
         try
         {
-            Application.Current?.Dispatcher?.Invoke(() => UpdateReplayMap(_replayer.Maps[_stepCount]));
+            Application.Current?.Dispatcher?.Invoke(() => UpdateReplayMap(_replayer.Maps[StepCount]));
         }
         catch { }
-        
-        
     }
 
     private void CalculateHeight(Cell[,] map)
@@ -417,18 +379,19 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateSimMap()
     {
         if (_scheduler == null) return;
-        StepCount = _scheduler.Step.ToString();
         RobotNumber = "0";
         TargetLeft = "0";
+        StepCount = 0;
         CreateMap(_scheduler.Map);
     }
 
     private void CreateReplayMap()
     {
         if (_replayer == null) return;
+        StepCount = 0;
         CreateMap(_replayer.Map);
-        StepCount = "0";
     }
+
     private void Cell_TargetPlaced(object? sender, EventArgs c)
     {
         if (_scheduler == null) return;
@@ -446,7 +409,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateSimMap()
     {
         if (_scheduler == null) return;
-        StepCount = _scheduler.Step.ToString();
+
         RobotNumber = _scheduler.RobotNum.ToString();
         TargetLeft = _scheduler.TargetNum.ToString();
         for (int i = 0; i < Cells.Count; i++)
@@ -459,11 +422,16 @@ public class MainViewModel : INotifyPropertyChanged
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
+        if (!_scheduler.Running)
+            StepCount = 0;
+        else
+            StepCount = _scheduler.Step;
     }
+
     private void UpdateReplayMap(int[,] map)
     {
-        if (_replayer == null) return;
-        StepCount = _replayer.Step.ToString();
+        if (_replayer == null || map == null) return;
+
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
@@ -474,6 +442,7 @@ public class MainViewModel : INotifyPropertyChanged
                 (map[x, y] % 10 == 0 ? North : (map[x, y] % 10 == 1 ? East : (map[x, y] % 10 == 2 ? South : West)))));
             Cells[idx].Id = id == null ? String.Empty : id;
         }
+        StepCount = _replayer.Step;
     }
 
     private LinearGradientBrush CircleColor(Cell cell)
@@ -521,6 +490,14 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+
+    public void ReplaySLider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (sender is Slider slider)
+            StepMethod((int)slider.Value);
+    }
+
+
     private void OnSimStart()
     {
         if (_scheduler == null) return;
@@ -549,8 +526,6 @@ public class MainViewModel : INotifyPropertyChanged
     {
         ExitGame?.Invoke(this, EventArgs.Empty);
     }
-
-    
     
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
