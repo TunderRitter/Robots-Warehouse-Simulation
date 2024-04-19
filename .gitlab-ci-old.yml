@@ -5,6 +5,7 @@ stages:
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
 
+
 before_script:
   - export GIT_TERMINAL_PROMPT=0
   - export GIT_ASKPASS=""

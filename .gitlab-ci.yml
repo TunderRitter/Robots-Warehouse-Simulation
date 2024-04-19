@@ -18,4 +18,3 @@ build:
     - find / -name msbuild
     - msbuild /p:Configuration=Release $SOLUTION
     - echo "Build succes"
-
