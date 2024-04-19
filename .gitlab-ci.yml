@@ -1,4 +1,5 @@
-image: mcr.microsoft.com/dotnet/core/sdk:2.2.301
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
 
 stages:
   - build
@@ -10,11 +11,19 @@ variables:
 
 before_script:
   - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
-  - dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools
+  - apt-get update -qq
+  - apt-get install -y curl
+  - curl -sL https://deb.nodesource.com/setup_14.x | bash -
 
 build:
   stage: build
   script:
-    - find / -name msbuild
-    - msbuild /p:Configuration=Release $SOLUTION
+    - dotnet restore
+    - dotnet build
     - echo "Build succes"
+
+test:
+  stage: test
+  script:
+    - dotnet test
+    - echo "Test succes"
