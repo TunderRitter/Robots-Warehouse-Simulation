@@ -10,7 +10,6 @@ public class Scheduler
     private readonly List<Target> _targets;
     private readonly Log _log;
     private readonly ITaskAssigner _strategy;
-    private double _timeLimit;
     private readonly int _teamSize;
     private readonly int _targetsSeen;
     private int _targetCount;
@@ -21,17 +20,13 @@ public class Scheduler
 
     public bool runs { get; set; }
 
-    public Cell[,] Map { get; private set; } // Encapsulation!
+    public Cell[,] Map { get; private set; }
     public int MaxSteps { get; set; }
     public int Step { get; private set; }
-    public double TimeLimit
-    {
-        get { return _timeLimit; }
-        set
-        {
-            _timeLimit = value;
-        }
-    }
+    public double TimeLimit { get; set; }
+
+    public int RobotNum => _robots.Length;
+    public int TargetNum => _targets.Count;
 
     public event EventHandler? ChangeOccurred;
 
@@ -69,14 +64,15 @@ public class Scheduler
         }
         _targetCount = data.Targets.Length;
 
-		_log = new Log();
+        _log = new Log();
         WriteLogStart();
         WriteLogTeamSize();
         WriteLogTasks();
+        InitLogEvents();
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
 
-        _timeLimit = 1000; // !!!
+        TimeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
@@ -114,9 +110,9 @@ public class Scheduler
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
-            int waitTime = (int)(elapsedMillisecs / _timeLimit);
+            int waitTime = (int)(elapsedMillisecs / TimeLimit);
 
-            Thread.Sleep((int)(_timeLimit * (waitTime + 1) - elapsedMillisecs));
+            Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
             
             for (int i = 0; i < waitTime; i++)
@@ -154,7 +150,7 @@ public class Scheduler
         if (sender is Robot robot)
         {
             Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
-            if(target != null) WriteLogEvents(target.InitId, Step, "finished");
+            if(target != null) WriteLogEvents(target.InitId, robot.Id, Step, "finished");
 
             _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
@@ -172,7 +168,7 @@ public class Scheduler
         {
             if(assignable.Count >= i)
             {
-                WriteLogEvents(assignable[i].InitId, Step, "assigned");
+                WriteLogEvents(assignable[i].InitId, free[i].Id, Step, "assigned");
             }
         }
 
@@ -222,7 +218,7 @@ public class Scheduler
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            Object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
             _log.start.Add(data);
         }
     }
@@ -257,25 +253,29 @@ public class Scheduler
         _log.makespan += 1;
     }
 
-    private void WriteLogEvents(int id, int step, String _event)
+    private void InitLogEvents()
     {
-        //_log.events.Add(new object[] { id, step, _event });
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            _log.events.Add(new List<object[]>());
+        }
+    }
+
+    private void WriteLogEvents(int taskId, int robotId,  int step, String _event)
+    {
+        _log.events[robotId].Add(new object[] { taskId, step, _event });
     }
 
     private void WriteLogActualPaths(int i, String move)
     {
         if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
         else _log.actualPaths[i] += "," + move;
-
-        Debug.WriteLine(_log.actualPaths[i]);
     }
 
     private void WriteLogPlannerpaths(int i, String move)
     {
         if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
         else _log.plannerPaths[i] += "," + move;
-
-        Debug.WriteLine(_log.plannerPaths[i]);
     }
 
     private void WriteLogTasks()
