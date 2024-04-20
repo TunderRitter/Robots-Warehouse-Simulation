@@ -186,6 +186,12 @@ public class MainViewModel : INotifyPropertyChanged
         get { return _pauseText; }
         set { _pauseText = value; OnPropertyChanged(nameof(PauseText)); }
     }
+    private string _endText;
+    public string EndText
+    {
+        get { return _endText; }
+        set { _endText = value; OnPropertyChanged(nameof(EndText)); }
+    }
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
@@ -219,6 +225,7 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand StepFwd { get; init; }
     public DelegateCommand StepBack { get; init; }
     public DelegateCommand PlayPause { get; init; }
+    public DelegateCommand EndCommand { get; init; }
 
     #endregion
 
@@ -226,6 +233,7 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler<(string, string)>? NewSimulationStarted;
     public event EventHandler<(string, string)>? Replay;
+    public event EventHandler? SaveLog;
     #endregion
 
     public MainViewModel()
@@ -246,9 +254,25 @@ public class MainViewModel : INotifyPropertyChanged
         StepFwd = new DelegateCommand(param => _replayer?.StepFwd());
         StepBack = new DelegateCommand(param => _replayer?.StepBack());
         PlayPause = new DelegateCommand(param => PlayPauseMethod());
+        EndCommand = new DelegateCommand(param => EndSimulation());
 
         Cells = new ObservableCollection<CellState>();
         _pauseText = "";
+        _endText = "";
+    }
+
+    private void EndSimulation()
+    {
+        if (_scheduler == null) return;
+        if (_scheduler.Running)
+        {
+            _scheduler.Running = false;
+            EndText = "Save simulation";
+        }
+        else if (!_scheduler.Running)
+        {
+            SaveLog?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void PlayPauseMethod()
@@ -312,6 +336,7 @@ public class MainViewModel : INotifyPropertyChanged
             CalculateHeight(_scheduler.Map);
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
+            EndText = "End simulation";
             CreateSimMap();
         }
         catch (Exception)
