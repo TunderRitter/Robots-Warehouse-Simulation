@@ -22,7 +22,7 @@ public partial class NumericUpDown : UserControl
         }
     }
 
-    private int _max = 10000;
+    private int _max = 1_000_000;
     public int Max
     {
         get => _max;
