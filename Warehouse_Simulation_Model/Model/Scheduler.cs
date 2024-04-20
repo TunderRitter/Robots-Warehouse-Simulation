@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -112,10 +113,13 @@ public class Scheduler
             _controller.Step++;
             if (Step > MaxSteps) break;
             
-            for (int i = 0; i < _robots.Length; i++)
+            if (waitTime > 0)
             {
-                WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
-                WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
+                for (int i = 0; i < _robots.Length; i++)
+                {
+                    WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
+                    WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
+                }
             }
             ExecuteSteps(steps);
 
@@ -127,6 +131,7 @@ public class Scheduler
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
         }
 
+        WriteLog();
         SimFinished?.Invoke(this, EventArgs.Empty);
     }
 
@@ -271,21 +276,25 @@ public class Scheduler
         }
     }
 
-    private void WriteLogEvents(int taskId, int robotId,  int step, String _event)
+    private void WriteLogEvents(int taskId, int robotId,  int step, string _event)
     {
         _log.events[robotId].Add(new object[] { taskId, step, _event });
     }
 
-    private void WriteLogActualPaths(int i, String move)
+    private void WriteLogActualPaths(int i, string move)
     {
-        if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
-        else _log.actualPaths[i] += "," + move;
+        if (_log.actualPaths[i] == "")
+            _log.actualPaths[i] += move;
+        else
+            _log.actualPaths[i] += "," + move;
     }
 
-    private void WriteLogPlannerpaths(int i, String move)
+    private void WriteLogPlannerpaths(int i, string move)
     {
-        if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
-        else _log.plannerPaths[i] += "," + move;
+        if (_log.plannerPaths[i] == "")
+            _log.plannerPaths[i] += move;
+        else
+            _log.plannerPaths[i] += "," + move;
     }
 
     private void WriteLogTasks()
