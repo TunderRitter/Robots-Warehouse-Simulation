@@ -327,9 +327,9 @@ public class MainViewModel : INotifyPropertyChanged
             _replayer = new Replay(logPath, mapPath);
             _replayer.ChangeOccurred += new EventHandler<int>(Replayer_ChangeOccured);
             OnPropertyChanged(nameof(MaxMap));
-            CalculateHeight(_replayer.Map);
-            Row = _replayer.Map.GetLength(0);
-            Col = _replayer.Map.GetLength(1);
+            CalculateHeight(_replayer.InitMap);
+            Row = _replayer.InitMap.GetLength(0);
+            Col = _replayer.InitMap.GetLength(1);
             PauseText = "\u23F8";
             CreateReplayMap();
         }
@@ -407,7 +407,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_replayer == null) return;
         StepCount = 0;
-        CreateMap(_replayer.Map);
+        CreateMap(_replayer.InitMap);
     }
 
     private void Cell_TargetPlaced(object? sender, EventArgs c)

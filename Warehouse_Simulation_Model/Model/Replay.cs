@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Warehouse_Simulation_Model.Persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -13,6 +12,7 @@ public class Replay
     public double Speed { get; private set; }
     public bool Paused { get; private set; }
     public Cell[,] Map { get; init; }
+    public Cell[,] InitMap { get; init; }
     public int[][,] Maps { get; init; }
     public int Step { get; private set; }
     public int MaxStep { get; init; }
@@ -27,20 +27,23 @@ public class Replay
     {
         _log = Log.Read(logPath);
         _robots = GetRobots(_log);
+        Robot[] initRobots = GetRobots(_log);
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
         _targets = GetTargets(_log);
+        Target[] initTargets = GetTargets(_log);
         _steps = GetSteps(_log);
         Map = GetMap(mapBool, _robots, _targets);
+        InitMap = GetMap(mapBool, initRobots, initTargets);
         Step = 0;
         Speed = 1.0;
         Paused = true;
         MaxStep = _log.sumOfCost / _log.plannerPaths.Count - 1;
         Maps = new int[MaxStep + 1][,];
+        GenerateMaps();
     }
 
     public void Start()
     {
-        GenerateMaps();
         Thread.Sleep(1000);
         Play();
     }
