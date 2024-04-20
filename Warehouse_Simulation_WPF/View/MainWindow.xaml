@@ -342,6 +342,17 @@
                            Margin="200,90,0,0" />
 
             </Grid>
+            <Button x:Name="EndButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10,270,0,0"
+                    Content="{Binding EndText, UpdateSourceTrigger=PropertyChanged}"
+                    Command="{Binding EndCommand}"/>
+            
+
             <Grid Grid.Row="2"
                   Grid.Column="0"
                   x:Name="OnlineGrid"
@@ -364,7 +375,8 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ToggleButton">
                                         <Border BorderBrush="{TemplateBinding BorderBrush}"
-                                                Background="{TemplateBinding Background}">
+                                                Background="{TemplateBinding Background}"
+                                                CornerRadius="15">
                                             <ContentPresenter HorizontalAlignment="Center"
                                                               VerticalAlignment="Center" />
                                         </Border>

@@ -33,6 +33,7 @@ public partial class MainWindow : Window
         StartGrid.Visibility = Visibility.Collapsed;
         InfoGrid.Visibility = Visibility.Visible;
         OnlineGrid.Visibility = Visibility.Visible;
+        EndButton.Visibility = Visibility.Visible;
     }
 
     private void HideReplayStartGrid(object sender, EventArgs e)
@@ -50,5 +51,6 @@ public partial class MainWindow : Window
         InfoGrid.Visibility = Visibility.Collapsed;
         MenuGrid.Visibility = Visibility.Visible;
         WindowState = WindowState.Normal;
+        EndButton.Visibility = Visibility.Collapsed;
     }
 }
