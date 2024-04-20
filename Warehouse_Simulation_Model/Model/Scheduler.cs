@@ -121,6 +121,7 @@ public class Scheduler
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();
+            checkIfDone();
             startTime = DateTime.Now;
         }
     }
@@ -162,7 +163,7 @@ public class Scheduler
 
         for (int i = 0; i < free.Count; i++)
         {
-            if(assignable.Count >= i)
+            if(assignable.Count > i)
             {
                 WriteLogEvents(assignable[i].InitId, free[i].Id, Step, "assigned");
             }
@@ -208,6 +209,15 @@ public class Scheduler
             _robots[i].CheckPos();
         }
         
+    }
+
+    private void checkIfDone()
+    {
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            if (_robots[i].TargetPos != null) return;
+        }
+        Running = false;
     }
 
     private void WriteLogStart()
