@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -103,7 +104,7 @@ public class Replay
             {
                 foreach (object[] targetEvent in _log.events[j])
                 {
-                    if ((int)targetEvent[1] == Step - 1)
+                    if ((int)targetEvent[1] == i - 1)
                     {
                         Target target = _targets.First(e => e.InitId == (int)targetEvent[0]);
                         if ((string)targetEvent[2] == "assigned")

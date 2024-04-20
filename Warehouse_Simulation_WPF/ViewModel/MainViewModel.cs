@@ -454,11 +454,10 @@ public class MainViewModel : INotifyPropertyChanged
         {
             int idx = i;
             int x = Cells[idx].X; int y = Cells[idx].Y;
-            String? id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y]  / 10) - 2).ToString() : String.Empty);
+            Cells[idx].Id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y]  / 10) - 2).ToString() : String.Empty);
             Cells[idx].Square = map[x, y] == 0 ? Wall : Floor;
-            Cells[idx].Circle = map[x, y] == 0 ? Wall : (map[x, y] == 1 ? Floor : (map[x, y] == -1 ? Target :
+            Cells[idx].Circle = map[x, y] == 0 ? Wall : (map[x, y] == 1 ? Floor : (map[x, y] < 0 ? Target :
                 (map[x, y] % 10 == 0 ? North : (map[x, y] % 10 == 1 ? East : (map[x, y] % 10 == 2 ? South : West)))));
-            Cells[idx].Id = id == null ? String.Empty : id;
         }
         StepCount = _replayer.Step;
     }
