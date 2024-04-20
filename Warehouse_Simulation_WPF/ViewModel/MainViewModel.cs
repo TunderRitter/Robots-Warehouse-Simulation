@@ -266,11 +266,13 @@ public class MainViewModel : INotifyPropertyChanged
     private void FastReplay()
     {
         if (_replayer == null) return;
+        _replayer.FasterSpeed();
     }
 
     private void SlowReplay()
     {
         if (_replayer == null) return;
+        _replayer.SlowerSpeed();
     }
 
     private void EndSimulation()
