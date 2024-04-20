@@ -359,6 +359,16 @@ public class MainViewModel : INotifyPropertyChanged
             throw;
         }
     }
+    public void SaveFile(string path)
+    {
+        if (_scheduler == null) return;
+        try
+        {
+            _scheduler.WriteToFile(path);
+            OnBackToMenu(null);
+        }
+        catch (Exception) { throw; }
+    }
 
     private void Scheduler_SimFinished(object? sender, EventArgs e)
     {

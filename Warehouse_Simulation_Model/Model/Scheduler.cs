@@ -322,4 +322,8 @@ public class Scheduler
         _targetCount++;
         ((Floor)Map[row, col]).Target = target;
     }
+    public void WriteToFile(string path)
+    {
+        _log.Write(path);
+    }
 }
