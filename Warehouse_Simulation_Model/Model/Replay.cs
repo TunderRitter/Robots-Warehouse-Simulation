@@ -12,9 +12,13 @@ public class Replay
     public double Speed { get; private set; }
     public bool Paused { get; private set; }
     public Cell[,] Map { get; init; }
+    public Cell[,] InitMap { get; init; }
     public int[][,] Maps { get; init; }
     public int Step { get; private set; }
-    public int MaxSteps { get; init; }
+    public int MaxStep { get; init; }
+
+    public int RobotNum => _robots.Length;
+    public int TargetNum => _targets.Where(e => e.Active).Count();
 
     public event EventHandler<int>? ChangeOccurred;
 
@@ -23,19 +27,24 @@ public class Replay
     {
         _log = Log.Read(logPath);
         _robots = GetRobots(_log);
+        Robot[] initRobots = GetRobots(_log);
         bool[,] mapBool = ConfigReader.ReadMap(mapPath);
         _targets = GetTargets(_log);
+        Target[] initTargets = GetTargets(_log);
         _steps = GetSteps(_log);
         Map = GetMap(mapBool, _robots, _targets);
+        InitMap = GetMap(mapBool, initRobots, initTargets);
+        Step = 0;
         Speed = 1.0;
         Paused = true;
-        MaxSteps = _log.sumOfCost / _log.plannerPaths.Count - 1;
-        Maps = new int[MaxSteps + 1][,];
+        MaxStep = _log.sumOfCost / _log.plannerPaths.Count - 1;
+        Maps = new int[MaxStep + 1][,];
+        GenerateMaps();
     }
 
     public void Start()
     {
-        GenerateMaps();
+        Thread.Sleep(1000);
         Play();
     }
 
@@ -50,14 +59,21 @@ public class Replay
         Paused = true;
     }
 
-    public void ChangeSpeed(double speed)
+    public void FasterSpeed()
     {
-         Speed = speed;
+        if (Speed >= 8) return;
+        Speed *= 2;
+    }
+
+    public void SlowerSpeed()
+    {
+        if (Speed <= 0.125) return;
+        Speed *= 0.5;
     }
 
     public void StepFwd()
     {
-        Step = Math.Min(Step + 1, MaxSteps);
+        Step = Math.Min(Step + 1, MaxStep);
         OnChangeOccured();
     }
 
@@ -69,7 +85,7 @@ public class Replay
 
     public void SkipTo(int step)
     {
-        Step = Math.Clamp(step, 0, MaxSteps);
+        Step = Math.Clamp(step, 0, MaxStep);
         OnChangeOccured();
     }
 
@@ -77,8 +93,8 @@ public class Replay
     {
         while (!Paused)
         {
-            Thread.Sleep((int)(1000 * Speed));
             StepFwd();
+            Thread.Sleep((int)(1000 / Speed));
         }
     }
 
@@ -91,7 +107,7 @@ public class Replay
             {
                 foreach (object[] targetEvent in _log.events[j])
                 {
-                    if ((int)targetEvent[1] == Step - 1)
+                    if ((int)targetEvent[1] == i - 1)
                     {
                         Target target = _targets.First(e => e.InitId == (int)targetEvent[0]);
                         if ((string)targetEvent[2] == "assigned")
