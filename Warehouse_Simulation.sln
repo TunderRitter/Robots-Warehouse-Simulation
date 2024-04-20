@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Warehouse_Simulation_WPF", "Warehouse_Simulation_WPF\Warehouse_Simulation_WPF.csproj", "{A4468539-8211-4B8B-B574-816F0E306127}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Warehouse_Simulation_WPF", "Warehouse_Simulation_WPF\Warehouse_Simulation_WPF.csproj", "{A4468539-8211-4B8B-B574-816F0E306127}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Warehouse_Simulation_Model", "Warehouse_Simulation_Model\Warehouse_Simulation_Model.csproj", "{A97CF8D1-1577-4AEC-B292-267321497D1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Warehouse_Simulation_Model", "Warehouse_Simulation_Model\Warehouse_Simulation_Model.csproj", "{A97CF8D1-1577-4AEC-B292-267321497D1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Warehouse_Simulation_Tests", "Warehouse_Simulation_Tests\Warehouse_Simulation_Tests.csproj", "{300E9179-82C4-42F7-8C78-066441CB46CA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A4468539-8211-4B8B-B574-816F0E306127} = {A4468539-8211-4B8B-B574-816F0E306127}
+		{A97CF8D1-1577-4AEC-B292-267321497D1F} = {A97CF8D1-1577-4AEC-B292-267321497D1F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +27,10 @@ Global
 		{A97CF8D1-1577-4AEC-B292-267321497D1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A97CF8D1-1577-4AEC-B292-267321497D1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A97CF8D1-1577-4AEC-B292-267321497D1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{300E9179-82C4-42F7-8C78-066441CB46CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{300E9179-82C4-42F7-8C78-066441CB46CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{300E9179-82C4-42F7-8C78-066441CB46CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{300E9179-82C4-42F7-8C78-066441CB46CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

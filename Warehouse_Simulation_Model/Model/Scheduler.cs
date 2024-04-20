@@ -121,6 +121,7 @@ public class Scheduler
             }
 
             Step++;
+            _controller.step = _controller.step + 1;
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();

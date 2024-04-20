@@ -1,26 +1,38 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+
 stages:
   - build
-  #- test
+  - test
+  - deploy
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
 
 before_script:
-  - export GIT_TERMINAL_PROMPT=0
-  - export GIT_ASKPASS=""
-  - apt-get update -qy
-  - apt-get install -y --no-install-recommends nuget
-  - apt-get install -y dotnet-sdk-8.0
-  - export PATH=$PATH:/usr/share/dotnet
-  - nuget restore $SOLUTION
+  - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
+  - apt-get update -qq
 
 build:
   stage: build
   script:
-    - /usr/share/dotnet/msbuild /p:Configuration=Release $SOLUTION
+    - dotnet restore
+    - dotnet build
+    - echo "Build succes"
+  
+release:
+  stage: build
+  only:
+    - master
+  script:
+    #- dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+    - echo "Publish succes"
+    - ls
+  
 
-#test:
-  #stage: test
-  #script:
-    #- dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 
+test:
+  stage: test
+  script:
+    - dotnet test
+    - echo "Test succes"
