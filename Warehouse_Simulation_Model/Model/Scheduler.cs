@@ -122,8 +122,8 @@ public class Scheduler
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();
-
-            ChangeOccurred?.Invoke(this, EventArgs.Empty);
+            checkIfDone();
+            startTime = DateTime.Now;
         }
 
         SimFinished?.Invoke(this, EventArgs.Empty);
@@ -210,8 +210,14 @@ public class Scheduler
         
     }
 
-
-    private void WriteLogActionModel(string model) => _log.actionModel = model;
+    private void checkIfDone()
+    {
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            if (_robots[i].TargetPos != null) return;
+        }
+        Running = false;
+    }
 
     private void WriteLogStart()
     {
