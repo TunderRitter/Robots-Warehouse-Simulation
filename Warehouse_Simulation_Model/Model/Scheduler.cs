@@ -60,22 +60,22 @@ public class Scheduler
         }
         _targetCount = data.Targets.Length;
 
-        _log = new Log();
-        WriteLogStart();
-        WriteLogTeamSize();
-        WriteLogTasks();
-        InitLogEvents();
-
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-
-        TimeLimit = 1000; // !!!
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
 
-        MaxSteps = 10000; // !!!
-        Step = 1;
+        TimeLimit = 1000;
+        MaxSteps = 10000;
+        Step = 0;
         Running = false;
+
+        _log = new Log();
+        WriteLogActionModel("MAPF_T");
+        WriteLogStart();
+        WriteLogTeamSize();
+        WriteLogTasks();
+        InitLogEvents();
     }
 
     public void Schedule()
@@ -100,28 +100,29 @@ public class Scheduler
             }
 
             string[] steps = _controller.CalculateSteps();
-            ExecuteSteps(steps);
-
-            //várjon az időlimitig, vagy ha túllépte akkor várjon megint annyit
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
             int waitTime = (int)(elapsedMillisecs / TimeLimit);
-
             Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
-            ChangeOccurred?.Invoke(this, EventArgs.Empty);
-            
-            for (int i = 0; i < waitTime; i++)
-            {
-                // log
-            }
+            startTime = DateTime.Now;
 
-            Step++;
-            _controller.step = _controller.step + 1;
+            Step += waitTime + 1;
+            _controller.Step++;
+            if (Step > MaxSteps) break;
+            
+            for (int i = 0; i < _robots.Length; i++)
+            {
+                WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
+                WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
+            }
+            ExecuteSteps(steps);
+
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();
-            startTime = DateTime.Now;
+
+            ChangeOccurred?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -146,9 +147,11 @@ public class Scheduler
         if (sender is Robot robot)
         {
             Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
-            if(target != null) WriteLogEvents(target.InitId, robot.Id, Step, "finished");
-
-            _targets.RemoveAt(_targets.FindIndex(e => e.Pos == robot.Pos));
+            if(target != null)
+            {
+                WriteLogEvents(target.InitId, robot.Id, Step, "finished");
+                _targets.Remove(target);
+            }
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
         }
 
@@ -160,15 +163,11 @@ public class Scheduler
         List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
         List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
 
-        for (int i = 0; i < free.Count; i++)
+        (int, int)[] assignments = _strategy.Assign(free, assignable);
+        foreach ((int robotId, int targetId) in assignments)
         {
-            if(assignable.Count >= i)
-            {
-                WriteLogEvents(assignable[i].InitId, free[i].Id, Step, "assigned");
-            }
+            WriteLogEvents(targetId, robotId, Step, "assigned");
         }
-
-        _strategy.Assign(free, assignable);
     }
 
     public void ExecuteSteps(string[] steps)
@@ -195,10 +194,8 @@ public class Scheduler
             }
 
             //write log
-
-            if (steps[i] == "W") WriteLogPlannerpaths(robot.Id, "T");
-            else WriteLogPlannerpaths(robot.Id, steps[i]);
-            WriteLogActualPaths(robot.Id, steps[i]);
+            WriteLogPlannerpaths(i, steps[i]);
+            WriteLogActualPaths(i, steps[i]);
         }
         for (int i = 0; i < _robots.Length; i++)
         {
@@ -210,11 +207,14 @@ public class Scheduler
         
     }
 
+
+    private void WriteLogActionModel(string model) => _log.actionModel = model;
+
     private void WriteLogStart()
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            object[] data = { _robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString() };
+            object[] data = [_robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString()];
             _log.start.Add(data);
         }
     }
@@ -278,7 +278,7 @@ public class Scheduler
     {
         for (int i = 0; i < _targets.Count; i++)
         {
-            int[] trg = { _targets[i].InitId, _targets[i].Pos.Item1, _targets[i].Pos.Item2 };
+            int[] trg = { _targets[i].InitId, _targets[i].Pos.row, _targets[i].Pos.col };
             _log.tasks.Add(trg);
         }
     }
