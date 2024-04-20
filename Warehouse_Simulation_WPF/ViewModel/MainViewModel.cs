@@ -347,6 +347,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(Scheduler_ChangeOccurred);
+            _scheduler.SimFinished += new EventHandler(Scheduler_SimFinished);
             CalculateHeight(_scheduler.Map);
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
@@ -357,6 +358,13 @@ public class MainViewModel : INotifyPropertyChanged
         {
             throw;
         }
+    }
+
+    private void Scheduler_SimFinished(object? sender, EventArgs e)
+    {
+        if (_scheduler == null) return;  
+        _scheduler.Running = false;
+        EndText = "SAVE SIMULATION";
     }
 
     public void CreateReplay(string logPath, string mapPath)
