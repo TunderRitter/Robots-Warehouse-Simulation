@@ -6,8 +6,8 @@ public class Controller
     private readonly Robot[] _robots;
     private readonly Queue<(int, int)>[] _routes;
     private AStar _astar;
-    private CAStar _castar;
-    public int step { get; set; }
+    private readonly CAStar _castar;
+    public int Step { get; set; }
 
 
     public Controller(bool[,] map, Robot[] robots)
@@ -20,7 +20,7 @@ public class Controller
         {
             _routes[i] = new Queue<(int, int)>();
         }
-        step = 0;
+        Step = 0;
     }
 
 
@@ -30,7 +30,7 @@ public class Controller
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
                 //_routes[i] = _astar.AStarSearch(_robots[i]);
-                _routes[i] = _castar.FindPath(_robots[i], step);
+                _routes[i] = _castar.FindPath(_robots[i], Step);
         }
     }
 

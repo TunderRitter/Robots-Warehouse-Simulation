@@ -477,10 +477,7 @@ public class MainViewModel : INotifyPropertyChanged
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
-        if (!_scheduler.Running)
-            StepCount = 0;
-        else
-            StepCount = _scheduler.Step;
+        StepCount = _scheduler.Step;
     }
 
     private void UpdateReplayMap(int[,] map)
