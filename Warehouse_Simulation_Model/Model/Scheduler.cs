@@ -25,6 +25,7 @@ public class Scheduler
     public int TargetNum => _targets.Count;
 
     public event EventHandler? ChangeOccurred;
+    public event EventHandler? SimFinished;
 
 
     public Scheduler(SchedulerData data)
@@ -124,6 +125,8 @@ public class Scheduler
 
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
         }
+
+        SimFinished?.Invoke(this, EventArgs.Empty);
     }
 
     private void AddTargets()
