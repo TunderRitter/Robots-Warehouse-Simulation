@@ -13,21 +13,6 @@ public partial class MainWindow : Window
     }
 
 
-    private void ReplayButton_Click(object sender, EventArgs e)
-    {
-        //MenuGrid.Visibility = Visibility.Collapsed;
-        //this.WindowState = WindowState.Maximized;
-        //SimGrid.Visibility = Visibility.Visible;
-        
-    }
-
-    private void SimulationButton_Click(object sender, EventArgs e)
-    {
-        //MenuGrid.Visibility = Visibility.Collapsed;
-        //this.WindowState = WindowState.Maximized;
-        //SimGrid.Visibility = Visibility.Visible;
-    }
-
     private void HideStartGrid(object sender, EventArgs e)
     {
         StartGrid.Visibility = Visibility.Collapsed;
@@ -41,6 +26,8 @@ public partial class MainWindow : Window
         ReplayStartGrid.Visibility = Visibility.Collapsed;
         InfoGrid.Visibility = Visibility.Visible;
         ReplayButtons2.Visibility = Visibility.Visible;
+        SlowButton.Visibility = Visibility.Visible;
+        FastButton.Visibility = Visibility.Visible;
     }
 
     private void Back(object sender, EventArgs e)
@@ -52,5 +39,7 @@ public partial class MainWindow : Window
         MenuGrid.Visibility = Visibility.Visible;
         WindowState = WindowState.Normal;
         EndButton.Visibility = Visibility.Collapsed;
+        SlowButton.Visibility = Visibility.Collapsed;
+        FastButton.Visibility = Visibility.Collapsed;
     }
 }

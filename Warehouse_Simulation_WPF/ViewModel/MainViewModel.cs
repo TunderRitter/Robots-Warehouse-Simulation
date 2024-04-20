@@ -206,18 +206,16 @@ public class MainViewModel : INotifyPropertyChanged
     LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
 
 
-    public event EventHandler? ExitGame;
+    public event EventHandler? ExitApp;
 
 
     public ObservableCollection<CellState> Cells { get; private set; }
 
     public DelegateCommand NewSimulation { get; private set; }
     public DelegateCommand LoadReplay { get; private set; }
-
     public DelegateCommand StartSim { get; private set; }
     public DelegateCommand StartReplay { get; private set; }
     public DelegateCommand Exit { get; private set; }
-
     public DelegateCommand Zoom { get; private set; }
     public DelegateCommand StepCommand { get; init; }
     public DelegateCommand IntCommand { get; init; }
@@ -226,6 +224,8 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand StepBack { get; init; }
     public DelegateCommand PlayPause { get; init; }
     public DelegateCommand EndCommand { get; init; }
+    public DelegateCommand Slow { get; init; }
+    public DelegateCommand Fast { get; init; }
 
     #endregion
 
@@ -247,7 +247,7 @@ public class MainViewModel : INotifyPropertyChanged
         StartSim = new DelegateCommand(param => OnSimStart());
         StartReplay = new DelegateCommand(param => OnReplayStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
-        Exit = new DelegateCommand(param => OnExitGame());
+        Exit = new DelegateCommand(param => OnExitApp());
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
         BackToMenu = new DelegateCommand(OnBackToMenu);
@@ -255,10 +255,22 @@ public class MainViewModel : INotifyPropertyChanged
         StepBack = new DelegateCommand(param => _replayer?.StepBack());
         PlayPause = new DelegateCommand(param => PlayPauseMethod());
         EndCommand = new DelegateCommand(param => EndSimulation());
+        Slow = new DelegateCommand(param => SlowReplay());
+        Fast = new DelegateCommand(param => FastReplay());
 
         Cells = new ObservableCollection<CellState>();
         _pauseText = "";
         _endText = "";
+    }
+
+    private void FastReplay()
+    {
+        if (_replayer == null) return;
+    }
+
+    private void SlowReplay()
+    {
+        if (_replayer == null) return;
     }
 
     private void EndSimulation()
@@ -267,7 +279,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (_scheduler.Running)
         {
             _scheduler.Running = false;
-            EndText = "Save simulation";
+            EndText = "SAVE SIMULATION";
         }
         else if (!_scheduler.Running)
         {
@@ -336,7 +348,7 @@ public class MainViewModel : INotifyPropertyChanged
             CalculateHeight(_scheduler.Map);
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
-            EndText = "End simulation";
+            EndText = "END SIMULATION";
             CreateSimMap();
         }
         catch (Exception)
@@ -564,11 +576,10 @@ public class MainViewModel : INotifyPropertyChanged
         Task.Run(() => _replayer.Start());
     }
 
-    private void OnExitGame()
+    private void OnExitApp()
     {
-        ExitGame?.Invoke(this, EventArgs.Empty);
+        ExitApp?.Invoke(this, EventArgs.Empty);
     }
-    
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

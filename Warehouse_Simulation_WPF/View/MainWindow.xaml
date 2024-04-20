@@ -70,7 +70,6 @@
                     Margin="0,120,120,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Click="ReplayButton_Click"
                     Command="{Binding Path=LoadReplay}" />
         </Grid>
         <Grid x:Name="SimGrid"
@@ -348,10 +347,33 @@
                     Visibility="Collapsed"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    Margin="10,270,0,0"
+                    Margin="10,140,0,0"
+                    Width="200"
                     Content="{Binding EndText, UpdateSourceTrigger=PropertyChanged}"
                     Command="{Binding EndCommand}"/>
-            
+
+            <Button x:Name="SlowButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10,140,0,0"
+                    Width="120"
+                    Content="SLOW DOWN"
+                    Command="{Binding Slow}" />
+            <Button x:Name="FastButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="140,140,0,0"
+                    Width="120"
+                    Content="SPEED UP"
+                    Command="{Binding Fast}" />
+
+
 
             <Grid Grid.Row="2"
                   Grid.Column="0"
