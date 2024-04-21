@@ -76,6 +76,16 @@ public class CAStar
         reservationMap[robot.Pos.row, robot.Pos.col] = false;
     }
 
+    private bool TooLongWait(CASCell cell)
+    {
+        int n = 1;
+        while(cell.Parent != null && cell.I == cell.Parent.I && cell.J == cell.Parent.J)
+        {
+            n++;
+            cell = cell.Parent;
+        }
+        return n > 5;
+    }
     public Queue<(int, int)> FindPath(Robot Robot, int StartTime)
     {
         if (Robot.TargetPos == null)
@@ -110,7 +120,7 @@ public class CAStar
             }
             Closed.Add(Current);
 
-            //bool neighborAdded = false;
+            bool neighborAdded = false;
 
             int time = Current.Time;
 
@@ -364,13 +374,14 @@ public class CAStar
 
             }
 
-            //if (!neighborAdded)
-            //{
-            //    CASCell Waiting = new CASCell(Current.I, Current.J, Current, Current.Time + 1);
-            //    Waiting.g = Current.g + 1;
-            //    Waiting.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
-            //    Open.Add(Waiting);
-            //}
+            if (!neighborAdded && Reservations.ContainsKey((Current.I,Current.J)) &&
+                !Reservations[(Current.I,Current.J)].Contains(time + 1) && !TooLongWait(Current))
+            {
+                CASCell Waiting = new CASCell(Current.I, Current.J, Current, Current.Time + 1);
+                Waiting.g = Current.g + 1;
+                Waiting.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
+                Open.Add(Waiting);
+            }
         }
         return new Queue<(int, int)>();
     }
