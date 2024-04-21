@@ -30,7 +30,7 @@ public partial class MainWindow : Window
         FastButton.Visibility = Visibility.Visible;
     }
 
-    private void Back(object sender, EventArgs e)
+    public void Back(object sender, EventArgs e)
     {
         SimGrid.Visibility = Visibility.Collapsed;
         OnlineGrid.Visibility = Visibility.Collapsed;

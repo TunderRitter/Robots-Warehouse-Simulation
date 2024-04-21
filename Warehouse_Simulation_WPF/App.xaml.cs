@@ -48,6 +48,7 @@ public partial class App : Application
             try
             {
                 _viewModel.SaveFile(filepath);
+                _view.Back(this, EventArgs.Empty);
             }
             catch(Exception)
             {
