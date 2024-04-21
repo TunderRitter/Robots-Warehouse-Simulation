@@ -19,6 +19,18 @@ public class Robot
     }
 
 
+    public (int row, int col) NextMove()
+    {
+        return Direction switch
+        {
+            Direction.N => (Pos.row - 1, Pos.col),
+            Direction.E => (Pos.row, Pos.col + 1),
+            Direction.S => (Pos.row + 1, Pos.col),
+            Direction.W => (Pos.row, Pos.col - 1),
+            _ => throw new Exception(),
+        };
+    }
+
     public void Move()
     {
         Pos = Direction switch

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Warehouse_Simulation_Model.Persistence;
+﻿using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -66,6 +65,7 @@ public class Scheduler
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
+        _controller.RobotStuck += Controller_RobotStuck;
 
         TimeLimit = 1000;
         MaxSteps = 10000;
@@ -79,6 +79,7 @@ public class Scheduler
         WriteLogTasks();
         InitLogEvents();
     }
+
 
     public void Schedule()
     {
@@ -97,10 +98,10 @@ public class Scheduler
             {
                 AddTargets();
                 AssignTasks();
-                _controller.CalculateRoutes();
                 _robotFreed = false;
             }
 
+            _controller.CalculateRoutes();
             string[] steps = _controller.CalculateSteps();
 
             endTime = DateTime.Now;
@@ -108,6 +109,9 @@ public class Scheduler
             int waitTime = (int)(elapsedMillisecs / TimeLimit);
             Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             startTime = DateTime.Now;
+
+            // DEBUG
+            waitTime = 0;
 
             Step += waitTime + 1;
             _controller.Step++;
@@ -167,10 +171,22 @@ public class Scheduler
         WriteLogNumTaskFinished();
     }
 
+    private void Controller_RobotStuck(object? sender, int e)
+    {
+        int idx = _targets.FindIndex(x => x.Pos == _robots[e].TargetPos);
+        if (idx == -1) return;
+
+        _robots[e].TargetPos = null;
+        _targets[idx].Id = null;
+        _robotFreed = true;
+    }
+
     public void AssignTasks()
     {
         List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
-        List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
+        List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(
+            e => e.Id == null && !_targets.Where(x => x.Id != null).Select(x => x.Pos).Contains(e.Pos)
+        ).ToList();
 
         (int, int)[] assignments = _strategy.Assign(free, assignable);
         foreach ((int robotId, int targetId) in assignments)
@@ -209,8 +225,7 @@ public class Scheduler
         for (int i = 0; i < _robots.Length; i++)
         {
             Robot robot = _robots[i];
-            if (steps[i] == "F")
-                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
+            ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             _robots[i].CheckPos();
         }
         
