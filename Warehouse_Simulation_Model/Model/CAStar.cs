@@ -76,22 +76,6 @@ public class CAStar
         reservationMap[robot.Pos.row, robot.Pos.col] = false;
     }
 
-    public void Reset(Robot robot)
-    {
-        reservationsFinish.Remove(robot.Pos);
-    }
-
-    public void Reset2()
-    {
-        for (int i = 0; i < Row; i++)
-        {
-            for (int j = 0; j < Col; j++)
-            {
-                reservationMap[i, j] = false;
-            }
-        }
-    }
-
     public Queue<(int, int)> FindPath(Robot Robot, int StartTime)
     {
         if (Robot.TargetPos == null)
