@@ -43,6 +43,33 @@
             <Setter Property="Width"
                     Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}" />
         </Style>
+        <Style TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsChecked"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="DarkSeaGreen" />
+                </Trigger>
+                <Trigger Property="IsChecked"
+                         Value="False">
+                    <Setter Property="Background"
+                            Value="White" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -166,7 +193,7 @@
                                           Width="auto">
                                         <Grid.InputBindings>
                                             <MouseBinding Gesture="LeftClick"
-                                                          Command="{Binding OnlineOrder}" />
+                                                          Command="{Binding CellClick}" />
                                         </Grid.InputBindings>
                                         <Rectangle Grid.Row="0"
                                                    Fill="{Binding Square}" />
@@ -391,35 +418,14 @@
                               Margin="0,0,0,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Left">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border BorderBrush="{TemplateBinding BorderBrush}"
-                                                Background="{TemplateBinding Background}"
-                                                CornerRadius="15">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked"
-                                         Value="True">
-                                    <Setter Property="Background"
-                                            Value="DarkSeaGreen" />
-                                </Trigger>
-                                <Trigger Property="IsChecked"
-                                         Value="False">
-                                    <Setter Property="Background"
-                                            Value="White" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding Path=ShowPath, Mode=TwoWay}"
+                              Width="100"
+                              Height="30"
+                              Content="SHOW PATH"
+                              Margin="110,0,0,0"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left">
                 </ToggleButton>
             </Grid>
 
