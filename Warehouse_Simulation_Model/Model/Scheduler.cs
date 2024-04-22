@@ -103,6 +103,7 @@ public class Scheduler
 
             _controller.CalculateRoutes();
             string[] steps = _controller.CalculateSteps();
+            if (steps.Contains("S")) continue;
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;

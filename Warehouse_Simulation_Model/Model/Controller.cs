@@ -73,7 +73,7 @@ public class Controller
             _reserved = new bool[_robots.Length];
             _castar = new CAStar(_map);
 
-            return [.. Enumerable.Repeat("W", _robots.Length)];
+            return ["S"];
         }
 
         return steps;
