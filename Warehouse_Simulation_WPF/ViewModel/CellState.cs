@@ -86,14 +86,14 @@ namespace Warehouse_Simulation_WPF.ViewModel
 
         public CellState()
         {
-            OnlineOrder = new DelegateCommand(OrderMethod);
+            CellClick = new DelegateCommand(CellClickMethod);
         }
-        private void OrderMethod(object? parameter)
+        private void CellClickMethod(object? parameter)
         {
-            TargetPlaced?.Invoke(this, new CellCoordinates(X, Y));
+            CellClicked?.Invoke(this, new CellCoordinates(X, Y));
         }
-        public DelegateCommand OnlineOrder { get; set; }
-        public event EventHandler? TargetPlaced;
+        public DelegateCommand CellClick { get; set; }
+        public event EventHandler? CellClicked;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

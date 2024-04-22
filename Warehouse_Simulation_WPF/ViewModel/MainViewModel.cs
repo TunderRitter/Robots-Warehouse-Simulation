@@ -133,6 +133,32 @@ public class MainViewModel : INotifyPropertyChanged
             if (value != _canOrder)
             {
                 _canOrder = value;
+                if (_showPath && value)
+                {
+                    ShowPath = false;
+                    _pathIdx = -1;
+                }
+                OnPropertyChanged();
+            }
+        }
+    }
+    private bool _showPath;
+    public bool ShowPath
+    {
+        get => _showPath;
+        set
+        {
+            if (value != _showPath)
+            {
+                if (_canOrder && value)
+                {
+                    CanOrder = false;
+                }
+                if (!value)
+                {
+                    _pathIdx = -1;
+                }
+                _showPath = value;
                 OnPropertyChanged();
             }
         }
@@ -192,6 +218,7 @@ public class MainViewModel : INotifyPropertyChanged
         get { return _endText; }
         set { _endText = value; OnPropertyChanged(nameof(EndText)); }
     }
+    private int _pathIdx;
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
@@ -204,6 +231,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
     LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
+    LinearGradientBrush InPath = new LinearGradientBrush(Colors.PaleGreen, Colors.PaleGreen, 0.0);
 
 
     public event EventHandler? ExitApp;
@@ -241,6 +269,7 @@ public class MainViewModel : INotifyPropertyChanged
         ZoomValue = 1;
         IntValue = "1000";
         StepValue = "100";
+        _pathIdx = -1;
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
@@ -321,6 +350,7 @@ public class MainViewModel : INotifyPropertyChanged
         IntValue = "1000";
         StepValue = "100";
         CanOrder = false;
+        ShowPath = false;
         ZoomValue = 1;
         if (_scheduler != null)
         {
@@ -439,7 +469,7 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     X = i,
                     Y = j,
-                    Circle = CircleColor(cell),
+                    Circle = CircleColor(cell, -1, -1),
                     Square = (cell is Floor) ? Floor : Wall,
                     Id = id == null ? String.Empty : id
                 });
@@ -456,7 +486,7 @@ public class MainViewModel : INotifyPropertyChanged
         CreateMap(_scheduler.Map);
         foreach (CellState cell in Cells)
         {
-            cell.TargetPlaced += new EventHandler(Cell_TargetPlaced);
+            cell.CellClicked += new EventHandler(Cell_CellClicked);
         }
     }
 
@@ -467,7 +497,7 @@ public class MainViewModel : INotifyPropertyChanged
         CreateMap(_replayer.InitMap);
     }
 
-    private void Cell_TargetPlaced(object? sender, EventArgs c)
+    private void Cell_CellClicked(object? sender, EventArgs c)
     {
         if (_scheduler == null) return;
         if (CanOrder)
@@ -477,6 +507,17 @@ public class MainViewModel : INotifyPropertyChanged
                 int i = coordinates.X;
                 int j = coordinates.Y;
                 _scheduler.AddTarget(i, j);
+            }
+        }
+        if (ShowPath)
+        {
+            if (c is CellCoordinates coordinates)
+            {
+                Cell cell = _scheduler.Map[coordinates.X, coordinates.Y];
+                if (cell is Floor floor && floor.Robot != null)
+                {
+                    _pathIdx = floor.Robot.Id;
+                }
             }
         }
     }
@@ -492,8 +533,8 @@ public class MainViewModel : INotifyPropertyChanged
             int idx = i;
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-            Cells[idx].Circle = CircleColor(cell);
-            Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
+            Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
+            Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && _scheduler.GetRobotPath(_pathIdx).Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null ? String.Empty : id;
 
         }
@@ -516,7 +557,7 @@ public class MainViewModel : INotifyPropertyChanged
         StepCount = _replayer.Step;
     }
 
-    private LinearGradientBrush CircleColor(Cell cell)
+    private LinearGradientBrush CircleColor(Cell cell, int x, int y)
     {
         if (cell is Wall)
         {
@@ -531,11 +572,20 @@ public class MainViewModel : INotifyPropertyChanged
                 if (floor.Robot.Direction == Direction.E) return East;
                 if (floor.Robot.Direction == Direction.W) return West;
             }
+            if (x >= 0 && y >= 0 && _pathIdx >= 0)
+            {
+                if (_scheduler != null && _scheduler.GetRobotPath(_pathIdx).Contains((x, y)))
+                {
+                    return InPath;
+                }
+            }
+            
             if (floor.Target != null)
             {
                 if (floor.Target.Active) return Target;
                 return InactiveTarget;
             }
+            
             return Floor;
         }
         return Floor;
