@@ -234,9 +234,6 @@ public class MainViewModel : INotifyPropertyChanged
     LinearGradientBrush InPath = new LinearGradientBrush(Colors.PaleGreen, Colors.PaleGreen, 0.0);
 
 
-    public event EventHandler? ExitApp;
-
-
     public ObservableCollection<CellState> Cells { get; private set; }
 
     public DelegateCommand NewSimulation { get; private set; }
@@ -262,13 +259,14 @@ public class MainViewModel : INotifyPropertyChanged
     public event EventHandler<(string, string)>? NewSimulationStarted;
     public event EventHandler<(string, string)>? Replay;
     public event EventHandler? SaveLog;
+    public event EventHandler? ExitApp;
     #endregion
 
     public MainViewModel()
     {
         ZoomValue = 1;
         IntValue = "1000";
-        StepValue = "100";
+        StepValue = "1000";
         _pathIdx = -1;
 
         Zoom = new DelegateCommand(ZoomMethod);
@@ -348,7 +346,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         Cells.Clear();
         IntValue = "1000";
-        StepValue = "100";
+        StepValue = "1000";
         CanOrder = false;
         ShowPath = false;
         ZoomValue = 1;
@@ -472,7 +470,7 @@ public class MainViewModel : INotifyPropertyChanged
                     Circle = CircleColor(cell, -1, -1),
                     Square = (cell is Floor) ? Floor : Wall,
                     Id = id == null ? String.Empty : id,
-                    Radius = CellSize / 2,
+                    Radius = CellSize / 2
                 });
             }
         }

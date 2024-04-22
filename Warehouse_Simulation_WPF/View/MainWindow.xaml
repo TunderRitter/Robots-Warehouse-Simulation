@@ -61,12 +61,16 @@
                 <Trigger Property="IsChecked"
                          Value="True">
                     <Setter Property="Background"
-                            Value="DarkSeaGreen" />
+                            Value="DarkSlateGray"/>
+                    <Setter Property="Foreground"
+                            Value="White" />
                 </Trigger>
                 <Trigger Property="IsChecked"
                          Value="False">
                     <Setter Property="Background"
                             Value="White" />
+                    <Setter Property="Foreground"
+                            Value="Black" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -222,11 +226,6 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <Grid x:Name="ReplayButtons"
-                  Grid.Row="1"
-                  Grid.Column="1">
-
-            </Grid>
 
             <Grid Grid.Row="2"
                   x:Name="ReplayButtons2"
@@ -280,16 +279,16 @@
                   Grid.Row="1"
                   Grid.Column="1"
                   Background="LightGray"
-                  Width="300"
-                  Height="150"
+                  Width="200"
+                  Height="100"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   Margin="10,10,0,0">
                 <Button Content="START"
                         Width="100"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="150,75,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,0"
                         Command="{Binding Path=StartReplay}"
                         Click="HideReplayStartGrid" />
 
