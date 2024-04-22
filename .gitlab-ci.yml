@@ -47,7 +47,8 @@ test:
 
 release:
   stage: deploy
-  only: master
+  only: 
+    - master
   script:
     - pwd
     - ls -a
