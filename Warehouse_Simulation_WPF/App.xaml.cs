@@ -13,7 +13,8 @@ public partial class App : Application
 {
     private MainWindow _view = null!;
     private MainViewModel _viewModel = null!;
-    //private Scheduler _model = null!;
+
+
     public App()
     {
         Startup += new StartupEventHandler(App_Startup);
@@ -37,11 +38,15 @@ public partial class App : Application
     private void SaveLogFile(object? sender, EventArgs e)
     {
         if (_viewModel == null) return;
-        SaveFileDialog saveFileDialog = new SaveFileDialog();
-        saveFileDialog.Title = "Save simulation into log file";
-        saveFileDialog.DefaultExt = "json";
-        saveFileDialog.DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        saveFileDialog.Filter = "Json Files|*.json";
+        SaveFileDialog saveFileDialog = new()
+        {
+            Title = "Save simulation into log file",
+            DefaultExt = "json",
+            Filter = "Json Files|*.json",
+            DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            CheckPathExists = true,
+            RestoreDirectory = true,
+        };
         if (saveFileDialog.ShowDialog() == true)
         {
             string filepath = saveFileDialog.FileName;
@@ -50,11 +55,11 @@ public partial class App : Application
                 _viewModel.SaveFile(filepath);
                 _view.Back(this, EventArgs.Empty);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 MessageBox.Show("Couldn't save log file!", "Warehouse Simulator", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
+
         }
 
 
@@ -69,17 +74,19 @@ public partial class App : Application
     {
         try
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = e.title;
-            openFileDialog.Filter = "Json Files|*.json";
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            
+            OpenFileDialog openFileDialog = new()
+            {
+                Title = e.title,
+				DefaultExt = "json",
+				Filter = "Json Files|*.json",
+                DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                CheckFileExists = true,
+                CheckPathExists = true,
+                RestoreDirectory = true,
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
-
-                //_model = new Scheduler(ConfigReader.Read(openFileDialog.FileName));
                 if (e.type == "config")
                 {
                     _viewModel.CreateScheduler(openFileDialog.FileName);
@@ -102,9 +109,9 @@ public partial class App : Application
                         _view.SimGrid.Visibility = Visibility.Visible;
                         _view.ReplayStartGrid.Visibility = Visibility.Visible;
                     }
-                    
+
                 }
-                
+
             }
         }
         catch (Exception)
