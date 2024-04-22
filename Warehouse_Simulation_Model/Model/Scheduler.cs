@@ -65,6 +65,7 @@ public class Scheduler
         _targetsSeen = data.TasksSeen;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
+        _controller.RobotStuck += Controller_RobotStuck;
 
         TimeLimit = 1000;
         MaxSteps = 10000;
@@ -78,6 +79,7 @@ public class Scheduler
         WriteLogTasks();
         InitLogEvents();
     }
+
 
     public void Schedule()
     {
@@ -96,11 +98,12 @@ public class Scheduler
             {
                 AddTargets();
                 AssignTasks();
-                _controller.CalculateRoutes();
                 _robotFreed = false;
             }
 
+            _controller.CalculateRoutes();
             string[] steps = _controller.CalculateSteps();
+            if (steps.Contains("S")) continue;
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
@@ -108,24 +111,32 @@ public class Scheduler
             Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             startTime = DateTime.Now;
 
+            // DEBUG
+            waitTime = 0;
+
             Step += waitTime + 1;
             _controller.Step++;
             if (Step > MaxSteps) break;
             
-            for (int i = 0; i < _robots.Length; i++)
+            if (waitTime > 0)
             {
-                WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
-                WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
+                for (int i = 0; i < _robots.Length; i++)
+                {
+                    WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
+                    WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
+                }
             }
             ExecuteSteps(steps);
 
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
             WriteLogSumOfCost();
-            checkIfDone();
-            startTime = DateTime.Now;
+
+            CheckIfDone();
+            ChangeOccurred?.Invoke(this, EventArgs.Empty);
         }
 
+        WriteLog();
         SimFinished?.Invoke(this, EventArgs.Empty);
     }
 
@@ -161,10 +172,22 @@ public class Scheduler
         WriteLogNumTaskFinished();
     }
 
+    private void Controller_RobotStuck(object? sender, int e)
+    {
+        int idx = _targets.FindIndex(x => x.Pos == _robots[e].TargetPos);
+        if (idx == -1) return;
+
+        _robots[e].TargetPos = null;
+        _targets[idx].Id = null;
+        _robotFreed = true;
+    }
+
     public void AssignTasks()
     {
         List<Robot> free = _robots.Where(e => e.TargetPos == null).ToList();
-        List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(e => e.Id == null).ToList();
+        List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(
+            e => e.Id == null && !_targets.Where(x => x.Id != null).Select(x => x.Pos).Contains(e.Pos)
+        ).ToList();
 
         (int, int)[] assignments = _strategy.Assign(free, assignable);
         foreach ((int robotId, int targetId) in assignments)
@@ -203,21 +226,24 @@ public class Scheduler
         for (int i = 0; i < _robots.Length; i++)
         {
             Robot robot = _robots[i];
-            if (steps[i] == "F")
-                ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
+            ((Floor)Map[robot.Pos.row, robot.Pos.col]).Robot = robot;
             _robots[i].CheckPos();
         }
         
     }
 
-    private void checkIfDone()
+    private void CheckIfDone()
     {
         for (int i = 0; i < _robots.Length; i++)
         {
             if (_robots[i].TargetPos != null) return;
         }
-        Running = false;
+        if (_targets.Count == 0)
+            Running = false;
     }
+
+
+    private void WriteLogActionModel(string model) => _log.actionModel = model;
 
     private void WriteLogStart()
     {
@@ -266,21 +292,25 @@ public class Scheduler
         }
     }
 
-    private void WriteLogEvents(int taskId, int robotId,  int step, String _event)
+    private void WriteLogEvents(int taskId, int robotId,  int step, string _event)
     {
         _log.events[robotId].Add(new object[] { taskId, step, _event });
     }
 
-    private void WriteLogActualPaths(int i, String move)
+    private void WriteLogActualPaths(int i, string move)
     {
-        if (_log.actualPaths[i] == "") _log.actualPaths[i] = new string(move);
-        else _log.actualPaths[i] += "," + move;
+        if (_log.actualPaths[i] == "")
+            _log.actualPaths[i] += move;
+        else
+            _log.actualPaths[i] += "," + move;
     }
 
-    private void WriteLogPlannerpaths(int i, String move)
+    private void WriteLogPlannerpaths(int i, string move)
     {
-        if (_log.plannerPaths[i] == "") _log.plannerPaths[i] = new string(move);
-        else _log.plannerPaths[i] += "," + move;
+        if (_log.plannerPaths[i] == "")
+            _log.plannerPaths[i] += move;
+        else
+            _log.plannerPaths[i] += "," + move;
     }
 
     private void WriteLogTasks()

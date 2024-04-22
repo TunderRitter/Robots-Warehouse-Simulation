@@ -5,17 +5,25 @@ public class Controller
 {
     private readonly Robot[] _robots;
     private readonly Queue<(int, int)>[] _routes;
-    private AStar _astar;
-    private readonly CAStar _castar;
+    private bool[] _reserved;
+    private int[] _stuck;
+    private readonly bool[,] _map;
+    //private AStar _astar;
+    private CAStar _castar;
     public int Step { get; set; }
+
+    public event EventHandler<int>? RobotStuck;
 
 
     public Controller(bool[,] map, Robot[] robots)
     {
-        _astar = new AStar(map);
-        _castar = new CAStar(map);
+        //_astar = new AStar(map);
+        _map = map;
+        _castar = new CAStar(_map);
         _robots = robots;
         _routes = new Queue<(int, int)>[robots.Length];
+        _reserved = new bool[robots.Length];
+        _stuck = new int[robots.Length];
         for (int i = 0; i < robots.Length; i++)
         {
             _routes[i] = new Queue<(int, int)>();
@@ -26,6 +34,15 @@ public class Controller
 
     public void CalculateRoutes()
     {
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            if (!_reserved[i] && _routes[i].Count == 0)
+            {
+                _reserved[i] = true;
+                _castar.Reserve(_robots[i]);
+            }
+        }
+
         for (int i = 0; i < _robots.Length; i++)
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
@@ -39,14 +56,44 @@ public class Controller
         string[] steps = new string[_robots.Length];
         for (int i = 0; i < _robots.Length; i++)
         {
-            steps[i] = CalculateStep(_robots[i], _routes[i]);
+            steps[i] = CalculateStep(i);
         }
+
+        HashSet<(int, int)> positions = [];
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            if (steps[i] == "F")
+                positions.Add(_robots[i].NextMove());
+            else
+                positions.Add(_robots[i].Pos);
+        }
+        if (positions.Count != _robots.Length)
+        {
+            Array.ForEach(_routes, e => e.Clear());
+            _reserved = new bool[_robots.Length];
+            _castar = new CAStar(_map);
+
+            return ["S"];
+        }
+
         return steps;
     }
 
-    private static string CalculateStep(Robot robot, Queue<(int, int)> route)
+    private string CalculateStep(int idx)
     {
-        if (route.Count == 0) return "W";
+        Robot robot = _robots[idx];
+        Queue<(int, int)> route = _routes[idx];
+
+        if (route.Count == 0)
+        {
+            _stuck[idx]++;
+            if (_stuck[idx] >= 5)
+            {
+                _stuck[idx] = 0;
+                RobotStuck?.Invoke(this, idx);
+            }
+            return "W";
+        }
         
         (int row, int col) posTo = route.Peek();
         (int row, int col) posFrom = robot.Pos;
@@ -110,7 +157,22 @@ public class Controller
         }
 
         if (move == "F")
+        {
+            _castar.UnReserve(robot);
+            _reserved[robot.Id] = false;
             route.Dequeue();
+        }
+
+        if (move == "W")
+            _stuck[idx]++;
+        else
+            _stuck[idx] = 0;
+
+        if (_stuck[idx] >= 5)
+        {
+            _stuck[idx] = 0;
+            RobotStuck?.Invoke(this, idx);
+        }
 
         return move;
     }

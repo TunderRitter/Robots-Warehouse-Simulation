@@ -37,7 +37,7 @@ public class Replay
         Step = 0;
         Speed = 1.0;
         Paused = true;
-        MaxStep = _log.sumOfCost / _log.plannerPaths.Count - 1;
+        MaxStep = _log.sumOfCost / _log.plannerPaths.Count;
         Maps = new int[MaxStep + 1][,];
         GenerateMaps();
     }

@@ -3,12 +3,7 @@
 
 public class Target
 {
-    private int? _id;
-    public int? Id
-    {
-        get => _id;
-        set => _id ??= value;
-    }
+    public int? Id { get; set; }
     public (int row, int col) Pos { get; init; }
     public bool Active { get; set; }
     public int InitId { get; init; }
