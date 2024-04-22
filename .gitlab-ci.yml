@@ -19,16 +19,6 @@ build:
     - dotnet restore
     - dotnet build
     - echo "Build succes"
-  
-release:
-  stage: build
-  only:
-    - master
-  script:
-    #- dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
-    - echo "Publish succes"
-    - ls
-  
 
 
 test:
@@ -36,3 +26,10 @@ test:
   script:
     - dotnet test
     - echo "Test succes"
+
+release:
+  stage: deploy
+  script:
+    - dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:Publtained true
+    - echo "Publish succes"
+    - ls
