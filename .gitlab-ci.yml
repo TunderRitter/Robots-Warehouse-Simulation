@@ -35,3 +35,6 @@ release:
     - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true
     - echo "Publish succes"
     - ls
+  artifacts:
+    paths:
+      - ./Release
