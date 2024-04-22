@@ -30,6 +30,8 @@ test:
 release:
   stage: deploy
   script:
+    - pwd
+    - ls -a
     - dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:Publtained true
     - echo "Publish succes"
     - ls
