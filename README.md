@@ -1,3 +1,7 @@
+[![pipeline status](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/badges/master/pipeline.svg)](https://szofttech.inf.elte.huszofttech-ab-2024/group-04/csapat3/-/commits/master)
+
+[![coverage report](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/badges/master/coverage.svg)](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/-/commits/master)
+
 # Warehouse Robots Simulation
 
 This repository contains a simulation program for optimizing the routes of robots in a warehouse. The simulation allows users to play out the movement of robots, experiment with different pathfinding solutions, and analyze their performance.

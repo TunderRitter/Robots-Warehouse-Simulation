@@ -12,6 +12,10 @@ variables:
 before_script:
   - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
   - apt-get update -qq
+  - apt-get install bc -y
+  - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
+  - 'export PATH=$PATH:$HOME/.dotnet/tools'
+  - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
 
 build:
   stage: build
@@ -19,20 +23,39 @@ build:
     - dotnet restore
     - dotnet build
     - echo "Build succes"
-  
-release:
-  stage: build
-  only:
-    - master
-  script:
-    #- dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
-    - echo "Publish succes"
-    - ls
-  
 
 
 test:
   stage: test
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   script:
-    - dotnet test
-    - echo "Test succes"
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
+    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
+    - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
+    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
+    - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
+  artifacts:
+    when: always
+    paths:
+      - ./**/TestResults.xml
+      - ./Cobertura.xml
+    reports:
+      junit:
+        - ./**/TestResults.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ./Cobertura.xml
+
+release:
+  stage: deploy
+  only: 
+    - master
+  script:
+    - pwd
+    - ls -a
+    - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:UseAppHost=true
+    - echo "Publish succes"
+    - ls
+  artifacts:
+    paths:
+      - ./Release
