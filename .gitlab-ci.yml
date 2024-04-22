@@ -32,7 +32,7 @@ release:
   script:
     - pwd
     - ls -a
-    - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:PublishProfile=UseAppHost=true
+    - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:UseAppHost=true
     - echo "Publish succes"
     - ls
   artifacts:
