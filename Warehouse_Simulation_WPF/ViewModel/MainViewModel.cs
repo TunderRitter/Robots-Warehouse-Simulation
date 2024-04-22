@@ -471,7 +471,8 @@ public class MainViewModel : INotifyPropertyChanged
                     Y = j,
                     Circle = CircleColor(cell, -1, -1),
                     Square = (cell is Floor) ? Floor : Wall,
-                    Id = id == null ? String.Empty : id
+                    Id = id == null ? String.Empty : id,
+                    Radius = CellSize / 2,
                 });
             }
         }
@@ -531,14 +532,79 @@ public class MainViewModel : INotifyPropertyChanged
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
-            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
+            List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx >= 0 ? _pathIdx : 0);
+            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y]; 
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
             Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
-            Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && _scheduler.GetRobotPath(_pathIdx).Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
-            Cells[idx].Id = id == null ? String.Empty : id;
+            Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
+            Cells[idx].Id = id == null || ((cell is Floor f) && _pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) && path.Count != 0 && f.Robot == null && f.Target != null && path[^1] != f.Target.Pos) ? String.Empty : id;
 
         }
+        if (_pathIdx >= 0)
+        {
+            List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx);
+            int[][] corners = GetCorners(path);
+            for (int i = 0; i < path.Count; i++)
+            {
+                for (int j = 0; j < Cells.Count; j++)
+                {
+                    if ((Cells[j].X, Cells[j].Y) == path[i])
+                        Cells[j].SetCorners = corners[i];
+                }
+            }
+        }
+
         StepCount = _scheduler.Step;
+    }
+
+    private int[][] GetCorners(List<(int row, int col)> path)
+    {
+        int[][] corners = new int[path.Count][];
+        for (int i = 0; i < path.Count; i++)
+        {
+            corners[i] = [1, 1, 1, 1];
+            if (i != 0 && path[i - 1] != path[i])
+            {
+                if (path[i].row > path[i - 1].row)
+                    corners[i] = [0, 0, .. corners[i][2..]];
+                else if (path[i].row < path[i - 1].row)
+                    corners[i] = [.. corners[i][..2], 0, 0];
+                else if (path[i].col > path[i - 1].col)
+                    corners[i] = [0, .. corners[i][1..3], 0];
+                else if (path[i].col < path[i - 1].col)
+                    corners[i] = [corners[i][0], 0, 0, corners[i][3]];
+            }
+            if (i != path.Count - 1 && path[i + 1] != path[i])
+            {
+                if (path[i].row > path[i + 1].row)
+                    corners[i] = [0, 0, .. corners[i][2..]];
+                else if (path[i].row < path[i + 1].row)
+                    corners[i] = [.. corners[i][..2], 0, 0];
+                else if (path[i].col > path[i + 1].col)
+                    corners[i] = [0, .. corners[i][1..3], 0];
+                else if (path[i].col < path[i + 1].col)
+                    corners[i] = [corners[i][0], 0, 0, corners[i][3]];
+            }
+        }
+        if (path.Count > 1)
+        {
+            for (int i = 1; i < path.Count; i++)
+            {
+                if (path[i] == path[i - 1])
+                {
+                    int[] union = [
+                        corners[i][0] & corners[i - 1][0],
+                        corners[i][1] & corners[i - 1][1],
+                        corners[i][2] & corners[i - 1][2],
+                        corners[i][3] & corners[i - 1][3],
+                    ];
+                    Array.Copy(union, corners[i], 4);
+                    Array.Copy(union, corners[i - 1], 4);
+                }
+            }
+        }
+
+        return corners;
     }
 
     private void UpdateReplayMap(int[,] map)

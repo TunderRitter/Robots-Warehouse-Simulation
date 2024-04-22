@@ -176,7 +176,7 @@
                                       Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
                                       MaxWidth="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
                                       MaxHeight="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
-                                      Background="Thistle"
+                                      Background="White"
                                       BorderBrush="DarkSlateGray"
                                       BorderThickness="2">
 
@@ -195,8 +195,10 @@
                                             <MouseBinding Gesture="LeftClick"
                                                           Command="{Binding CellClick}" />
                                         </Grid.InputBindings>
-                                        <Rectangle Grid.Row="0"
-                                                   Fill="{Binding Square}" />
+                                        <Border Grid.Row="0"
+                                                   BorderThickness="0"
+                                                   CornerRadius="{Binding Corners}"
+                                                   Background="{Binding Square}" />
                                         <Ellipse Grid.Row="0"
                                                  Fill="{Binding Circle}" />
                                         <TextBlock Grid.Row="0"

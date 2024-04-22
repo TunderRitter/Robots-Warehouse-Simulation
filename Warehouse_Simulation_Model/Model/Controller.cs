@@ -232,6 +232,6 @@ public class Controller
 
     public List<(int,int)> GetRoute(int idx)
     {
-        return _routes[idx].ToList();
+        return [_robots[idx].Pos, .. _routes[idx]];
     }
 }
