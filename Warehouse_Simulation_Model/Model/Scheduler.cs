@@ -326,4 +326,9 @@ public class Scheduler
     {
         _log.Write(path);
     }
+    
+    public List<(int,int)> GetRobotPath(int idx)
+    {
+        return _controller.GetRoute(idx);
+    }
 }

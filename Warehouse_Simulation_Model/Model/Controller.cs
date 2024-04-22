@@ -229,4 +229,9 @@ public class Controller
 
         return move;
     }
+
+    public List<(int,int)> GetRoute(int idx)
+    {
+        return _routes[idx].ToList();
+    }
 }
