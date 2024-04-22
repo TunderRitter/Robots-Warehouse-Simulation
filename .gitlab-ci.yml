@@ -12,6 +12,7 @@ variables:
 before_script:
   - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
   - apt-get update -qq
+  - apt-get install bc
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
   - 'export PATH=$PATH:$HOME/.dotnet/tools'
   - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
