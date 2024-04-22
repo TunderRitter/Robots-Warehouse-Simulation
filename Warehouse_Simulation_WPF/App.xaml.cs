@@ -25,12 +25,39 @@ public partial class App : Application
         _viewModel = new MainViewModel();
         _viewModel.NewSimulationStarted += new EventHandler<(string, string)>(LoadFile);
         _viewModel.Replay += new EventHandler<(string, string)>(LoadFile);
+        _viewModel.SaveLog += new EventHandler(SaveLogFile);
 
         _view = new MainWindow();
         _view.DataContext = _viewModel;
         _view.Closing += new CancelEventHandler(View_Closing);
         _view.ReplaySlider.ValueChanged += _viewModel.ReplaySLider_ValueChanged;
         _view.Show();
+    }
+
+    private void SaveLogFile(object? sender, EventArgs e)
+    {
+        if (_viewModel == null) return;
+        SaveFileDialog saveFileDialog = new SaveFileDialog();
+        saveFileDialog.Title = "Save simulation into log file";
+        saveFileDialog.DefaultExt = "json";
+        saveFileDialog.DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        saveFileDialog.Filter = "Json Files|*.json";
+        if (saveFileDialog.ShowDialog() == true)
+        {
+            string filepath = saveFileDialog.FileName;
+            try
+            {
+                _viewModel.SaveFile(filepath);
+                _view.Back(this, EventArgs.Empty);
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("Couldn't save log file!", "Warehouse Simulator", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
+        }
+
+
     }
 
     private void NewReplay(object? sender, EventArgs e)

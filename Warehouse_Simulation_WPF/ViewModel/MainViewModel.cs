@@ -133,6 +133,32 @@ public class MainViewModel : INotifyPropertyChanged
             if (value != _canOrder)
             {
                 _canOrder = value;
+                if (_showPath && value)
+                {
+                    ShowPath = false;
+                    _pathIdx = -1;
+                }
+                OnPropertyChanged();
+            }
+        }
+    }
+    private bool _showPath;
+    public bool ShowPath
+    {
+        get => _showPath;
+        set
+        {
+            if (value != _showPath)
+            {
+                if (_canOrder && value)
+                {
+                    CanOrder = false;
+                }
+                if (!value)
+                {
+                    _pathIdx = -1;
+                }
+                _showPath = value;
                 OnPropertyChanged();
             }
         }
@@ -186,6 +212,13 @@ public class MainViewModel : INotifyPropertyChanged
         get { return _pauseText; }
         set { _pauseText = value; OnPropertyChanged(nameof(PauseText)); }
     }
+    private string _endText;
+    public string EndText
+    {
+        get { return _endText; }
+        set { _endText = value; OnPropertyChanged(nameof(EndText)); }
+    }
+    private int _pathIdx;
 
 
     LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
@@ -198,20 +231,16 @@ public class MainViewModel : INotifyPropertyChanged
 
     LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
     LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
-
-
-    public event EventHandler? ExitGame;
+    LinearGradientBrush InPath = new LinearGradientBrush(Colors.PaleGreen, Colors.PaleGreen, 0.0);
 
 
     public ObservableCollection<CellState> Cells { get; private set; }
 
     public DelegateCommand NewSimulation { get; private set; }
     public DelegateCommand LoadReplay { get; private set; }
-
     public DelegateCommand StartSim { get; private set; }
     public DelegateCommand StartReplay { get; private set; }
     public DelegateCommand Exit { get; private set; }
-
     public DelegateCommand Zoom { get; private set; }
     public DelegateCommand StepCommand { get; init; }
     public DelegateCommand IntCommand { get; init; }
@@ -219,6 +248,9 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand StepFwd { get; init; }
     public DelegateCommand StepBack { get; init; }
     public DelegateCommand PlayPause { get; init; }
+    public DelegateCommand EndCommand { get; init; }
+    public DelegateCommand Slow { get; init; }
+    public DelegateCommand Fast { get; init; }
 
     #endregion
 
@@ -226,29 +258,62 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler<(string, string)>? NewSimulationStarted;
     public event EventHandler<(string, string)>? Replay;
+    public event EventHandler? SaveLog;
+    public event EventHandler? ExitApp;
     #endregion
 
     public MainViewModel()
     {
         ZoomValue = 1;
         IntValue = "1000";
-        StepValue = "100";
+        StepValue = "1000";
+        _pathIdx = -1;
 
         Zoom = new DelegateCommand(ZoomMethod);
         NewSimulation = new DelegateCommand(param => OnNewSimulation());
         StartSim = new DelegateCommand(param => OnSimStart());
         StartReplay = new DelegateCommand(param => OnReplayStart());
         LoadReplay = new DelegateCommand(param => OnReplay());
-        Exit = new DelegateCommand(param => OnExitGame());
+        Exit = new DelegateCommand(param => OnExitApp());
         StepCommand = new DelegateCommand(value => StepValue = (string?)value ?? StepValue);
         IntCommand = new DelegateCommand(value => IntValue = (string?)value ?? IntValue);
         BackToMenu = new DelegateCommand(OnBackToMenu);
         StepFwd = new DelegateCommand(param => _replayer?.StepFwd());
         StepBack = new DelegateCommand(param => _replayer?.StepBack());
         PlayPause = new DelegateCommand(param => PlayPauseMethod());
+        EndCommand = new DelegateCommand(param => EndSimulation());
+        Slow = new DelegateCommand(param => SlowReplay());
+        Fast = new DelegateCommand(param => FastReplay());
 
         Cells = new ObservableCollection<CellState>();
         _pauseText = "";
+        _endText = "";
+    }
+
+    private void FastReplay()
+    {
+        if (_replayer == null) return;
+        _replayer.FasterSpeed();
+    }
+
+    private void SlowReplay()
+    {
+        if (_replayer == null) return;
+        _replayer.SlowerSpeed();
+    }
+
+    private void EndSimulation()
+    {
+        if (_scheduler == null) return;
+        if (_scheduler.Running)
+        {
+            _scheduler.Running = false;
+            EndText = "SAVE SIMULATION";
+        }
+        else if (!_scheduler.Running)
+        {
+            SaveLog?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void PlayPauseMethod()
@@ -281,8 +346,9 @@ public class MainViewModel : INotifyPropertyChanged
     {
         Cells.Clear();
         IntValue = "1000";
-        StepValue = "100";
+        StepValue = "1000";
         CanOrder = false;
+        ShowPath = false;
         ZoomValue = 1;
         if (_scheduler != null)
         {
@@ -309,15 +375,34 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _scheduler = new Scheduler(ConfigReader.Read(path));
             _scheduler.ChangeOccurred += new EventHandler(Scheduler_ChangeOccurred);
+            _scheduler.SimFinished += new EventHandler(Scheduler_SimFinished);
             CalculateHeight(_scheduler.Map);
             Row = _scheduler.Map.GetLength(0);
             Col = _scheduler.Map.GetLength(1);
+            EndText = "END SIMULATION";
             CreateSimMap();
         }
         catch (Exception)
         {
             throw;
         }
+    }
+    public void SaveFile(string path)
+    {
+        if (_scheduler == null) return;
+        try
+        {
+            _scheduler.WriteToFile(path);
+            OnBackToMenu(null);
+        }
+        catch (Exception) { throw; }
+    }
+
+    private void Scheduler_SimFinished(object? sender, EventArgs e)
+    {
+        if (_scheduler == null) return;  
+        _scheduler.Running = false;
+        EndText = "SAVE SIMULATION";
     }
 
     public void CreateReplay(string logPath, string mapPath)
@@ -382,9 +467,10 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     X = i,
                     Y = j,
-                    Circle = CircleColor(cell),
+                    Circle = CircleColor(cell, -1, -1),
                     Square = (cell is Floor) ? Floor : Wall,
-                    Id = id == null ? String.Empty : id
+                    Id = id == null ? String.Empty : id,
+                    Radius = CellSize / 2
                 });
             }
         }
@@ -399,7 +485,7 @@ public class MainViewModel : INotifyPropertyChanged
         CreateMap(_scheduler.Map);
         foreach (CellState cell in Cells)
         {
-            cell.TargetPlaced += new EventHandler(Cell_TargetPlaced);
+            cell.CellClicked += new EventHandler(Cell_CellClicked);
         }
     }
 
@@ -410,7 +496,7 @@ public class MainViewModel : INotifyPropertyChanged
         CreateMap(_replayer.InitMap);
     }
 
-    private void Cell_TargetPlaced(object? sender, EventArgs c)
+    private void Cell_CellClicked(object? sender, EventArgs c)
     {
         if (_scheduler == null) return;
         if (CanOrder)
@@ -420,6 +506,17 @@ public class MainViewModel : INotifyPropertyChanged
                 int i = coordinates.X;
                 int j = coordinates.Y;
                 _scheduler.AddTarget(i, j);
+            }
+        }
+        if (ShowPath)
+        {
+            if (c is CellCoordinates coordinates)
+            {
+                Cell cell = _scheduler.Map[coordinates.X, coordinates.Y];
+                if (cell is Floor floor && floor.Robot != null)
+                {
+                    _pathIdx = floor.Robot.Id;
+                }
             }
         }
     }
@@ -433,14 +530,79 @@ public class MainViewModel : INotifyPropertyChanged
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
-            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
+            List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx >= 0 ? _pathIdx : 0);
+            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y]; 
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
-            Cells[idx].Circle = CircleColor(cell);
-            Cells[idx].Square = (cell is Floor) ? Brushes.White : Brushes.DarkSlateGray;
-            Cells[idx].Id = id == null ? String.Empty : id;
+            Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
+            Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
+            Cells[idx].Id = id == null || ((cell is Floor f) && _pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) && path.Count != 0 && f.Robot == null && f.Target != null && path[^1] != f.Target.Pos) ? String.Empty : id;
 
         }
+        if (_pathIdx >= 0)
+        {
+            List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx);
+            int[][] corners = GetCorners(path);
+            for (int i = 0; i < path.Count; i++)
+            {
+                for (int j = 0; j < Cells.Count; j++)
+                {
+                    if ((Cells[j].X, Cells[j].Y) == path[i])
+                        Cells[j].SetCorners = corners[i];
+                }
+            }
+        }
+
         StepCount = _scheduler.Step;
+    }
+
+    private int[][] GetCorners(List<(int row, int col)> path)
+    {
+        int[][] corners = new int[path.Count][];
+        for (int i = 0; i < path.Count; i++)
+        {
+            corners[i] = [1, 1, 1, 1];
+            if (i != 0 && path[i - 1] != path[i])
+            {
+                if (path[i].row > path[i - 1].row)
+                    corners[i] = [0, 0, .. corners[i][2..]];
+                else if (path[i].row < path[i - 1].row)
+                    corners[i] = [.. corners[i][..2], 0, 0];
+                else if (path[i].col > path[i - 1].col)
+                    corners[i] = [0, .. corners[i][1..3], 0];
+                else if (path[i].col < path[i - 1].col)
+                    corners[i] = [corners[i][0], 0, 0, corners[i][3]];
+            }
+            if (i != path.Count - 1 && path[i + 1] != path[i])
+            {
+                if (path[i].row > path[i + 1].row)
+                    corners[i] = [0, 0, .. corners[i][2..]];
+                else if (path[i].row < path[i + 1].row)
+                    corners[i] = [.. corners[i][..2], 0, 0];
+                else if (path[i].col > path[i + 1].col)
+                    corners[i] = [0, .. corners[i][1..3], 0];
+                else if (path[i].col < path[i + 1].col)
+                    corners[i] = [corners[i][0], 0, 0, corners[i][3]];
+            }
+        }
+        if (path.Count > 1)
+        {
+            for (int i = 1; i < path.Count; i++)
+            {
+                if (path[i] == path[i - 1])
+                {
+                    int[] union = [
+                        corners[i][0] & corners[i - 1][0],
+                        corners[i][1] & corners[i - 1][1],
+                        corners[i][2] & corners[i - 1][2],
+                        corners[i][3] & corners[i - 1][3],
+                    ];
+                    Array.Copy(union, corners[i], 4);
+                    Array.Copy(union, corners[i - 1], 4);
+                }
+            }
+        }
+
+        return corners;
     }
 
     private void UpdateReplayMap(int[,] map)
@@ -459,7 +621,7 @@ public class MainViewModel : INotifyPropertyChanged
         StepCount = _replayer.Step;
     }
 
-    private LinearGradientBrush CircleColor(Cell cell)
+    private LinearGradientBrush CircleColor(Cell cell, int x, int y)
     {
         if (cell is Wall)
         {
@@ -474,11 +636,20 @@ public class MainViewModel : INotifyPropertyChanged
                 if (floor.Robot.Direction == Direction.E) return East;
                 if (floor.Robot.Direction == Direction.W) return West;
             }
+            if (x >= 0 && y >= 0 && _pathIdx >= 0)
+            {
+                if (_scheduler != null && _scheduler.GetRobotPath(_pathIdx).Contains((x, y)))
+                {
+                    return InPath;
+                }
+            }
+            
             if (floor.Target != null)
             {
                 if (floor.Target.Active) return Target;
                 return InactiveTarget;
             }
+            
             return Floor;
         }
         return Floor;
@@ -536,11 +707,10 @@ public class MainViewModel : INotifyPropertyChanged
         Task.Run(() => _replayer.Start());
     }
 
-    private void OnExitGame()
+    private void OnExitApp()
     {
-        ExitGame?.Invoke(this, EventArgs.Empty);
+        ExitApp?.Invoke(this, EventArgs.Empty);
     }
-    
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

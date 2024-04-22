@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Media;
 
 namespace Warehouse_Simulation_WPF.ViewModel
 {
-    public class CellState :INotifyPropertyChanged
+	public class CellState :INotifyPropertyChanged
     {
         private int _x;
         public int X
@@ -84,16 +76,44 @@ namespace Warehouse_Simulation_WPF.ViewModel
             }
         }
 
+        private int _radius = 0;
+        public int Radius
+        {
+            set
+            {
+                if (_radius != value)
+                {
+                    _radius = value;
+                    OnPropertyChanged(nameof(Corners));
+                }
+            }
+        }
+
+        private int[] _corners = [0, 0, 0, 0];
+        public string Corners => string.Join(',', _corners.Select(e => e *= _radius));
+        public int[] SetCorners
+        {
+            set
+            {
+                if (!_corners.SequenceEqual(value))
+                {
+                    _corners = value;
+                    OnPropertyChanged(nameof(Corners));
+                }
+            }
+        }
+
+
         public CellState()
         {
-            OnlineOrder = new DelegateCommand(OrderMethod);
+            CellClick = new DelegateCommand(CellClickMethod);
         }
-        private void OrderMethod(object? parameter)
+        private void CellClickMethod(object? parameter)
         {
-            TargetPlaced?.Invoke(this, new CellCoordinates(X, Y));
+            CellClicked?.Invoke(this, new CellCoordinates(X, Y));
         }
-        public DelegateCommand OnlineOrder { get; set; }
-        public event EventHandler? TargetPlaced;
+        public DelegateCommand CellClick { get; set; }
+        public event EventHandler? CellClicked;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

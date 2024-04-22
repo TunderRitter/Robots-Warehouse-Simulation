@@ -347,4 +347,13 @@ public class Scheduler
         _targetCount++;
         ((Floor)Map[row, col]).Target = target;
     }
+    public void WriteToFile(string path)
+    {
+        _log.Write(path);
+    }
+    
+    public List<(int,int)> GetRobotPath(int idx)
+    {
+        return _controller.GetRoute(idx);
+    }
 }

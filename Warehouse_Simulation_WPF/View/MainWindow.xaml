@@ -43,6 +43,37 @@
             <Setter Property="Width"
                     Value="{Binding Path=CircleSize, UpdateSourceTrigger=PropertyChanged}" />
         </Style>
+        <Style TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsChecked"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="DarkSlateGray"/>
+                    <Setter Property="Foreground"
+                            Value="White" />
+                </Trigger>
+                <Trigger Property="IsChecked"
+                         Value="False">
+                    <Setter Property="Background"
+                            Value="White" />
+                    <Setter Property="Foreground"
+                            Value="Black" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -70,7 +101,6 @@
                     Margin="0,120,120,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Click="ReplayButton_Click"
                     Command="{Binding Path=LoadReplay}" />
         </Grid>
         <Grid x:Name="SimGrid"
@@ -150,7 +180,7 @@
                                       Height="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
                                       MaxWidth="{Binding Path=MapWidth, UpdateSourceTrigger=PropertyChanged}"
                                       MaxHeight="{Binding Path=MapHeight, UpdateSourceTrigger=PropertyChanged}"
-                                      Background="Thistle"
+                                      Background="White"
                                       BorderBrush="DarkSlateGray"
                                       BorderThickness="2">
 
@@ -167,10 +197,12 @@
                                           Width="auto">
                                         <Grid.InputBindings>
                                             <MouseBinding Gesture="LeftClick"
-                                                          Command="{Binding OnlineOrder}" />
+                                                          Command="{Binding CellClick}" />
                                         </Grid.InputBindings>
-                                        <Rectangle Grid.Row="0"
-                                                   Fill="{Binding Square}" />
+                                        <Border Grid.Row="0"
+                                                   BorderThickness="0"
+                                                   CornerRadius="{Binding Corners}"
+                                                   Background="{Binding Square}" />
                                         <Ellipse Grid.Row="0"
                                                  Fill="{Binding Circle}" />
                                         <TextBlock Grid.Row="0"
@@ -194,11 +226,6 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <Grid x:Name="ReplayButtons"
-                  Grid.Row="1"
-                  Grid.Column="1">
-
-            </Grid>
 
             <Grid Grid.Row="2"
                   x:Name="ReplayButtons2"
@@ -252,16 +279,16 @@
                   Grid.Row="1"
                   Grid.Column="1"
                   Background="LightGray"
-                  Width="300"
-                  Height="150"
+                  Width="200"
+                  Height="100"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   Margin="10,10,0,0">
                 <Button Content="START"
                         Width="100"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="150,75,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,0"
                         Command="{Binding Path=StartReplay}"
                         Click="HideReplayStartGrid" />
 
@@ -342,6 +369,40 @@
                            Margin="200,90,0,0" />
 
             </Grid>
+            <Button x:Name="EndButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10,140,0,0"
+                    Width="200"
+                    Content="{Binding EndText, UpdateSourceTrigger=PropertyChanged}"
+                    Command="{Binding EndCommand}"/>
+
+            <Button x:Name="SlowButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10,140,0,0"
+                    Width="120"
+                    Content="SLOW DOWN"
+                    Command="{Binding Slow}" />
+            <Button x:Name="FastButton"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="140,140,0,0"
+                    Width="120"
+                    Content="SPEED UP"
+                    Command="{Binding Fast}" />
+
+
+
             <Grid Grid.Row="2"
                   Grid.Column="0"
                   x:Name="OnlineGrid"
@@ -358,34 +419,14 @@
                               Margin="0,0,0,0"
                               VerticalAlignment="Top"
                               HorizontalAlignment="Left">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border BorderBrush="{TemplateBinding BorderBrush}"
-                                                Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked"
-                                         Value="True">
-                                    <Setter Property="Background"
-                                            Value="DarkSeaGreen" />
-                                </Trigger>
-                                <Trigger Property="IsChecked"
-                                         Value="False">
-                                    <Setter Property="Background"
-                                            Value="White" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding Path=ShowPath, Mode=TwoWay}"
+                              Width="100"
+                              Height="30"
+                              Content="SHOW PATH"
+                              Margin="110,0,0,0"
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left">
                 </ToggleButton>
             </Grid>
 

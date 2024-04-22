@@ -291,4 +291,9 @@ public class Controller
 
         return move;
     }
+
+    public List<(int,int)> GetRoute(int idx)
+    {
+        return [_robots[idx].Pos, .. _routes[idx]];
+    }
 }
