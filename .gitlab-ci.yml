@@ -12,6 +12,9 @@ variables:
 before_script:
   - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
   - apt-get update -qq
+  - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
+  - 'export PATH=$PATH:$HOME/.dotnet/tools'
+  - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
 
 build:
   stage: build
@@ -23,9 +26,24 @@ build:
 
 test:
   stage: test
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   script:
-    - dotnet test
-    - echo "Test succes"
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
+    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
+    - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
+    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
+    - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
+  artifacts:
+    when: always
+    paths:
+      - ./**/TestResults.xml
+      - ./Cobertura.xml
+    reports:
+      junit:
+        - ./**/TestResults.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ./Cobertura.xml
 
 release:
   stage: deploy
