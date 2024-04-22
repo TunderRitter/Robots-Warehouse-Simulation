@@ -10,8 +10,8 @@ This repository contains a simulation program for optimizing the routes of robot
 The simulation operates on a grid-based warehouse layout where robots navigate to assigned destinations while avoiding conflicts. The robots move in discrete time steps, following instructions from a central scheduler. They can move to adjacent cells, turn 90 degrees clockwise or counterclockwise, or remain stationary. Obstacles such as warehouse racks and walls restrict robot movement.
 
 ## Features
-- **Basic Functionality**: Robots can execute tasksand manage conflicts by waiting. The program generates a log file.
-- **Configurability**: Users can specify warehouse layout, number of robots, starting positions, task destinations, and scheduling strategy.
+- **Basic Functionality**: Robots can execute tasks and manage conflicts. The program generates a log file which can be save at the end of the simulation.
+- **Configurability**: Users can specify warehouse layout, number of robots, starting positions, task destinations, and scheduling strategy. The speed of the robots and the maximum number of steps are also modifiable.
 - **Interactive Order Assignment**: Allows users to designate task destinations interactively during simulation.
 - **Pathfinding Algorithms**: Utilizes advanced pathfinding algorithms like A* or Cooperative A* for efficient route planning.
 - **Deadlock Detection**: Detects and resolves deadlock situations to ensure smooth operation.
