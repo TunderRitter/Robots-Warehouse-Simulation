@@ -32,6 +32,6 @@ release:
   script:
     - pwd
     - ls -a
-    - dotnet publish --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:Publtained true
+    - dotnet publish ./Warehouse_Simulation.sln -runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:Publtained true
     - echo "Publish succes"
     - ls
