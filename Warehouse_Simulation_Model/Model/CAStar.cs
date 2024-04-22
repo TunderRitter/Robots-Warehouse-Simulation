@@ -369,7 +369,7 @@ public class CAStar
                     NewCell.g = next_cost;
                     NewCell.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
                     Open.Add(NewCell);
-                    //neighborAdded = true;
+                    neighborAdded = true;
                 }
 
             }
