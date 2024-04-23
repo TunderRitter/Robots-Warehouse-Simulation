@@ -14,7 +14,7 @@ public class Log
     public int makespan { get; set; }
     public List<string> actualPaths { get; set; }
     public List<string> plannerPaths { get; set; }
-    public List<double> plannerTimes { get; set; }
+    public List<float> plannerTimes { get; set; }
     public List<object[]> errors { get; set; }
     public List<List<object[]>> events { get; set; }
     public List<int[]> tasks { get; set; }

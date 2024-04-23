@@ -102,7 +102,8 @@ public class MainViewModel : INotifyPropertyChanged
     public string IntValue
     {
         get => _intValue.ToString();
-        set {
+        set
+        {
             if (int.TryParse(value, out int val) && val != _intValue)
             {
                 _intValue = val;
@@ -115,7 +116,8 @@ public class MainViewModel : INotifyPropertyChanged
     public string StepValue
     {
         get => _stepValue.ToString();
-        set {
+        set
+        {
             if (int.TryParse(value, out int val) && val != _stepValue)
             {
                 _stepValue = val;
@@ -185,7 +187,7 @@ public class MainViewModel : INotifyPropertyChanged
         set
         {
             if (int.TryParse(value, out int val) && val != _robotNumber)
-            _robotNumber = val; 
+                _robotNumber = val;
             OnPropertyChanged();
         }
     }
@@ -360,7 +362,7 @@ public class MainViewModel : INotifyPropertyChanged
             _replayer.Pause();
             _replayer = null;
         }
-        
+
     }
 
     private void StepMethod(int parameter)
@@ -387,6 +389,7 @@ public class MainViewModel : INotifyPropertyChanged
             throw;
         }
     }
+
     public void SaveFile(string path)
     {
         if (_scheduler == null) return;
@@ -400,8 +403,10 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void Scheduler_SimFinished(object? sender, EventArgs e)
     {
-        if (_scheduler == null) return;  
+        if (_scheduler == null) return;
         _scheduler.Running = false;
+        _pathIdx = -1;
+        UpdateSimMap();
         EndText = "SAVE SIMULATION";
     }
 
@@ -492,8 +497,6 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateReplayMap()
     {
         if (_replayer == null) return;
-        RobotNumber = "0";
-        TargetLeft = "0";
         StepCount = 0;
         CreateMap(_replayer.InitMap);
     }
@@ -503,7 +506,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (_scheduler == null) return;
         if (CanOrder)
         {
-            if(c is CellCoordinates coordinates)
+            if (c is CellCoordinates coordinates)
             {
                 int i = coordinates.X;
                 int j = coordinates.Y;
@@ -533,7 +536,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             int idx = i;
             List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx >= 0 ? _pathIdx : 0);
-            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y]; 
+            Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
             String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
             Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
             Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
@@ -554,7 +557,8 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
 
-        StepCount = _scheduler.Step;
+        if (_scheduler.Running)
+            StepCount = _scheduler.Step;
     }
 
     private int[][] GetCorners(List<(int row, int col)> path)
@@ -611,13 +615,11 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_replayer == null || map == null) return;
 
-        RobotNumber = _replayer.RobotNum.ToString();
-        TargetLeft = _replayer.TargetNum.ToString();
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
             int x = Cells[idx].X; int y = Cells[idx].Y;
-            Cells[idx].Id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y]  / 10) - 2).ToString() : String.Empty);
+            Cells[idx].Id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y] / 10) - 2).ToString() : String.Empty);
             Cells[idx].Square = map[x, y] == 0 ? Wall : Floor;
             Cells[idx].Circle = map[x, y] == 0 ? Wall : (map[x, y] == 1 ? Floor : (map[x, y] < 0 ? Target :
                 (map[x, y] % 10 == 0 ? North : (map[x, y] % 10 == 1 ? East : (map[x, y] % 10 == 2 ? South : West)))));
@@ -647,13 +649,13 @@ public class MainViewModel : INotifyPropertyChanged
                     return InPath;
                 }
             }
-            
+
             if (floor.Target != null)
             {
                 if (floor.Target.Active) return Target;
                 return InactiveTarget;
             }
-            
+
             return Floor;
         }
         return Floor;
@@ -697,12 +699,12 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void OnNewSimulation()
     {
-        NewSimulationStarted?.Invoke(this, ("Choose config file","config"));
+        NewSimulationStarted?.Invoke(this, ("Choose config file", "config"));
     }
 
     private void OnReplay()
     {
-        Replay?.Invoke(this, ("Choose log file","log"));
+        Replay?.Invoke(this, ("Choose log file", "log"));
     }
 
     private void OnReplayStart()

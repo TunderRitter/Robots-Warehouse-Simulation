@@ -1,22 +1,22 @@
-﻿using System.Diagnostics;
-
-namespace Warehouse_Simulation_Model.Model;
+﻿namespace Warehouse_Simulation_Model.Model;
 
 public class CASCell
 {
-    public int I;
-    public int J;
+    public int I { get; set; }
+    public int J { get; set; }
     /*
-     * g: A kiindulóponttól megtett távolság
-     * h: becsült hátralévő távolság a célállomástól (a sor- és oszlopindexek különbségeinek összege)
-     * f: g + h, ez alapján választjuk ki az Open listából a legkedvezőbb cellát
+     * G: A kiindulóponttól megtett távolság
+     * H: becsült hátralévő távolság a célállomástól (a sor- és oszlopindexek különbségeinek összege)
+     * F: G + H, ez alapján választjuk ki az Open listából a legkedvezőbb cellát
      */
-    public int f, g, h;
+    public int F { get; set; }
+    public int G { get; set; }
+    public int H { get; set; }
 
     public CASCell? Parent;
 
     //annak az időpillanata, hogy a cellába léptünk
-    public int Time;
+    public int Time { get; set; }
 
     public CASCell(int i, int j, CASCell? p, int t)
     {
@@ -24,10 +24,11 @@ public class CASCell
         Time = t;
         Parent = p;
     }
+
     public void SetH_F(int i, int j)
     {
-        h = Math.Abs(I - i) + Math.Abs(J - j);
-        f = g + h;
+        H = Math.Abs(I - i) + Math.Abs(J - j);
+        F = G + H;
     }
 }
 
@@ -39,10 +40,10 @@ public class CAStar
     /// </summary>
     private Dictionary<(int I, int J), List<int>> Reservations;
     private Dictionary<(int I, int J), int> reservationsFinish;
-    private bool[,] Map;
-    private bool[,] reservationMap;
-    private int Row;
-    private int Col;
+    private readonly bool[,] Map;
+    private readonly bool[,] reservationMap;
+    private readonly int Row;
+    private readonly int Col;
 
     public CAStar(bool[,] m)
     {
@@ -60,7 +61,7 @@ public class CAStar
         int lowest = 0;
         for (int i = 1; i < list.Count; i++)
         {
-            if (list[i].f < list[lowest].f) lowest = i;
+            if (list[i].F < list[lowest].F) lowest = i;
         }
         return lowest;
     }
@@ -79,7 +80,7 @@ public class CAStar
     private bool TooLongWait(CASCell cell)
     {
         int n = 1;
-        while(cell.Parent != null && cell.I == cell.Parent.I && cell.J == cell.Parent.J)
+        while (cell.Parent != null && cell.I == cell.Parent.I && cell.J == cell.Parent.J)
         {
             n++;
             cell = cell.Parent;
@@ -99,7 +100,7 @@ public class CAStar
 
         CASCell Start = new CASCell(Robot.Pos.row, Robot.Pos.col, null, StartTime)
         {
-            g = 0
+            G = 0
         };
         Start.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
 
@@ -157,10 +158,8 @@ public class CAStar
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 1 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time)) continue;
-
                             //most foglalt a cella, valszeg helycsere lenne
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
@@ -179,17 +178,13 @@ public class CAStar
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 2 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //if (Reservations.ContainsKey((Current.I, Current.J)) &&
-                            //    Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
-                            //    Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
-
                             //két időegység múlva foglalt a szomszéd cella
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
 
                             //két időegység múlva foglalt a mi cellánk, egy időegység múlva foglalt a szomszéd:
                             //helycsere esélye
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
@@ -201,7 +196,7 @@ public class CAStar
                             (Robot.Direction == Direction.W && Current.J < Neighbor.J))
                         {
                             //3 lépés múlva foglalt a szomszéd
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
 
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
@@ -216,13 +211,13 @@ public class CAStar
 
                             //foglalt a mi cellánk 3 lépés múlva, a szomszéd 2 lépés múlva:
                             //helcsere esélye
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 3) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
                         }
                     }
-                    
+
                 }
                 else
                 {
@@ -237,17 +232,15 @@ public class CAStar
                             (Current.Parent.J > Current.J && Current.J > Neighbor.J))
                         {
                             //foglalt a következő lépés idejében a cella
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
 
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 1 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //if (Reservations[(Neighbor.I, Neighbor.J)].Contains(time)) continue;
-
                             //most foglalt a cella, valszeg helycsere lenne
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
@@ -261,20 +254,16 @@ public class CAStar
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
 
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
-                                reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 2 && 
+                                reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 2 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //if (Reservations.ContainsKey((Current.I, Current.J)) &&
-                            //    Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
-                            //    Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
-
                             //két időegység múlva foglalt a szomszéd cella
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
 
                             //két időegység múlva foglalt a mi cellánk, egy időegység múlva foglalt a szomszéd:
                             //helycsere esélye
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
@@ -286,11 +275,11 @@ public class CAStar
                             (Current.Parent.J > Current.J && Current.J < Neighbor.J))
                         {
                             //3 lépés múlva foglalt a szomszéd
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
 
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
-                                reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 3 && 
+                                reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 3 &&
                                 Neighbor != Robot.TargetPos) continue;
 
                             //foglalt a mi cellánk 1 vagy 2 lépés múlva, nincs idő fordulni
@@ -301,7 +290,7 @@ public class CAStar
 
                             //foglalt a mi cellánk 3 lépés múlva, a szomszéd 2 lépés múlva:
                             //helcsere esélye
-                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) && 
+                            if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 3) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
@@ -310,15 +299,15 @@ public class CAStar
                 }
 
                 //esélyes a cella arra hogy odalépjünk
-                int next_cost = Current.g + 1;
+                int next_cost = Current.G + 1;
                 int n;
                 if ((n = Open.FindIndex(c => c.I == Neighbor.I && c.J == Neighbor.J)) != -1)
                 {
-                    if (Open[n].g > next_cost) Open.RemoveAt(n);
+                    if (Open[n].G > next_cost) Open.RemoveAt(n);
                 }
                 if ((n = Closed.FindIndex(c => c.I == Neighbor.I && c.J == Neighbor.J)) != -1)
                 {
-                    if (Closed[n].g > next_cost) Closed.RemoveAt(n);
+                    if (Closed[n].G > next_cost) Closed.RemoveAt(n);
                 }
 
                 if (!(Open.Any(c => c.I == Neighbor.I && c.J == Neighbor.J)) &&
@@ -366,7 +355,7 @@ public class CAStar
                     }
 
                     CASCell NewCell = new CASCell(Neighbor.I, Neighbor.J, Current, n_time);
-                    NewCell.g = next_cost;
+                    NewCell.G = next_cost;
                     NewCell.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
                     Open.Add(NewCell);
                     neighborAdded = true;
@@ -374,11 +363,11 @@ public class CAStar
 
             }
 
-            if (!neighborAdded && Reservations.ContainsKey((Current.I,Current.J)) &&
-                !Reservations[(Current.I,Current.J)].Contains(time + 1) && !TooLongWait(Current))
+            if (!neighborAdded && Reservations.ContainsKey((Current.I, Current.J)) &&
+                !Reservations[(Current.I, Current.J)].Contains(time + 1) && !TooLongWait(Current))
             {
                 CASCell Waiting = new CASCell(Current.I, Current.J, Current, Current.Time + 1);
-                Waiting.g = Current.g + 1;
+                Waiting.G = Current.G + 1;
                 Waiting.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
                 Open.Add(Waiting);
             }
@@ -394,10 +383,6 @@ public class CAStar
             path.Insert(0, (Cell.I, Cell.J));
             if (!Reservations.ContainsKey((Cell.I, Cell.J)))
                 Reservations.Add((Cell.I, Cell.J), new List<int>());
-            if (Reservations[(Cell.I, Cell.J)].Contains(Cell.Time))
-            {
-                Debug.WriteLine("már foglalt!!!!");
-            }
             Reservations[(Cell.I, Cell.J)].Add(Cell.Time);
 
 
@@ -408,10 +393,6 @@ public class CAStar
                     Reservations.Add((Cell.Parent.I, Cell.Parent.J), new List<int>());
                 for (int i = Cell.Parent.Time + 1; i < Cell.Time; i++)
                 {
-                    if (Reservations[(Cell.Parent.I, Cell.Parent.J)].Contains(i))
-                    {
-                        Debug.WriteLine("már foglalt!!!!");
-                    }
                     Reservations[(Cell.Parent.I, Cell.Parent.J)].Add(i);
                 }
             }

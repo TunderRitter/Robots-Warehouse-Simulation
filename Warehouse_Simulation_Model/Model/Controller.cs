@@ -8,7 +8,6 @@ public class Controller
     private bool[] _reserved;
     private int[] _stuck;
     private readonly bool[,] _map;
-    //private AStar _astar;
     private CAStar _castar;
     public int Step { get; set; }
 
@@ -17,7 +16,6 @@ public class Controller
 
     public Controller(bool[,] map, Robot[] robots)
     {
-        //_astar = new AStar(map);
         _map = map;
         _castar = new CAStar(_map);
         _robots = robots;
@@ -46,7 +44,6 @@ public class Controller
         for (int i = 0; i < _robots.Length; i++)
         {
             if (_robots[i].TargetPos != null && _routes[i].Count == 0)
-                //_routes[i] = _astar.AStarSearch(_robots[i]);
                 _routes[i] = _castar.FindPath(_robots[i], Step);
         }
     }
@@ -71,6 +68,7 @@ public class Controller
         {
             Array.ForEach(_routes, e => e.Clear());
             _reserved = new bool[_robots.Length];
+            _stuck = new int[_robots.Length];
             _castar = new CAStar(_map);
 
             return ["S"];
@@ -87,14 +85,14 @@ public class Controller
         if (route.Count == 0)
         {
             _stuck[idx]++;
-            if (_stuck[idx] >= 5)
+            if (_stuck[idx] >= 7)
             {
                 _stuck[idx] = 0;
                 RobotStuck?.Invoke(this, idx);
             }
             return "W";
         }
-        
+
         (int row, int col) posTo = route.Peek();
         (int row, int col) posFrom = robot.Pos;
 
@@ -168,7 +166,7 @@ public class Controller
         else
             _stuck[idx] = 0;
 
-        if (_stuck[idx] >= 5)
+        if (_stuck[idx] >= 7)
         {
             _stuck[idx] = 0;
             RobotStuck?.Invoke(this, idx);
@@ -178,121 +176,7 @@ public class Controller
     }
 
 
-
-    // HANDLE DUPLICATE COORDINATES
-    private static string CalculateStep2(Robot robot, Queue<(int, int)> route)
-    {
-        (int row, int col) posFrom = robot.Pos;
-        (int row, int col)? posTo = route.ElementAtOrDefault(0);
-
-        string move = "";
-        int wait = 0;
-
-        if (posTo == null)
-        {
-            move = "W";
-        }
-        else if (posFrom == posTo)
-        {
-            posTo = route.ElementAtOrDefault(1);
-            if (posTo == null)
-            {
-                move = "W";
-            }
-            else if (posFrom == posTo)
-            {
-                posTo = route.ElementAtOrDefault(2);
-                wait = 2;
-                if (posTo == null || posFrom == posTo)
-                {
-                    move = "W";
-                }
-            }
-            else
-            {
-                wait = 1;
-            }
-        }
-        if (move == "W") return move;
-
-        if (posFrom.row == posTo?.row)
-        {
-            if (posFrom.col - 1 == posTo?.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "C",
-                    Direction.E => "R",
-                    Direction.S => "R",
-                    Direction.W => "F",
-                    _ => throw new Exception(),
-                };
-
-                if (move == "R" && wait != 2)
-                    move = "W";
-                else if ((move == "R" || move == "C") && wait != 1)
-                    move = "W";
-            }
-            else if (posFrom.col + 1 == posTo?.col)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "F",
-                    Direction.S => "C",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (move == "R" && wait != 2)
-                    move = "W";
-                else if ((move == "R" || move == "C") && wait != 1)
-                    move = "W";
-            }
-        }
-        else if (posFrom.col == posTo?.col)
-        {
-            if (posFrom.row - 1 == posTo?.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "F",
-                    Direction.E => "C",
-                    Direction.S => "R",
-                    Direction.W => "R",
-                    _ => throw new Exception(),
-                };
-
-                if (move == "R" && wait != 2)
-                    move = "W";
-                else if ((move == "R" || move == "C") && wait != 1)
-                    move = "W";
-            }
-            else if (posFrom.row + 1 == posTo?.row)
-            {
-                move = robot.Direction switch
-                {
-                    Direction.N => "R",
-                    Direction.E => "R",
-                    Direction.S => "F",
-                    Direction.W => "C",
-                    _ => throw new Exception(),
-                };
-
-                if (move == "R" && wait != 2)
-                    move = "W";
-                else if ((move == "R" || move == "C") && wait != 1)
-                    move = "W";
-            }
-        }
-
-        if (move != "W")
-            route.Dequeue();
-
-        return move;
-    }
-
-    public List<(int,int)> GetRoute(int idx)
+    public List<(int, int)> GetRoute(int idx)
     {
         return [_robots[idx].Pos, .. _routes[idx]];
     }
