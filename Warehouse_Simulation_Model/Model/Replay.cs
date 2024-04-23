@@ -18,7 +18,18 @@ public class Replay
     public int MaxStep { get; init; }
 
     public int RobotNum => _robots.Length;
-    public int TargetNum => _targets.Where(e => e.Active).Count();
+    public int TargetNum {
+        get
+        {
+            int num = 0;
+            foreach (int cell in Maps[Step])
+            {
+                if (cell < 0)
+                    num++;
+            }
+            return num;
+        }
+    }
 
     public event EventHandler<int>? ChangeOccurred;
 

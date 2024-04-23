@@ -497,6 +497,8 @@ public class MainViewModel : INotifyPropertyChanged
     private void CreateReplayMap()
     {
         if (_replayer == null) return;
+        RobotNumber = "0";
+        TargetLeft = "0";
         StepCount = 0;
         CreateMap(_replayer.InitMap);
     }
@@ -615,6 +617,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_replayer == null || map == null) return;
 
+        RobotNumber = _replayer.RobotNum.ToString();
+        TargetLeft = _replayer.TargetNum.ToString();
         for (int i = 0; i < Cells.Count; i++)
         {
             int idx = i;
