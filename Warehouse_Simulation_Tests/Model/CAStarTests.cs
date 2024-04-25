@@ -7,36 +7,53 @@ namespace Warehouse_Simulation_Tests.Model
     [TestClass]
     public class CASCellTests
     {
-        private CASCell? _testClass;
-        private int _i;
-        private int _j;
-        private CASCell _p;
-        private int _t;
+        private bool[,] _map;
 
         [TestInitialize]
-        public void SetUp()
+        public void Setup()
         {
-            _i = 1170451990;
-            _j = 537964413;
-            _p = new CASCell(430843507, 1208397320, default(CASCell), 609786662);
-            _t = 1743549481;
-            _testClass = new CASCell(_i, _j, _p, _t);
+            _map = new bool[,]
+            {
+                { false, false, false, false },
+                { false, true, false, false },
+                { false, true, false, false },
+                { false, false, false, false }
+            };
         }
 
         [TestMethod]
         public void CanConstruct()
         {
-            // Act
-            var instance = new CASCell(_i, _j, _p, _t);
+            var instance = new CASCell(1170451990, 537964413, new CASCell(430843507, 1208397320, default(CASCell), 609786662), 1743549481);
 
-            // Assert
             Assert.IsNotNull(instance);
         }
 
+
         [TestMethod]
-        public void CanCallSetH_F()
+        public void FindPath_Returns_Path_When_TargetPos_Is_Valid()
         {
-            //valaki
+            var caStar = new CAStar(_map);
+            var robot = new Robot(1, (0, 0), Direction.N);
+            robot.TargetPos = (2, 0);
+
+            var path = caStar.FindPath(robot, 0);
+
+            Assert.IsTrue(path.Count > 0);
         }
+
+        [TestMethod]
+        public void FindPath_Returns_Path_When_ReservationMap_Is_Empty()
+        {
+            var caStar = new CAStar(_map);
+            var robot = new Robot(1, (0, 0), Direction.N);
+            robot.TargetPos = (2, 0);
+
+            var path = caStar.FindPath(robot, 0);
+
+            Assert.IsTrue(path.Count > 0);
+        }
+
+
     }
 }
