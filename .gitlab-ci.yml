@@ -10,7 +10,7 @@ variables:
   SOLUTION: "Warehouse_Simulation.sln"
 
 before_script:
-  - 'echo | dotnet --version' # must be v 2.2.300 or later for reporter tool to work
+  - 'echo | dotnet --version'
   - apt-get update -qq
   - apt-get install bc -y
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
