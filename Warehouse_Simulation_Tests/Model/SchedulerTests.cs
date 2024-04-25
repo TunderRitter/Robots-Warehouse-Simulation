@@ -84,5 +84,43 @@ namespace Warehouse_Simulation_Model.Model.Tests
             Assert.AreEqual(2, scheduler.Step);
             Assert.AreEqual(true, scheduler.Running);
         }
+
+        [TestMethod()]
+        public void ExecuteStepTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            String[] steps = [];
+
+            Assert.ThrowsException<IndexOutOfRangeException> (() => scheduler.ExecuteSteps(steps));
+        }
+
+        [TestMethod()]
+        public void AddTargetTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            scheduler.AddTarget(1, 1);
+
+            Assert.AreEqual(3, scheduler.TargetNum);
+        }
     }
 }
