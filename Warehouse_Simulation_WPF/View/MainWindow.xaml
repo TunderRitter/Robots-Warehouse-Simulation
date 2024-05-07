@@ -8,7 +8,9 @@
         Width="500"
         Height="300"
         ResizeMode="NoResize"
-        Title="Warehouse simulator">
+        Title="Warehouse simulator"
+        Icon="/Images/forklift.ico"
+        >
 
     <Window.Resources>
         <Style TargetType="Button">
