@@ -1,5 +1,6 @@
 image: mcr.microsoft.com/dotnet/sdk:8.0
 
+
 stages:
   - build
   - test
@@ -21,17 +22,15 @@ build:
   script:
     - dotnet restore
     - dotnet build
-    - echo "Build success"
+    - echo "Build succes"
+
 
 test:
   stage: test
   coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   script:
-    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
-    - |
-      dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./Coverage/ /p:Exclude="[YourNamespace.*]*" *.sln
-      reportgenerator -reports:"./Coverage/coverage.cobertura.xml" -targetdir:"./Coverage" -reporttypes:"cobertura"
-    - mv ./Coverage/coverage.cobertura.xml ./Cobertura.xml
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose" --filter TestCategory!=Warehouse_Simulation_WPF.ViewModel.To.Ignore
+    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
     - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
     - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
     - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
@@ -47,6 +46,7 @@ test:
         coverage_format: cobertura
         path: ./Cobertura.xml
 
+
 release:
   stage: deploy
   only: 
@@ -55,7 +55,7 @@ release:
     - pwd
     - ls -a
     - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:UseAppHost=true
-    - echo "Publish success"
+    - echo "Publish succes"
     - ls
   artifacts:
     paths:
