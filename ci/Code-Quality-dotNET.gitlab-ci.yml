@@ -1,0 +1,69 @@
+code_quality_dotnet:
+  stage: test
+  image: tmselte/evaluator:dotnet-8.0
+  tags:
+    - windows
+  variables:
+    CHECK_PATH: .
+  script:
+    - |
+      Write-Output "Checking path: $CHECK_PATH"
+      cd $CHECK_PATH
+
+      # Compile VS projects
+      $solutions = Get-ChildItem -Path ./ -Filter *.sln -Recurse -File -Name;      
+      $solutions = $solutions | Where-Object { $ignored_solutions -notcontains $_ }
+      if ($solutions.Count -eq 0) {
+        Write-Error -Message "No C# solutions found." -Category InvalidData
+        exit 1
+      }
+
+      $code=0
+      :SolutionLoop foreach ($solution in $solutions) {
+        $dir=(Get-Item "$solution").DirectoryName
+        $projects=Get-ChildItem -Path $dir -Filter *.csproj -Recurse -File -Name
+        foreach ($project in $projects) {
+          $isDotnetFramework = (Select-String -Path "$dir\\$project" -Pattern "<Project.*ToolsVersion=").Matches.Success
+          if ($isDotnetFramework) {
+            echo "$project is an old .NET Framework project"
+            echo "Skipping to build: $solution"
+            continue SolutionLoop 
+          }
+        }
+        
+        echo "Now building: $solution"
+        dotnet build "$solution"
+        if ($LastExitCode -ne 0) {
+          $code=$LastExitCode
+          Write-Error -Message "Compilation error: $solution" -Category InvalidOperation
+        }
+      }
+      if ($code -ne 0) {
+        exit $code;
+      }
+
+      # Run Static Analysis
+      $diagnostics = @("--supported-diagnostics")
+      $diagnostics += curl.exe --fail --silent --show-error https://gitlab.com/tms-elte/backend-core/-/snippets/2518152/raw/main/diagnostics.txt | Where-Object { $_ -notmatch "^#" }
+      roslynator analyze $solutions `
+        --output roslynator.xml `
+        --severity-level hidden `
+        --ignore-analyzer-references `
+        --analyzer-assemblies $env:ANALYZERS_DIR `
+        --report-suppressed-diagnostics `
+        $diagnostics
+      $code = $LASTEXITCODE
+      if (Test-Path -Path "roslynator.xml") {
+        dotnet tool install --global CodeQualityToGitlab --version 1.0.0
+        cq roslynator roslynator.xml gl-code-quality-report.json $CI_PROJECT_DIR
+        (Get-Content "gl-code-quality-report.json").Replace("\\", "/") | Set-Content "gl-code-quality-report.json"
+        exit 0
+      }
+      exit $code
+  artifacts:
+    expose_as: 'code_quality_report'
+    reports:
+      codequality: $CHECK_PATH/gl-code-quality-report.json
+    paths:
+      - $CHECK_PATH/roslynator.xml
+      - $CHECK_PATH/gl-code-quality-report.json
