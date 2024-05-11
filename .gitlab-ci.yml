@@ -57,6 +57,20 @@ test:
         path: ./*/TestResults/*/coverage.cobertura.xml
   coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
 
+pages:
+  stage: deploy
+  before_script:
+    - apt-get update -yqq
+    - apt-get install -yqq doxygen graphviz
+  script:
+    - doxygen
+    - cp -r doc/html/. public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 day
+  only:
+    - master
 
 release:
   stage: deploy
