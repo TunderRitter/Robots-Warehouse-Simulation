@@ -11,7 +11,7 @@ using Warehouse_Simulation_Model.Persistence;
 namespace Warehouse_Simulation_WPF.ViewModel;
 
 
-[ExcludeFromCodeCoverage]
+
 public class MainViewModel : INotifyPropertyChanged
 {
     #region properties

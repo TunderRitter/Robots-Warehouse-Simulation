@@ -4,7 +4,7 @@ using System.Windows.Input;
 namespace Warehouse_Simulation_WPF.ViewModel;
 
 
-[ExcludeFromCodeCoverage]
+
 public class DelegateCommand : ICommand
 {
     private readonly Action<object?> _execute;
