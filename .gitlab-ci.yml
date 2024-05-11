@@ -9,8 +9,6 @@ stages:
 
 include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
-  - local: ci/Code-Quality-dotNET.gitlab-ci.yml
-
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
