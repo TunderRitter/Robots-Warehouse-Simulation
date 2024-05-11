@@ -72,6 +72,8 @@ documentation:
   artifacts:
     paths:
       - public
+  only:
+    - master
 
 release:
   stage: deploy_
@@ -84,3 +86,5 @@ release:
   artifacts:
     paths:
       - ./Release
+  only:
+    - master
