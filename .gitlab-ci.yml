@@ -61,7 +61,7 @@ test:
         path: ./*/TestResults/*/coverage.cobertura.xml
   coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
 
-pages:
+documentation:
   stage: deploy
   before_script:
     - apt-get update -yqq
@@ -72,7 +72,6 @@ pages:
   artifacts:
     paths:
       - public
-    expire_in: 1 day
 
 release:
   stage: deploy_
