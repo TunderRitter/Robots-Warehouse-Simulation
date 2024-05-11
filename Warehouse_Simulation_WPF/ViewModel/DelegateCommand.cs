@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Input;
 
 namespace Warehouse_Simulation_WPF.ViewModel;
 

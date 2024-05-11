@@ -5,6 +5,10 @@ stages:
   - build
   - test
   - deploy
+  - deploy_
+
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
@@ -27,29 +31,50 @@ build:
 
 test:
   stage: test
-  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
+  before_script:
+    - dotnet restore Warehouse_Simulation_Tests --packages .nuget
   script:
-    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
-    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
-    - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
-    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
-    - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
-  artifacts:
-    when: always
+    - > 
+      dotnet test Warehouse_Simulation_Tests --no-restore
+      --logger:"junit;LogFilePath=../junit/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"
+      --collect="XPlat Code Coverage"
+    - apt-get update -yqq
+    - apt-get install -yqq bc
+    - dotnet tool install --tool-path . dotnet-reportgenerator-globaltool
+    - ./reportgenerator "-reports:$CI_PROJECT_DIR/*/TestResults/*/coverage.cobertura.xml" "-targetdir:report" "-reporttypes:Cobertura"
+    - line_rate="$(head -n 3 ./report/Cobertura.xml | sed 'N;N;s/.*line-rate="\([^" ]*\).*/\1/g')"
+    - coverage=$(echo "${line_rate} * 100" | bc)
+    - 'printf "TOTAL_COVERAGE=%2.2f\n" "$coverage"'
+  cache:
+    key: "unittest-$CI_COMMIT_REF_SLUG"
     paths:
-      - ./**/TestResults.xml
-      - ./Cobertura.xml
+      - .nuget
+  artifacts:
+    paths:
+      - ./junit/*test-result.xml
+      - ./*/TestResults/*/coverage.cobertura.xml
     reports:
       junit:
-        - ./**/TestResults.xml
+        - ./junit/*test-result.xml
       coverage_report:
         coverage_format: cobertura
-        path: ./Cobertura.xml
+        path: ./*/TestResults/*/coverage.cobertura.xml
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
+
+documentation:
+  stage: deploy
+  before_script:
+    - apt-get update -yqq
+    - apt-get install -yqq doxygen graphviz
+  script:
+    - doxygen
+    - cp -r doc/html/. public/
+  artifacts:
+    paths:
+      - public
 
 release:
-  stage: deploy
-  only: 
-    - master
+  stage: deploy_
   script:
     - pwd
     - ls -a
