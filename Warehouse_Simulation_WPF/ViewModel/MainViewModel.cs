@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,7 @@ using Warehouse_Simulation_Model.Persistence;
 namespace Warehouse_Simulation_WPF.ViewModel;
 
 
+[ExcludeFromCodeCoverage]
 public class MainViewModel : INotifyPropertyChanged
 {
     #region properties

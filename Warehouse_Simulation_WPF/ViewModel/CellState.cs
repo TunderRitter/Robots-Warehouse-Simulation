@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
 namespace Warehouse_Simulation_WPF.ViewModel;
 
 
+[ExcludeFromCodeCoverage]
 public class CellState : INotifyPropertyChanged
 {
     private int _x;
