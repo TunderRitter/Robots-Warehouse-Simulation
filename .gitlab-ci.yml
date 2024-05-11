@@ -14,13 +14,13 @@ before_script:
   - 'echo | dotnet --version'
   - apt-get update -qq
   - apt-get install -y gnupg2  # Install gnupg2 package
+  - apt-get install -y wget  # Install wget package
   - apt-get install bc -y
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
   - 'export PATH=$PATH:$HOME/.dotnet/tools'
   - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
   # Install docfx
-  - wget -qO docfx.tar.gz https://github.com/dotnet/docfx/releases/download/v2.56.3/docfx.zip
-  - tar -xzf docfx.tar.gz -C /usr/local/bin/
+  - wget -qO /usr/local/bin/docfx https://github.com/dotnet/docfx/releases/download/v2.56.3/docfx.zip
   - chmod +x /usr/local/bin/docfx
 
 build:
