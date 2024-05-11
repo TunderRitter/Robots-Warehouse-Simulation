@@ -4,6 +4,7 @@ image: mcr.microsoft.com/dotnet/sdk:8.0
 stages:
   - build
   - test
+  - documentation
   - deploy
 
 variables:
@@ -18,14 +19,9 @@ before_script:
   - 'export PATH=$PATH:$HOME/.dotnet/tools'
   - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
   # Install docfx
-  - wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
-  - mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-  - wget -q https://packages.microsoft.com/config/debian/10/prod.list
-  - mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
-  - chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
-  - chown root:root /etc/apt/sources.list.d/microsoft-prod.list
-  - apt-get update
-  - apt-get install -y docfx
+  - wget -qO docfx.tar.gz https://github.com/dotnet/docfx/releases/download/v2.56.3/docfx.zip
+  - tar -xzf docfx.tar.gz -C /usr/local/bin/
+  - chmod +x /usr/local/bin/docfx
 
 build:
   stage: build
