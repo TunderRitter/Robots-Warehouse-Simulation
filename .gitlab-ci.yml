@@ -30,9 +30,8 @@ test:
   coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
-    - |
-      dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./Coverage/ /p:Exclude="[Warehouse_Simulation_WPF.*]*" *.sln
-      reportgenerator -reports:"./Coverage/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
+    - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./Coverage/ /p:Exclude="[Warehouse_Simulation_WPF.*]*" *.sln
+    - reportgenerator -reports:"./Coverage/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
     - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
     - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
     - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
