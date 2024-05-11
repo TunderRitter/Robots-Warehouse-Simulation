@@ -1,9 +1,9 @@
 image: mcr.microsoft.com/dotnet/sdk:8.0
 
+
 stages:
   - build
   - test
-  - documentation
   - deploy
 
 variables:
@@ -12,55 +12,51 @@ variables:
 before_script:
   - 'echo | dotnet --version'
   - apt-get update -qq
-  - apt-get install -y gnupg2  # Install gnupg2 package
-  - apt-get install -y curl  # Install curl package
-  - apt-get install -y unzip  # Install unzip package
   - apt-get install bc -y
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
   - 'export PATH=$PATH:$HOME/.dotnet/tools'
   - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
-  # Install docfx
-  - curl -L -o docfx.zip https://github.com/dotnet/docfx/releases/latest/download/docfx.zip
-  - unzip -q docfx.zip -d docfx_temp
-  - mv docfx_temp/docfx /usr/local/bin/docfx
-  - chmod +x /usr/local/bin/docfx
 
 build:
   stage: build
   script:
     - dotnet restore
     - dotnet build
-    - echo "Build success"
+    - echo "Build succes"
+
 
 test:
   stage: test
-  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
+  before_script:
+    - dotnet restore Warehouse_Simulation_Tests --packages .nuget
   script:
-    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
-    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
-    - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
-    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
-    - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
-  artifacts:
-    when: always
+    - > 
+      dotnet test Warehouse_Simulation_Tests --no-restore
+      --logger:"junit;LogFilePath=../junit/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"
+      --collect="XPlat Code Coverage"
+    - apt-get update -yqq
+    - apt-get install -yqq bc
+    - dotnet tool install --tool-path . dotnet-reportgenerator-globaltool
+    - ./reportgenerator "-reports:$CI_PROJECT_DIR/*/TestResults/*/coverage.cobertura.xml" "-targetdir:report" "-reporttypes:Cobertura"
+    - line_rate="$(head -n 3 ./report/Cobertura.xml | sed 'N;N;s/.*line-rate="\([^" ]*\).*/\1/g')"
+    - coverage=$(echo "${line_rate} * 100" | bc)
+    - 'printf "TOTAL_COVERAGE=%2.2f\n" "$coverage"'
+  cache:
+    key: "unittest-$CI_COMMIT_REF_SLUG"
     paths:
-      - ./**/TestResults.xml
-      - ./Cobertura.xml
+      - .nuget
+  artifacts:
+    paths:
+      - ./junit/*test-result.xml
+      - ./*/TestResults/*/coverage.cobertura.xml
     reports:
       junit:
-        - ./**/TestResults.xml
+        - ./junit/*test-result.xml
       coverage_report:
         coverage_format: cobertura
-        path: ./Cobertura.xml
+        path: ./*/TestResults/*/coverage.cobertura.xml
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
 
-documentation:
-  stage: documentation
-  script:
-    - docfx init -q
-    - docfx build
-  artifacts:
-    paths:
-      - ./_site
 
 release:
   stage: deploy
@@ -70,11 +66,8 @@ release:
     - pwd
     - ls -a
     - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:UseAppHost=true
-    - echo "Publish success"
+    - echo "Publish succes"
     - ls
   artifacts:
     paths:
       - ./Release
-
-
-
