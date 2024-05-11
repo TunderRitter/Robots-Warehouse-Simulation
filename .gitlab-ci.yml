@@ -25,6 +25,7 @@ before_script:
   - unzip -q docfx.zip -d docfx_temp
   - mv docfx_temp/docfx.exe /usr/local/bin/docfx
   - chmod +x /usr/local/bin/docfx
+
 build:
   stage: build
   script:
