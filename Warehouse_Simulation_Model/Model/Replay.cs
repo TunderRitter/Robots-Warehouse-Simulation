@@ -2,22 +2,66 @@
 
 namespace Warehouse_Simulation_Model.Model;
 
-
+/// <summary>
+/// Class responsible for replaying the simulation.
+/// </summary>
 public class Replay
 {
+    #region Fields
+    /// <summary>
+    /// Variable representing the log of the replay.
+    /// </summary>
     private readonly Log _log;
+    /// <summary>
+    /// Array representing the robots in the replay.
+    /// </summary>
     private readonly Robot[] _robots;
+    /// <summary>
+    /// Array representing the targets in the replay.
+    /// </summary>
     private readonly Target[] _targets;
+    /// <summary>
+    /// Array representing the steps of the replay.
+    /// </summary>
     private readonly List<string>[] _steps;
-    public double Speed { get; private set; }
-    public bool Paused { get; private set; }
-    public Cell[,] Map { get; init; }
-    public Cell[,] InitMap { get; init; }
-    public int[][,] Maps { get; init; }
-    public int Step { get; private set; }
-    public int MaxStep { get; init; }
+    #endregion
 
+    #region Properties
+    /// <summary>
+    /// Property representing the speed of the replay.
+    /// </summary>
+    public double Speed { get; private set; }
+    /// <summary>
+    /// Property representing if the replay is paused.
+    /// </summary>
+    public bool Paused { get; private set; }
+    /// <summary>
+    /// Matrix representing the map currently shown in the replay.
+    /// </summary>
+    public Cell[,] Map { get; init; }
+    /// <summary>
+    /// Matrix representing the initial map of the replay.
+    /// </summary>
+    public Cell[,] InitMap { get; init; }
+    /// <summary>
+    /// Three-dimensional array representing the maps of the replay.
+    /// </summary>
+    public int[][,] Maps { get; init; }
+    /// <summary>
+    /// Property representing the current step of the replay.
+    /// </summary>
+    public int Step { get; private set; }
+    /// <summary>
+    /// Property representing the maximum step of the replay.
+    /// </summary>
+    public int MaxStep { get; init; }
+    /// <summary>
+    /// Property representing the number of robots in the replay.
+    /// </summary>
     public int RobotNum => _robots.Length;
+    /// <summary>
+    /// property representing the number of targets in the replay.
+    /// </summary>
     public int TargetNum {
         get
         {
@@ -30,10 +74,21 @@ public class Replay
             return num;
         }
     }
+    #endregion
 
+    #region Events
+    /// <summary>
+    /// Event that is triggered when a change occurs in the replay.
+    /// </summary>
     public event EventHandler<int>? ChangeOccurred;
+    #endregion
 
-
+    #region Public Methods
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Replay"/> class.
+    /// </summary>
+    /// <param name="logPath"></param>
+    /// <param name="mapPath"></param>
     public Replay(string logPath, string mapPath)
     {
         _log = Log.Read(logPath);
@@ -53,53 +108,81 @@ public class Replay
         GenerateMaps();
     }
 
+    /// <summary>
+    /// Function that starts the replay.
+    /// </summary>
     public void Start()
     {
         Thread.Sleep(1000);
         Play();
     }
 
+    /// <summary>
+    /// Function that plays the replay.
+    /// </summary>
     public void Play()
     {
         Paused = false;
         Task.Run(Playing);
     }
 
+    /// <summary>
+    /// Function that pauses the replay.
+    /// </summary>
     public void Pause()
     {
         Paused = true;
     }
 
+    /// <summary>
+    /// Function that doubles the speed of the replay.
+    /// </summary>
     public void FasterSpeed()
     {
         if (Speed >= 8) return;
         Speed *= 2;
     }
 
+    /// <summary>
+    /// Function that halves the speed of the replay.
+    /// </summary>
     public void SlowerSpeed()
     {
         if (Speed <= 0.125) return;
         Speed *= 0.5;
     }
 
+    /// <summary>
+    /// Function that steps forward in the replay.
+    /// </summary>
     public void StepFwd()
     {
         Step = Math.Min(Step + 1, MaxStep);
         OnChangeOccured();
     }
 
+    /// <summary>
+    /// Function that steps back in the replay.
+    /// </summary>
     public void StepBack()
     {
         Step = Math.Max(Step - 1, 0);
         OnChangeOccured();
     }
 
+    /// <summary>
+    /// Function that skips to a specific step in the replay.
+    /// </summary>
+    /// <param name="step"></param>
     public void SkipTo(int step)
     {
         Step = Math.Clamp(step, 0, MaxStep);
         OnChangeOccured();
     }
 
+    /// <summary>
+    /// Function that plays the replay.
+    /// </summary>
     public void Playing()
     {
         while (!Paused)
@@ -109,6 +192,10 @@ public class Replay
         }
     }
 
+    /// <summary>
+    /// Function that generates the maps of the replay.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
     public void GenerateMaps()
     {
         Maps[0] = CompressMap(Map);
@@ -171,7 +258,15 @@ public class Replay
             Maps[i] = CompressMap(Map);
         }
     }
+    #endregion
 
+    #region Private Methods
+    /// <summary>
+    /// Function that compresses the map into numbers.
+    /// </summary>
+    /// <param name="cellMap"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     private static int[,] CompressMap(Cell[,] cellMap)
     {
         int rows = cellMap.GetLength(0);
@@ -214,6 +309,11 @@ public class Replay
         return map;
     }
 
+    /// <summary>
+    /// Function that sets the steps of the robots of the replay.
+    /// </summary>
+    /// <param name="log"></param>
+    /// <returns></returns>
     private static List<string>[] GetSteps(Log log)
     {
         List<string>[] steps = new List<string>[log.start.Count];
@@ -227,6 +327,12 @@ public class Replay
         return steps;
     }
 
+    /// <summary>
+    /// Function that sets the robots of the replay.
+    /// </summary>
+    /// <param name="log"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidDataException"></exception>
     private static Robot[] GetRobots(Log log)
     {
         Robot[] robots = new Robot[log.teamSize];
@@ -255,6 +361,12 @@ public class Replay
         return robots;
     }
 
+    /// <summary>
+    /// Function that sets the targets of the replay.
+    /// </summary>
+    /// <param name="log"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidDataException"></exception>
     private static Target[] GetTargets(Log log)
     {
         Target[] targets = new Target[log.tasks.Count];
@@ -275,6 +387,13 @@ public class Replay
         return targets;
     }
 
+    /// <summary>
+    /// Function that sets the map of the replay.
+    /// </summary>
+    /// <param name="mapBool"></param>
+    /// <param name="robots"></param>
+    /// <param name="targets"></param>
+    /// <returns></returns>
     private static Cell[,] GetMap(bool[,] mapBool, Robot[] robots, Target[] targets)
     {
         int height = mapBool.GetLength(0);
@@ -304,5 +423,9 @@ public class Replay
         return map;
     }
 
+    /// <summary>
+    /// Function that triggers the change event.
+    /// </summary>
     private void OnChangeOccured() => ChangeOccurred?.Invoke(this, Step);
+    #endregion
 }

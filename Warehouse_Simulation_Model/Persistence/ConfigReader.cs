@@ -2,7 +2,9 @@
 
 namespace Warehouse_Simulation_Model.Persistence;
 
-
+/// <summary>
+/// Class that reads the configuration files.
+/// </summary>
 public static class ConfigReader
 {
     public static SchedulerData Read(string path)

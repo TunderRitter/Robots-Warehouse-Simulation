@@ -1,8 +1,17 @@
 ﻿namespace Warehouse_Simulation_Model.Model;
 
-
+/// <summary>
+/// Class that assigns the robots to the targets in a round-robin fashion.
+/// </summary>
 public class RoundRobin : ITaskAssigner
 {
+    #region Methods
+    /// <summary>
+    /// Method that assigns the robots to the targets in a round-robin fashion.
+    /// </summary>
+    /// <param name="robots"></param>
+    /// <param name="targets"></param>
+    /// <returns></returns>
     public (int, int)[] Assign(List<Robot> robots, List<Target> targets)
     {
         List<(int, int)> assignments = [];
@@ -16,4 +25,5 @@ public class RoundRobin : ITaskAssigner
 
         return [.. assignments];
     }
+    #endregion
 }
