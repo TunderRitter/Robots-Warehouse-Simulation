@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - deploy
+  - deploy_
 
 variables:
   SOLUTION: "Warehouse_Simulation.sln"
@@ -69,13 +70,9 @@ pages:
     paths:
       - public
     expire_in: 1 day
-  only:
-    - master
 
 release:
-  stage: deploy
-  only: 
-    - master
+  stage: deploy_
   script:
     - pwd
     - ls -a
