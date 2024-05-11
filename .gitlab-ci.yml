@@ -27,24 +27,28 @@ build:
 
 test:
   stage: test
-  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class;FailureBodyFormat=Verbose"
-    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura" -assemblyfilters:+[!Warehouse_Simulation_WPF.ViewModel.ClassToExclude]*
+    - reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"." -reporttypes:"cobertura"
     - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./Cobertura.xml")
-    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
+    - grep -v 'Warehouse_Simulation_WPF.ViewModel' "./Cobertura.xml" > "./FilteredCoverage.xml"
+    - COVERAGE_VALUE_FILTERED=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "./FilteredCoverage.xml")
+    - COVERAGE=$(echo "scale=2; $COVERAGE_VALUE_FILTERED * 100" | bc)
     - 'echo "TOTAL_COVERAGE=$COVERAGE%"'
   artifacts:
     when: always
     paths:
       - ./**/TestResults.xml
       - ./Cobertura.xml
+      - ./FilteredCoverage.xml
     reports:
       junit:
         - ./**/TestResults.xml
       coverage_report:
         coverage_format: cobertura
         path: ./Cobertura.xml
+
+
 
 release:
   stage: deploy
