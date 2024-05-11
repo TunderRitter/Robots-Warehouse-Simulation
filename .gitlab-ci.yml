@@ -20,7 +20,7 @@ before_script:
   - 'export PATH=$PATH:$HOME/.dotnet/tools'
   - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
   # Install docfx
-  - curl -L -o docfx.zip https://github.com/dotnet/docfx/releases/download/v2.56.3/docfx-linux-x64.zip
+  - curl -L -o docfx.zip https://github.com/dotnet/docfx/releases/latest/download/docfx.zip
   - unzip -q docfx.zip -d docfx_temp
   - mv docfx_temp/docfx /usr/local/bin/docfx
   - chmod +x /usr/local/bin/docfx
