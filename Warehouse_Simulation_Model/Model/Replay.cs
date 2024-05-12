@@ -375,8 +375,10 @@ public class Replay
             for (int i = 0; i < log.tasks.Count; i++)
             {
                 if (log.tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
-                targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0]);
-                targets[i].Active = true;
+                targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0])
+                {
+                    Active = true
+                };
             }
         }
         catch (Exception)

@@ -512,7 +512,7 @@ public class Scheduler
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            _log.events.Add(new List<object[]>());
+            _log.events.Add([]);
         }
     }
 
@@ -590,8 +590,7 @@ public class Scheduler
     /// </summary>
     private void WriteLogAllValid()
     {
-        if (_log.errors.Count > 0) _log.AllValid = "No";
-        else _log.AllValid = "Yes";
+        _log.AllValid = _log.errors.Where(e => (string)e[^1] == "collision").Any() ? "No" : "Yes";
     }
     #endregion
 }

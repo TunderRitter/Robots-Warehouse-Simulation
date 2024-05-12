@@ -7,7 +7,7 @@ namespace Warehouse_Simulation_Model.Persistence;
 /// </summary>
 public class Log
 {
-    #region 
+    #region Properties
     /// <summary>
     /// Property that stores the action model.
     /// </summary>
@@ -60,13 +60,17 @@ public class Log
     /// Property that stores the tasks and their positions.
     /// </summary>
     public List<int[]> tasks { get; set; }
-    #endregion
-
-    #region Methods
     /// <summary>
-    /// Initializes a new instance of the <see cref="Log"/> class.
+    /// JSON Pretty Print
     /// </summary>
-    public Log()
+    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
+#endregion
+
+#region Methods
+/// <summary>
+/// Initializes a new instance of the <see cref="Log"/> class.
+/// </summary>
+public Log()
     {
         actionModel = "";
         AllValid = "";
@@ -136,7 +140,7 @@ public class Log
     {
         try
         {
-            File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(path, JsonSerializer.Serialize(this, _options));
         }
         catch (Exception)
         {
