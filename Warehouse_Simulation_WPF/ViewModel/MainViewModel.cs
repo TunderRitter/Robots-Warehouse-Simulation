@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,8 +14,7 @@ namespace Warehouse_Simulation_WPF.ViewModel;
 /// </summary>
 public class MainViewModel : INotifyPropertyChanged
 {
-    #region Properties
-
+    #region Fields
     /// <summary>
     /// Schduler object.
     /// </summary>
@@ -26,6 +24,45 @@ public class MainViewModel : INotifyPropertyChanged
     /// </summary>
     Replay? _replayer;
 
+    /// <summary>
+    /// Brush for the south direction.
+    /// </summary>
+    private readonly LinearGradientBrush South = new(Colors.LightCyan, Colors.DarkCyan, 90.0);
+    /// <summary>
+    /// Brush for the north direction.
+    /// </summary>
+    private readonly LinearGradientBrush North = new(Colors.DarkCyan, Colors.LightCyan, 90.0);
+    /// <summary>
+    /// Brush for the east direction.
+    /// </summary>
+    private readonly LinearGradientBrush East = new(Colors.LightCyan, Colors.DarkCyan, 0.0);
+    /// <summary>
+    /// Brush for the west direction.
+    /// </summary>
+    private readonly LinearGradientBrush West = new(Colors.DarkCyan, Colors.LightCyan, 0.0);
+    /// <summary>
+    /// Brush for the targets.
+    /// </summary>
+    private readonly LinearGradientBrush Target = new(Colors.Salmon, Colors.Salmon, 0.0);
+    /// <summary>
+    /// Brush for the inactive targets.
+    /// </summary>
+    private readonly LinearGradientBrush InactiveTarget = new(Colors.LightGray, Colors.LightGray, 0.0);
+    /// <summary>
+    /// Brush for the walls.
+    /// </summary>
+    private readonly LinearGradientBrush Wall = new(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
+    /// <summary>
+    /// Brush for the floor.
+    /// </summary>
+    private readonly LinearGradientBrush Floor = new(Colors.White, Colors.White, 0.0);
+    /// <summary>
+    /// Brudh for the path shown.
+    /// </summary>
+    private readonly LinearGradientBrush InPath = new(Colors.PaleGreen, Colors.PaleGreen, 0.0);
+    #endregion
+
+    #region Properties
     private int _row;
     /// <summary>
     /// Property that represents the row of the map.
@@ -276,8 +313,15 @@ public class MainViewModel : INotifyPropertyChanged
     /// </summary>
     public string PauseText
     {
-        get { return _pauseText; }
-        set { _pauseText = value; OnPropertyChanged(nameof(PauseText)); }
+        get => _pauseText;
+        set
+        {
+            if (_pauseText != value)
+            {
+                _pauseText = value;
+                OnPropertyChanged();
+            }
+        }
     }
     private string _endText;
     /// <summary>
@@ -285,54 +329,20 @@ public class MainViewModel : INotifyPropertyChanged
     /// </summary>
     public string EndText
     {
-        get { return _endText; }
-        set { _endText = value; OnPropertyChanged(nameof(EndText)); }
+        get => _endText;
+        set
+        {
+            if (_endText != value)
+            {
+                _endText = value;
+                OnPropertyChanged();
+            }
+        }
     }
     /// <summary>
     /// Integer that represents the path index.
     /// </summary>
     private int _pathIdx;
-
-
-    /// <summary>
-    /// Brush for the south direction.
-    /// </summary>
-    LinearGradientBrush South = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 90.0);
-    /// <summary>
-    /// Brush for the north direction.
-    /// </summary>
-    LinearGradientBrush North = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 90.0);
-    /// <summary>
-    /// Brush for the east direction.
-    /// </summary>
-    LinearGradientBrush East = new LinearGradientBrush(Colors.LightCyan, Colors.DarkCyan, 0.0);
-    /// <summary>
-    /// Brush for the west direction.
-    /// </summary>
-    LinearGradientBrush West = new LinearGradientBrush(Colors.DarkCyan, Colors.LightCyan, 0.0);
-
-    /// <summary>
-    /// Brush for the targets.
-    /// </summary>
-    LinearGradientBrush Target = new LinearGradientBrush(Colors.Salmon, Colors.Salmon, 0.0);
-    /// <summary>
-    /// Brush for the inactive targets.
-    /// </summary>
-    LinearGradientBrush InactiveTarget = new LinearGradientBrush(Colors.LightGray, Colors.LightGray, 0.0);
-
-    /// <summary>
-    /// Brush for the walls.
-    /// </summary>
-    LinearGradientBrush Wall = new LinearGradientBrush(Colors.DarkSlateGray, Colors.DarkSlateGray, 0.0);
-    /// <summary>
-    /// Brush for the floor.
-    /// </summary>
-    LinearGradientBrush Floor = new LinearGradientBrush(Colors.White, Colors.White, 0.0);
-    /// <summary>
-    /// Brudh for the path shown.
-    /// </summary>
-    LinearGradientBrush InPath = new LinearGradientBrush(Colors.PaleGreen, Colors.PaleGreen, 0.0);
-
 
     /// <summary>
     /// ObservableCollection of cell states (map representetive).
@@ -399,10 +409,9 @@ public class MainViewModel : INotifyPropertyChanged
     /// Command for speeding up the replay.
     /// </summary>
     public DelegateCommand Fast { get; init; }
-
     #endregion
 
-    #region events
+    #region Events
     /// <summary>
     /// Event that represents the property changed.
     /// </summary>
@@ -452,7 +461,7 @@ public class MainViewModel : INotifyPropertyChanged
         Slow = new DelegateCommand(param => SlowReplay());
         Fast = new DelegateCommand(param => FastReplay());
 
-        Cells = new ObservableCollection<CellState>();
+        Cells = [];
         _pauseText = "";
         _endText = "";
     }
@@ -577,9 +586,8 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _replayer.Play();
             PauseText = "\u23F8";
-            return;
         }
-        if (!_replayer.Paused)
+        else
         {
             _replayer.Pause();
             PauseText = "\u25B6";
@@ -700,7 +708,7 @@ public class MainViewModel : INotifyPropertyChanged
             for (int j = 0; j < map.GetLength(1); j++)
             {
                 Cell cell = map[i, j];
-                String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+                string? id = (cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : "")) : "";
 
                 Cells.Add(new CellState
                 {
@@ -708,7 +716,7 @@ public class MainViewModel : INotifyPropertyChanged
                     Y = j,
                     Circle = CircleColor(cell, -1, -1),
                     Square = (cell is Floor) ? Floor : Wall,
-                    Id = id == null ? String.Empty : id,
+                    Id = id ?? "",
                     Radius = CellSize / 2
                 });
             }
@@ -787,7 +795,7 @@ public class MainViewModel : INotifyPropertyChanged
             int idx = i;
             List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx >= 0 ? _pathIdx : 0);
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
-            String? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+            string? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
             Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
             Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
             Cells[idx].Id = id == null || ((cell is Floor f) && _pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) && path.Count != 0 && f.Robot == null && f.Target != null && path[^1] != f.Target.Pos) ? String.Empty : id;
@@ -812,10 +820,10 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Method that gets the corners of the shown path.
+    /// Method that gets the rounded corners of the shown path.
     /// </summary>
     /// <param name="path"></param>
-    /// <returns></returns>
+    /// <returns>Which corners should be rounded for the shown path.</returns>
     private int[][] GetCorners(List<(int row, int col)> path)
     {
         int[][] corners = new int[path.Count][];
