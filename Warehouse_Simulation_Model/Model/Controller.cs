@@ -104,7 +104,6 @@ public class Controller
         {
             steps[i] = CalculateStep(i);
         }
-
         return steps;
     }
 
