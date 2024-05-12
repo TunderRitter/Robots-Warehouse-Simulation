@@ -103,13 +103,13 @@ public class Replay
         Step = 0;
         Speed = 1.0;
         Paused = true;
-        MaxStep = _log.sumOfCost / _log.plannerPaths.Count;
+        MaxStep = _log.SumOfCost / _log.PlannerPaths.Count;
         Maps = new int[MaxStep + 1][,];
         GenerateMaps();
     }
 
     /// <summary>
-    /// Function that starts the replay.
+    /// Method that starts the replay.
     /// </summary>
     public void Start()
     {
@@ -118,7 +118,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that plays the replay.
+    /// Method that plays the replay.
     /// </summary>
     public void Play()
     {
@@ -127,7 +127,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that pauses the replay.
+    /// Method that pauses the replay.
     /// </summary>
     public void Pause()
     {
@@ -135,7 +135,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that doubles the speed of the replay.
+    /// Method that doubles the speed of the replay.
     /// </summary>
     public void FasterSpeed()
     {
@@ -144,7 +144,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that halves the speed of the replay.
+    /// Method that halves the speed of the replay.
     /// </summary>
     public void SlowerSpeed()
     {
@@ -153,7 +153,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that steps forward in the replay.
+    /// Method that steps forward in the replay.
     /// </summary>
     public void StepFwd()
     {
@@ -162,7 +162,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that steps back in the replay.
+    /// Method that steps back in the replay.
     /// </summary>
     public void StepBack()
     {
@@ -171,7 +171,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that skips to a specific step in the replay.
+    /// Method that skips to a specific step in the replay.
     /// </summary>
     /// <param name="step"></param>
     public void SkipTo(int step)
@@ -181,7 +181,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that plays the replay.
+    /// Method that plays the replay.
     /// </summary>
     public void Playing()
     {
@@ -193,7 +193,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that generates the maps of the replay.
+    /// Method that generates the maps of the replay.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public void GenerateMaps()
@@ -203,7 +203,7 @@ public class Replay
         {
             for (int j = 0; j < _robots.Length; j++)
             {
-                foreach (object[] targetEvent in _log.events[j])
+                foreach (object[] targetEvent in _log.Events[j])
                 {
                     if ((int)targetEvent[1] == i - 1)
                     {
@@ -262,10 +262,10 @@ public class Replay
 
     #region Private Methods
     /// <summary>
-    /// Function that compresses the map into numbers.
+    /// Method that compresses the map into numbers.
     /// </summary>
     /// <param name="cellMap"></param>
-    /// <returns></returns>
+    /// <returns>An <see langword="int"/>[,] representing the map.</returns>
     /// <exception cref="Exception"></exception>
     private static int[,] CompressMap(Cell[,] cellMap)
     {
@@ -310,17 +310,17 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that sets the steps of the robots of the replay.
+    /// Method that sets the steps of the robots of the replay.
     /// </summary>
     /// <param name="log"></param>
-    /// <returns></returns>
+    /// <returns>The steps as a list of strings.</returns>
     private static List<string>[] GetSteps(Log log)
     {
-        List<string>[] steps = new List<string>[log.start.Count];
+        List<string>[] steps = new List<string>[log.Start.Count];
         for (int i = 0; i < steps.Length; i++)
         {
             steps[i] = [];
-            string[] moves = log.actualPaths[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
+            string[] moves = log.ActualPaths[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
             steps[i].AddRange(moves);
         }
 
@@ -328,24 +328,24 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that sets the robots of the replay.
+    /// Method that sets the robots of the replay.
     /// </summary>
     /// <param name="log"></param>
-    /// <returns></returns>
+    /// <returns>An array of the robots.</returns>
     /// <exception cref="InvalidDataException"></exception>
     private static Robot[] GetRobots(Log log)
     {
-        Robot[] robots = new Robot[log.teamSize];
+        Robot[] robots = new Robot[log.TeamSize];
         try
         {
-            if (log.teamSize != log.start.Count) throw new InvalidDataException("Invalid number of robots");
+            if (log.TeamSize != log.Start.Count) throw new InvalidDataException("Invalid number of robots");
 
             for (int i = 0; i < robots.Length; i++)
             {
-                if (log.start[i].Length == 3
-                    && log.start[i][0] is int row
-                    && log.start[i][1] is int col
-                    && log.start[i][2] is string directionStr)
+                if (log.Start[i].Length == 3
+                    && log.Start[i][0] is int row
+                    && log.Start[i][1] is int col
+                    && log.Start[i][2] is string directionStr)
                 {
                     if (!Enum.TryParse(directionStr, out Direction direction)) throw new InvalidDataException("Invalid direction");
                     robots[i] = new Robot(i, (row, col), direction);
@@ -362,21 +362,23 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that sets the targets of the replay.
+    /// Method that sets the targets of the replay.
     /// </summary>
     /// <param name="log"></param>
-    /// <returns></returns>
+    /// <returns>An array of the targets.</returns>
     /// <exception cref="InvalidDataException"></exception>
     private static Target[] GetTargets(Log log)
     {
-        Target[] targets = new Target[log.tasks.Count];
+        Target[] targets = new Target[log.Tasks.Count];
         try
         {
-            for (int i = 0; i < log.tasks.Count; i++)
+            for (int i = 0; i < log.Tasks.Count; i++)
             {
-                if (log.tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
-                targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0]);
-                targets[i].Active = true;
+                if (log.Tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
+                targets[i] = new Target((log.Tasks[i][1], log.Tasks[i][2]), log.Tasks[i][0])
+                {
+                    Active = true
+                };
             }
         }
         catch (Exception)
@@ -388,12 +390,12 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that sets the map of the replay.
+    /// Method that sets the map of the replay.
     /// </summary>
     /// <param name="mapBool"></param>
     /// <param name="robots"></param>
     /// <param name="targets"></param>
-    /// <returns></returns>
+    /// <returns>The map.</returns>
     private static Cell[,] GetMap(bool[,] mapBool, Robot[] robots, Target[] targets)
     {
         int height = mapBool.GetLength(0);
@@ -424,7 +426,7 @@ public class Replay
     }
 
     /// <summary>
-    /// Function that triggers the change event.
+    /// Method that triggers the change event.
     /// </summary>
     private void OnChangeOccured() => ChangeOccurred?.Invoke(this, Step);
     #endregion

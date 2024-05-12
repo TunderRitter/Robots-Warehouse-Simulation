@@ -127,7 +127,7 @@ public class Scheduler
         _targetCount = data.Targets.Length;
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-        _targetsSeen = data.TasksSeen;
+        _targetsSeen = data.TasksSeen * data.Robots.Length;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
         _controller.RobotStuck += Controller_RobotStuck;
@@ -159,7 +159,7 @@ public class Scheduler
         ChangeOccurred?.Invoke(this, EventArgs.Empty);
         Running = true;
 
-        while (Running && Step <= MaxSteps)
+        while (Running && Step < MaxSteps)
         {
             if (_robotFreed)
             {
@@ -170,7 +170,6 @@ public class Scheduler
 
             _controller.CalculateRoutes();
             string[] steps = _controller.CalculateSteps();
-            if (steps.Contains("S")) continue;
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
@@ -178,12 +177,9 @@ public class Scheduler
             Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             startTime = DateTime.Now;
 
-            // DEBUG
-            // waitTime = 0;
-
-            Step += waitTime + 1;
             _controller.Step++;
-            if (Step > MaxSteps) break;
+            waitTime = Math.Min(waitTime, MaxSteps - Step);
+            Step += waitTime;
 
             if (waitTime > 0)
             {
@@ -192,8 +188,32 @@ public class Scheduler
                     WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
                     WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
                 }
+                List<object[]> timeouts = [];
+                for (int i = Step - waitTime; i < Step; i++)
+                {
+                    timeouts.Add([-1, -1, i, "timeout"]);
+                }
+                WriteLogErrors(timeouts);
             }
-            ExecuteSteps(steps);
+
+            if (Step >= MaxSteps)
+            {
+                ChangeOccurred?.Invoke(this, EventArgs.Empty);
+                break;
+            }
+            Step++;
+
+            List<object[]> errors = CheckCollisions(steps);
+            if (errors.Count != 0)
+            {
+                ExecuteSteps(Enumerable.Repeat("W", _robots.Length).ToArray());
+                _controller.Reset();
+                WriteLogErrors(errors);
+            }
+            else
+            {
+                ExecuteSteps(steps);
+            }
 
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
@@ -222,6 +242,37 @@ public class Scheduler
         {
             WriteLogEvents(targetId, robotId, Step, "assigned");
         }
+    }
+    
+    /// <summary>
+    /// Method for checking robot collisions.
+    /// </summary>
+    /// <param name="steps"></param>
+    /// <returns>The collisions to log.</returns>
+    public List<object[]> CheckCollisions(string[] steps)
+    {
+        List<object[]> errors = [];
+        Dictionary<(int, int), int> collisions = [];
+
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            (int, int) position;
+            if (steps[i] == "F")
+                position = _robots[i].NextMove();
+            else
+                position = _robots[i].Pos;
+            if (!collisions.TryAdd(position, i))
+            {
+                errors.Add([
+                    i,
+                    collisions[position],
+                    Step,
+                    "collision",
+                ]);
+            }
+        }
+
+        return errors;
     }
 
     /// <summary>
@@ -252,7 +303,6 @@ public class Scheduler
                     throw new InvalidOperationException("Invalid move");
             }
 
-            //write log
             WriteLogPlannerpaths(i, steps[i]);
             WriteLogActualPaths(i, steps[i]);
         }
@@ -395,7 +445,7 @@ public class Scheduler
     /// Method for writing the actionmodel to the log.
     /// </summary>
     /// <param name="model"></param>
-    private void WriteLogActionModel(string model) => _log.actionModel = model;
+    private void WriteLogActionModel(string model) => _log.ActionModel = model;
 
     /// <summary>
     /// Method for writing the starting positions and directions of the robots to the log.
@@ -405,7 +455,7 @@ public class Scheduler
         for (int i = 0; i < _robots.Length; i++)
         {
             object[] data = [_robots[i].Pos.row, _robots[i].Pos.col, _robots[i].Direction.ToString()];
-            _log.start.Add(data);
+            _log.Start.Add(data);
         }
     }
 
@@ -415,7 +465,7 @@ public class Scheduler
     /// <param name="time"></param>
     private void WriteLogPlannerTimes(double time)
     {
-        _log.plannerTimes.Add((float)time / 1000f);
+        _log.PlannerTimes.Add((float)time / 1000f);
     }
 
     /// <summary>
@@ -423,11 +473,11 @@ public class Scheduler
     /// </summary>
     private void WriteLogTeamSize()
     {
-        _log.teamSize = _robots.Length;
+        _log.TeamSize = _robots.Length;
         for (int i = 0; i < _robots.Length; i++)
         {
-            _log.plannerPaths.Add("");
-            _log.actualPaths.Add("");
+            _log.PlannerPaths.Add("");
+            _log.ActualPaths.Add("");
         }
     }
 
@@ -436,7 +486,7 @@ public class Scheduler
     /// </summary>
     private void WriteLogNumTaskFinished()
     {
-        _log.numTaskFinished += 1;
+        _log.NumTaskFinished += 1;
     }
 
     /// <summary>
@@ -444,7 +494,7 @@ public class Scheduler
     /// </summary>
     private void WriteLogSumOfCost()
     {
-        _log.sumOfCost += _robots.Length;
+        _log.SumOfCost += _robots.Length;
     }
 
     /// <summary>
@@ -452,7 +502,7 @@ public class Scheduler
     /// </summary>
     private void WriteLogMakespan()
     {
-        _log.makespan += 1;
+        _log.Makespan += 1;
     }
 
     /// <summary>
@@ -462,7 +512,7 @@ public class Scheduler
     {
         for (int i = 0; i < _robots.Length; i++)
         {
-            _log.events.Add(new List<object[]>());
+            _log.Events.Add([]);
         }
     }
 
@@ -475,7 +525,7 @@ public class Scheduler
     /// <param name="_event"></param>
     private void WriteLogEvents(int taskId, int robotId, int step, string _event)
     {
-        _log.events[robotId].Add([taskId, step, _event]);
+        _log.Events[robotId].Add([taskId, step, _event]);
     }
 
     /// <summary>
@@ -485,10 +535,10 @@ public class Scheduler
     /// <param name="move"></param>
     private void WriteLogActualPaths(int i, string move)
     {
-        if (_log.actualPaths[i] == "")
-            _log.actualPaths[i] += move;
+        if (_log.ActualPaths[i] == "")
+            _log.ActualPaths[i] += move;
         else
-            _log.actualPaths[i] += "," + move;
+            _log.ActualPaths[i] += "," + move;
     }
 
     /// <summary>
@@ -498,10 +548,10 @@ public class Scheduler
     /// <param name="move"></param>
     private void WriteLogPlannerpaths(int i, string move)
     {
-        if (_log.plannerPaths[i] == "")
-            _log.plannerPaths[i] += move;
+        if (_log.PlannerPaths[i] == "")
+            _log.PlannerPaths[i] += move;
         else
-            _log.plannerPaths[i] += "," + move;
+            _log.PlannerPaths[i] += "," + move;
     }
 
     /// <summary>
@@ -512,7 +562,7 @@ public class Scheduler
         for (int i = 0; i < _targets.Count; i++)
         {
             int[] trg = [_targets[i].InitId, _targets[i].Pos.row, _targets[i].Pos.col];
-            _log.tasks.Add(trg);
+            _log.Tasks.Add(trg);
         }
     }
 
@@ -523,15 +573,16 @@ public class Scheduler
     private void WriteLogExtraTask(Target target)
     {
         int[] trg = [target.InitId, target.Pos.row, target.Pos.col];
-        _log.tasks.Add(trg);
+        _log.Tasks.Add(trg);
     }
 
     /// <summary>
-    /// Method for writing the errors (collisions) to the log.
+    /// Method for writing the errors (collisions, timeout) to the log.
     /// </summary>
-    private void WriteLogErrors()
+    /// <param name="errors"></param>
+    private void WriteLogErrors(List<object[]> errors)
     {
-
+        _log.Errors.AddRange(errors);
     }
 
     /// <summary>
@@ -539,8 +590,7 @@ public class Scheduler
     /// </summary>
     private void WriteLogAllValid()
     {
-        if (_log.errors.Count > 0) _log.AllValid = "No";
-        else _log.AllValid = "Yes";
+        _log.AllValid = _log.Errors.Where(e => (string)e[^1] == "collision").Any() ? "No" : "Yes";
     }
     #endregion
 }

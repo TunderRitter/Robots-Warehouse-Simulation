@@ -30,6 +30,10 @@ public class Controller
     /// AStar object for calculating the routes.
     /// </summary>
     private CAStar _castar;
+    /// <summary>
+    /// Random object for randomizing when is a task given back.
+    /// </summary>
+    private readonly Random _rnd;
     #endregion
 
     #region Properties
@@ -60,6 +64,7 @@ public class Controller
         _routes = new Queue<(int, int)>[robots.Length];
         _reserved = new bool[robots.Length];
         _stuck = new int[robots.Length];
+        _rnd = new Random();
         for (int i = 0; i < robots.Length; i++)
         {
             _routes[i] = new Queue<(int, int)>();
@@ -99,26 +104,18 @@ public class Controller
         {
             steps[i] = CalculateStep(i);
         }
-
-        HashSet<(int, int)> positions = [];
-        for (int i = 0; i < _robots.Length; i++)
-        {
-            if (steps[i] == "F")
-                positions.Add(_robots[i].NextMove());
-            else
-                positions.Add(_robots[i].Pos);
-        }
-        if (positions.Count != _robots.Length)
-        {
-            Array.ForEach(_routes, e => e.Clear());
-            _reserved = new bool[_robots.Length];
-            _stuck = new int[_robots.Length];
-            _castar = new CAStar(_map);
-
-            return ["S"];
-        }
-
         return steps;
+    }
+
+    /// <summary>
+    /// Resets the pathfinding in case of failure
+    /// </summary>
+    public void Reset()
+    {
+        Array.ForEach(_routes, e => e.Clear());
+        _reserved = new bool[_robots.Length];
+        _stuck = new int[_robots.Length];
+        _castar = new CAStar(_map);
     }
 
     /// <summary>
@@ -147,7 +144,7 @@ public class Controller
         if (route.Count == 0)
         {
             _stuck[idx]++;
-            if (_stuck[idx] >= 7)
+            if (_stuck[idx] >= _rnd.Next(5, 10))
             {
                 _stuck[idx] = 0;
                 RobotStuck?.Invoke(this, idx);
@@ -228,7 +225,7 @@ public class Controller
         else
             _stuck[idx] = 0;
 
-        if (_stuck[idx] >= 7)
+        if (_stuck[idx] >= _rnd.Next(5, 10))
         {
             _stuck[idx] = 0;
             RobotStuck?.Invoke(this, idx);

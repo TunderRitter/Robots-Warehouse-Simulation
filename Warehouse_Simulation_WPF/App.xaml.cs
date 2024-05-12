@@ -108,8 +108,8 @@ public partial class App : Application
             OpenFileDialog openFileDialog = new()
             {
                 Title = e.title,
-				DefaultExt = "json",
-				Filter = "Json Files|*.json",
+                DefaultExt = "json",
+                Filter = "Json Files|*.json",
                 DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 CheckFileExists = true,
                 CheckPathExists = true,

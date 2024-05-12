@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
@@ -23,7 +22,7 @@ public class CellState : INotifyPropertyChanged
             if (_x != value)
             {
                 _x = value;
-                OnPropertyChanged(nameof(X));
+                OnPropertyChanged();
             }
         }
     }
@@ -40,7 +39,7 @@ public class CellState : INotifyPropertyChanged
             if (_y != value)
             {
                 _y = value;
-                OnPropertyChanged(nameof(Y));
+                OnPropertyChanged();
             }
         }
     }
@@ -57,7 +56,7 @@ public class CellState : INotifyPropertyChanged
             if (_square != value)
             {
                 _square = value;
-                OnPropertyChanged(nameof(Square));
+                OnPropertyChanged();
             }
         }
     }
@@ -74,7 +73,7 @@ public class CellState : INotifyPropertyChanged
             if (_circle != value)
             {
                 _circle = value;
-                OnPropertyChanged(nameof(Circle));
+                OnPropertyChanged();
             }
         }
     }
@@ -91,7 +90,7 @@ public class CellState : INotifyPropertyChanged
             if (_id != value)
             {
                 _id = value;
-                OnPropertyChanged(nameof(Id));
+                OnPropertyChanged();
             }
         }
     }
@@ -114,7 +113,7 @@ public class CellState : INotifyPropertyChanged
 
     private int[] _corners = [0, 0, 0, 0];
     /// <summary>
-    /// Property that represents the corners of the brushes.
+    /// Property that represents the corners of the cells.
     /// </summary>
     public string Corners => string.Join(',', _corners.Select(e => e *= _radius));
     public int[] SetCorners
@@ -128,6 +127,22 @@ public class CellState : INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>
+    /// Command that handles the cell click event.
+    /// </summary>
+    public DelegateCommand CellClick { get; set; }
+    #endregion
+
+    #region Events
+    /// <summary>
+    /// Event that handles the cell click event.
+    /// </summary>
+    public event EventHandler? CellClicked;
+    /// <summary>
+    /// Event that handles the property changed event.
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
     #endregion
 
     #region Methods
@@ -141,6 +156,7 @@ public class CellState : INotifyPropertyChanged
         _id = "";
         CellClick = new DelegateCommand(CellClickMethod);
     }
+
     /// <summary>
     /// Method that handles the cell click event.
     /// </summary>
@@ -149,18 +165,7 @@ public class CellState : INotifyPropertyChanged
     {
         CellClicked?.Invoke(this, new CellCoordinates(X, Y));
     }
-    /// <summary>
-    /// Command that handles the cell click event.
-    /// </summary>
-    public DelegateCommand CellClick { get; set; }
-    /// <summary>
-    /// Event that handles the cell click event.
-    /// </summary>
-    public event EventHandler? CellClicked;
-    /// <summary>
-    /// Event that handles the property changed event.
-    /// </summary>
-    public event PropertyChangedEventHandler? PropertyChanged;
+
     /// <summary>
     /// Method that handles the property changed event.
     /// </summary>
@@ -194,7 +199,8 @@ public class CellCoordinates : EventArgs
     /// <param name="y"></param>
     public CellCoordinates(int x, int y)
     {
-        X = x; Y = y;
+        X = x;
+        Y = y;
     }
     #endregion
 }
