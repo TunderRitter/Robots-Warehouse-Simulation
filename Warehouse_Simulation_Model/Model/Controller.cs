@@ -100,25 +100,18 @@ public class Controller
             steps[i] = CalculateStep(i);
         }
 
-        HashSet<(int, int)> positions = [];
-        for (int i = 0; i < _robots.Length; i++)
-        {
-            if (steps[i] == "F")
-                positions.Add(_robots[i].NextMove());
-            else
-                positions.Add(_robots[i].Pos);
-        }
-        if (positions.Count != _robots.Length)
-        {
-            Array.ForEach(_routes, e => e.Clear());
-            _reserved = new bool[_robots.Length];
-            _stuck = new int[_robots.Length];
-            _castar = new CAStar(_map);
-
-            return ["S"];
-        }
-
         return steps;
+    }
+
+    /// <summary>
+    /// Resets the pathfinding in case of failure
+    /// </summary>
+    public void Reset()
+    {
+        Array.ForEach(_routes, e => e.Clear());
+        _reserved = new bool[_robots.Length];
+        _stuck = new int[_robots.Length];
+        _castar = new CAStar(_map);
     }
 
     /// <summary>

@@ -127,7 +127,7 @@ public class Scheduler
         _targetCount = data.Targets.Length;
 
         _strategy = TaskAssignerFactory.Create(data.Strategy);
-        _targetsSeen = data.TasksSeen;
+        _targetsSeen = data.TasksSeen * data.Robots.Length;
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
         _controller.RobotStuck += Controller_RobotStuck;
@@ -159,7 +159,7 @@ public class Scheduler
         ChangeOccurred?.Invoke(this, EventArgs.Empty);
         Running = true;
 
-        while (Running && Step <= MaxSteps)
+        while (Running && Step < MaxSteps)
         {
             if (_robotFreed)
             {
@@ -170,7 +170,6 @@ public class Scheduler
 
             _controller.CalculateRoutes();
             string[] steps = _controller.CalculateSteps();
-            if (steps.Contains("S")) continue;
 
             endTime = DateTime.Now;
             double elapsedMillisecs = (endTime - startTime).TotalMilliseconds;
@@ -178,12 +177,9 @@ public class Scheduler
             Thread.Sleep((int)(TimeLimit * (waitTime + 1) - elapsedMillisecs));
             startTime = DateTime.Now;
 
-            // DEBUG
-            // waitTime = 0;
-
-            Step += waitTime + 1;
             _controller.Step++;
-            if (Step > MaxSteps) break;
+            waitTime = Math.Min(waitTime, MaxSteps - Step);
+            Step += waitTime;
 
             if (waitTime > 0)
             {
@@ -192,8 +188,32 @@ public class Scheduler
                     WriteLogPlannerpaths(i, string.Join(',', Enumerable.Repeat("T", waitTime)));
                     WriteLogActualPaths(i, string.Join(',', Enumerable.Repeat("W", waitTime)));
                 }
+                List<object[]> timeouts = [];
+                for (int i = Step - waitTime; i < Step; i++)
+                {
+                    timeouts.Add([-1, -1, i, "timeout"]);
+                }
+                WriteLogErrors(timeouts);
             }
-            ExecuteSteps(steps);
+
+            if (Step >= MaxSteps)
+            {
+                ChangeOccurred?.Invoke(this, EventArgs.Empty);
+                break;
+            }
+            Step++;
+
+            List<object[]> errors = CheckCollisions(steps);
+            if (errors.Count != 0)
+            {
+                ExecuteSteps(Enumerable.Repeat("W", _robots.Length).ToArray());
+                _controller.Reset();
+                WriteLogErrors(errors);
+            }
+            else
+            {
+                ExecuteSteps(steps);
+            }
 
             WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
@@ -222,6 +242,37 @@ public class Scheduler
         {
             WriteLogEvents(targetId, robotId, Step, "assigned");
         }
+    }
+    
+    /// <summary>
+    /// Method for checking robot collisions
+    /// </summary>
+    /// <param name="steps"></param>
+    /// <returns>The collisions to log</returns>
+    public List<object[]> CheckCollisions(string[] steps)
+    {
+        List<object[]> errors = [];
+        Dictionary<(int, int), int> collisions = [];
+
+        for (int i = 0; i < _robots.Length; i++)
+        {
+            (int, int) position;
+            if (steps[i] == "F")
+                position = _robots[i].NextMove();
+            else
+                position = _robots[i].Pos;
+            if (!collisions.TryAdd(position, i))
+            {
+                errors.Add([
+                    i,
+                    collisions[position],
+                    Step,
+                    "collision",
+                ]);
+            }
+        }
+
+        return errors;
     }
 
     /// <summary>
@@ -252,7 +303,6 @@ public class Scheduler
                     throw new InvalidOperationException("Invalid move");
             }
 
-            //write log
             WriteLogPlannerpaths(i, steps[i]);
             WriteLogActualPaths(i, steps[i]);
         }
@@ -527,11 +577,12 @@ public class Scheduler
     }
 
     /// <summary>
-    /// Method for writing the errors (collisions) to the log.
+    /// Method for writing the errors (collisions, timeout) to the log.
     /// </summary>
-    private void WriteLogErrors()
+    /// <param name="errors"></param>
+    private void WriteLogErrors(List<object[]> errors)
     {
-
+        _log.errors.AddRange(errors);
     }
 
     /// <summary>
