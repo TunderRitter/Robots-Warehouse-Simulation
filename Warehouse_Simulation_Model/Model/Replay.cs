@@ -103,7 +103,7 @@ public class Replay
         Step = 0;
         Speed = 1.0;
         Paused = true;
-        MaxStep = _log.sumOfCost / _log.plannerPaths.Count;
+        MaxStep = _log.SumOfCost / _log.PlannerPaths.Count;
         Maps = new int[MaxStep + 1][,];
         GenerateMaps();
     }
@@ -203,7 +203,7 @@ public class Replay
         {
             for (int j = 0; j < _robots.Length; j++)
             {
-                foreach (object[] targetEvent in _log.events[j])
+                foreach (object[] targetEvent in _log.Events[j])
                 {
                     if ((int)targetEvent[1] == i - 1)
                     {
@@ -316,11 +316,11 @@ public class Replay
     /// <returns></returns>
     private static List<string>[] GetSteps(Log log)
     {
-        List<string>[] steps = new List<string>[log.start.Count];
+        List<string>[] steps = new List<string>[log.Start.Count];
         for (int i = 0; i < steps.Length; i++)
         {
             steps[i] = [];
-            string[] moves = log.actualPaths[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
+            string[] moves = log.ActualPaths[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
             steps[i].AddRange(moves);
         }
 
@@ -335,17 +335,17 @@ public class Replay
     /// <exception cref="InvalidDataException"></exception>
     private static Robot[] GetRobots(Log log)
     {
-        Robot[] robots = new Robot[log.teamSize];
+        Robot[] robots = new Robot[log.TeamSize];
         try
         {
-            if (log.teamSize != log.start.Count) throw new InvalidDataException("Invalid number of robots");
+            if (log.TeamSize != log.Start.Count) throw new InvalidDataException("Invalid number of robots");
 
             for (int i = 0; i < robots.Length; i++)
             {
-                if (log.start[i].Length == 3
-                    && log.start[i][0] is int row
-                    && log.start[i][1] is int col
-                    && log.start[i][2] is string directionStr)
+                if (log.Start[i].Length == 3
+                    && log.Start[i][0] is int row
+                    && log.Start[i][1] is int col
+                    && log.Start[i][2] is string directionStr)
                 {
                     if (!Enum.TryParse(directionStr, out Direction direction)) throw new InvalidDataException("Invalid direction");
                     robots[i] = new Robot(i, (row, col), direction);
@@ -369,13 +369,13 @@ public class Replay
     /// <exception cref="InvalidDataException"></exception>
     private static Target[] GetTargets(Log log)
     {
-        Target[] targets = new Target[log.tasks.Count];
+        Target[] targets = new Target[log.Tasks.Count];
         try
         {
-            for (int i = 0; i < log.tasks.Count; i++)
+            for (int i = 0; i < log.Tasks.Count; i++)
             {
-                if (log.tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
-                targets[i] = new Target((log.tasks[i][1], log.tasks[i][2]), log.tasks[i][0])
+                if (log.Tasks[i].Length != 3) throw new InvalidDataException("Invalid tasks");
+                targets[i] = new Target((log.Tasks[i][1], log.Tasks[i][2]), log.Tasks[i][0])
                 {
                     Active = true
                 };

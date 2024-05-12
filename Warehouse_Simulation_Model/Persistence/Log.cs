@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Warehouse_Simulation_Model.Persistence;
 
@@ -11,59 +12,65 @@ public class Log
     /// <summary>
     /// Property that stores the action model.
     /// </summary>
-    public string actionModel { get; set; }
+    public string ActionModel { get; set; }
     /// <summary>
     /// Property that stores whether the simulation was collision-free.
     /// </summary>
+    [JsonPropertyName("AllValid")]
     public string AllValid { get; set; }
     /// <summary>
     /// Property that stores the team size.
     /// </summary>
-    public int teamSize { get; set; }
+    public int TeamSize { get; set; }
     /// <summary>
     /// Property that stores the starting positions and directions of all robots in a list.
     /// </summary>
-    public List<object[]> start { get; set; }
+    public List<object[]> Start { get; set; }
     /// <summary>
     /// Property that stores the number of tasks completed.
     /// </summary>
-    public int numTaskFinished { get; set; }
+    public int NumTaskFinished { get; set; }
     /// <summary>
     /// Property that stores the sum fo cost.
     /// </summary>
-    public int sumOfCost { get; set; }
+    public int SumOfCost { get; set; }
     /// <summary>
     /// Property that stores the makespan.
     /// </summary>
-    public int makespan { get; set; }
+    public int Makespan { get; set; }
     /// <summary>
     /// Property that stores the actual paths of the robots.
     /// </summary>
-    public List<string> actualPaths { get; set; }
+    public List<string> ActualPaths { get; set; }
     /// <summary>
     /// Property that stores the planned paths of the robots.
     /// </summary>
-    public List<string> plannerPaths { get; set; }
+    public List<string> PlannerPaths { get; set; }
     /// <summary>
     /// Property that stores the time each step takes.
     /// </summary>
-    public List<float> plannerTimes { get; set; }
+    public List<float> PlannerTimes { get; set; }
     /// <summary>
     /// Property that stores the errors that occurred during the simulation (collisions).
     /// </summary>
-    public List<object[]> errors { get; set; }
+    public List<object[]> Errors { get; set; }
     /// <summary>
     /// Property that stores the events that occurred during the simulation.
     /// </summary>
-    public List<List<object[]>> events { get; set; }
+    public List<List<object[]>> Events { get; set; }
     /// <summary>
     /// Property that stores the tasks and their positions.
     /// </summary>
-    public List<int[]> tasks { get; set; }
+    public List<int[]> Tasks { get; set; }
+
     /// <summary>
-    /// JSON Pretty Print
+    /// Sets JSON Pretty Print and property names
     /// </summary>
-    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+    };
 #endregion
 
 #region Methods
@@ -72,19 +79,19 @@ public class Log
 /// </summary>
 public Log()
     {
-        actionModel = "";
+        ActionModel = "";
         AllValid = "";
-        teamSize = 0;
-        start = [];
-        numTaskFinished = 0;
-        sumOfCost = 0;
-        makespan = 0;
-        actualPaths = [];
-        plannerPaths = [];
-        plannerTimes = [];
-        errors = [];
-        events = [];
-        tasks = [];
+        TeamSize = 0;
+        Start = [];
+        NumTaskFinished = 0;
+        SumOfCost = 0;
+        Makespan = 0;
+        ActualPaths = [];
+        PlannerPaths = [];
+        PlannerTimes = [];
+        Errors = [];
+        Events = [];
+        Tasks = [];
     }
 
     /// <summary>
@@ -99,28 +106,28 @@ public Log()
         try
         {
             Log log = JsonSerializer.Deserialize<Log>(File.ReadAllText(path)) ?? throw new NullReferenceException();
-            for (int i = 0; i < log.start.Count; i++)
+            for (int i = 0; i < log.Start.Count; i++)
             {
-                log.start[i][0] = ((JsonElement)log.start[i][0]).GetInt32();
-                log.start[i][1] = ((JsonElement)log.start[i][1]).GetInt32();
-                log.start[i][2] = ((JsonElement)log.start[i][2]).GetString()
+                log.Start[i][0] = ((JsonElement)log.Start[i][0]).GetInt32();
+                log.Start[i][1] = ((JsonElement)log.Start[i][1]).GetInt32();
+                log.Start[i][2] = ((JsonElement)log.Start[i][2]).GetString()
                     ?? throw new InvalidDataException();
             }
-            for (int i = 0; i < log.errors.Count; i++)
+            for (int i = 0; i < log.Errors.Count; i++)
             {
-                log.errors[i][0] = ((JsonElement)log.errors[i][0]).GetInt32();
-                log.errors[i][1] = ((JsonElement)log.errors[i][1]).GetInt32();
-                log.errors[i][2] = ((JsonElement)log.errors[i][2]).GetInt32();
-                log.errors[i][3] = ((JsonElement)log.errors[i][3]).GetString()
+                log.Errors[i][0] = ((JsonElement)log.Errors[i][0]).GetInt32();
+                log.Errors[i][1] = ((JsonElement)log.Errors[i][1]).GetInt32();
+                log.Errors[i][2] = ((JsonElement)log.Errors[i][2]).GetInt32();
+                log.Errors[i][3] = ((JsonElement)log.Errors[i][3]).GetString()
                     ?? throw new InvalidDataException();
             }
-            for (int i = 0; i < log.events.Count; i++)
+            for (int i = 0; i < log.Events.Count; i++)
             {
-                for (int j = 0; j < log.events[i].Count; j++)
+                for (int j = 0; j < log.Events[i].Count; j++)
                 {
-                    log.events[i][j][0] = ((JsonElement)log.events[i][j][0]).GetInt32();
-                    log.events[i][j][1] = ((JsonElement)log.events[i][j][1]).GetInt32();
-                    log.events[i][j][2] = ((JsonElement)log.events[i][j][2]).GetString()
+                    log.Events[i][j][0] = ((JsonElement)log.Events[i][j][0]).GetInt32();
+                    log.Events[i][j][1] = ((JsonElement)log.Events[i][j][1]).GetInt32();
+                    log.Events[i][j][2] = ((JsonElement)log.Events[i][j][2]).GetString()
                         ?? throw new InvalidDataException();
                 }
             }
