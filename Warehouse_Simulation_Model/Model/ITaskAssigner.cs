@@ -7,11 +7,11 @@ public interface ITaskAssigner
 {
     #region Methods
     /// <summary>
-    /// Assigns the robots to the targets.
+    /// Method that assigns the robots to the targets.
     /// </summary>
     /// <param name="robots"></param>
     /// <param name="targets"></param>
-    /// <returns></returns>
+    /// <returns>The assigned robot and target pairs.</returns>
     public (int, int)[] Assign(List<Robot> robots, List<Target> targets);
     #endregion
 }

@@ -10,7 +10,7 @@ public static class TaskAssignerFactory
     /// Method that creates the task assigners.
     /// </summary>
     /// <param name="type"></param>
-    /// <returns></returns>
+    /// <returns>The correct <see cref="ITaskAssigner"/> instance.</returns>
     /// <exception cref="InvalidDataException"></exception>
     public static ITaskAssigner Create(string type)
     {

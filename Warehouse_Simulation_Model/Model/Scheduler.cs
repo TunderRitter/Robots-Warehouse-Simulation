@@ -245,10 +245,10 @@ public class Scheduler
     }
     
     /// <summary>
-    /// Method for checking robot collisions
+    /// Method for checking robot collisions.
     /// </summary>
     /// <param name="steps"></param>
-    /// <returns>The collisions to log</returns>
+    /// <returns>The collisions to log.</returns>
     public List<object[]> CheckCollisions(string[] steps)
     {
         List<object[]> errors = [];

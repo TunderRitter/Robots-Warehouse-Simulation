@@ -11,7 +11,7 @@ public class RoundRobin : ITaskAssigner
     /// </summary>
     /// <param name="robots"></param>
     /// <param name="targets"></param>
-    /// <returns></returns>
+    /// <returns>The assigned robot and target pairs.</returns>
     public (int, int)[] Assign(List<Robot> robots, List<Target> targets)
     {
         List<(int, int)> assignments = [];

@@ -8,6 +8,17 @@ namespace Warehouse_Simulation_Model.Persistence;
 /// </summary>
 public class Log
 {
+    #region Fields
+    /// <summary>
+    /// Sets JSON Pretty Print and property names
+    /// </summary>
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+    };
+    #endregion
+
     #region Properties
     /// <summary>
     /// Property that stores the action model.
@@ -62,22 +73,13 @@ public class Log
     /// Property that stores the tasks and their positions.
     /// </summary>
     public List<int[]> Tasks { get; set; }
+    #endregion
 
+    #region Methods
     /// <summary>
-    /// Sets JSON Pretty Print and property names
+    /// Initializes a new instance of the <see cref="Log"/> class.
     /// </summary>
-    private static readonly JsonSerializerOptions _options = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true,
-    };
-#endregion
-
-#region Methods
-/// <summary>
-/// Initializes a new instance of the <see cref="Log"/> class.
-/// </summary>
-public Log()
+    public Log()
     {
         ActionModel = "";
         AllValid = "";
@@ -105,7 +107,7 @@ public Log()
     {
         try
         {
-            Log log = JsonSerializer.Deserialize<Log>(File.ReadAllText(path)) ?? throw new NullReferenceException();
+            Log log = JsonSerializer.Deserialize<Log>(File.ReadAllText(path), _options) ?? throw new NullReferenceException();
             for (int i = 0; i < log.Start.Count; i++)
             {
                 log.Start[i][0] = ((JsonElement)log.Start[i][0]).GetInt32();
