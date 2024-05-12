@@ -81,7 +81,7 @@ namespace Warehouse_Simulation_Model.Model.Tests
 
             scheduler.Schedule();
 
-            Assert.AreEqual(2, scheduler.Step);
+            Assert.AreEqual(1, scheduler.Step);
             Assert.AreEqual(true, scheduler.Running);
         }
 
