@@ -429,8 +429,32 @@
                               Content="SHOW PATH"
                               Margin="110,0,0,0"
                               VerticalAlignment="Top"
-                              HorizontalAlignment="Left">
+                              HorizontalAlignment="Left"
+                              Click="ShowPathButtons">
                 </ToggleButton>
+                <Button Content="-"
+                        x:Name="showdec"
+                        Command="{Binding Path=PathNumberDec}"
+                        Visibility="Collapsed"
+                        Width="30"
+                        Height="30"
+                        Margin="220,0,0,0"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                <Button Content="+"
+                        x:Name="showinc"
+                        Command="{Binding Path=PathNumberInc}"
+                        Visibility="Collapsed"
+                        Width="30"
+                        Height="30"
+                        Margin="255,0,0,0"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top" />
+                
             </Grid>
 
         </Grid>
