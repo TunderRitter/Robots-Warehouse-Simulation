@@ -122,5 +122,87 @@ namespace Warehouse_Simulation_Model.Model.Tests
 
             Assert.AreEqual(3, scheduler.TargetNum);
         }
+
+        [TestMethod()]
+        public void AssignTasksTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            scheduler.AssignTasks();
+
+            Assert.AreEqual(scheduler.TargetNum, 2);
+
+            scheduler.TimeLimit = 1;
+            scheduler.Schedule();
+            System.Threading.Thread.Sleep(1000);
+
+            Assert.AreEqual(scheduler.TargetNum, 0);
+        }
+
+        [TestMethod()]
+        public void WriteLogTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            scheduler.WriteLog();
+
+            Assert.AreEqual(false, System.IO.File.Exists("log.txt"));
+        }
+
+        [TestMethod()]
+        public void WriteToFileTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            scheduler.WriteToFile("asd");
+
+            Assert.AreEqual(false, System.IO.File.Exists("schedule.txt"));
+        }
+
+        [TestMethod()]
+        public void GetRobotPathTest()
+        {
+            SchedulerData data = new SchedulerData
+            {
+                Map = map,
+                Robots = robots,
+                Targets = targets,
+                TeamSize = 2,
+                TasksSeen = 2,
+                Strategy = "roundrobin",
+            };
+
+            Scheduler scheduler = new Scheduler(data);
+            object type = scheduler.GetRobotPath(1);
+
+            Assert.AreEqual(type, type);
+        }
     }
 }
