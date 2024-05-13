@@ -2,26 +2,45 @@
 
 namespace Warehouse_Simulation_Model.Persistence;
 
-
+/// <summary>
+/// Class that reads the configuration files.
+/// </summary>
 public static class ConfigReader
 {
+    #region Fields
+    /// <summary>
+    /// Sets JSON property names
+    /// </summary>
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+    #endregion
+
+    #region Methods
+    /// <summary>
+    /// Reads config file.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns><see cref="SchedulerData"/> object containing the read values.</returns>
+    /// <exception cref="DirectoryNotFoundException"></exception>
     public static SchedulerData Read(string path)
     {
         try
         {
             string configParent = Directory.GetParent(path)?.FullName ?? throw new DirectoryNotFoundException();
-            ConfigFile config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(path));
-            bool[,] map = ReadMap(Path.Combine(configParent, config.mapFile.Replace("/", "\\")));
-            (int, int)[] robots = ReadCoordinates(Path.Combine(configParent, config.agentFile.Replace("/", "\\")), map);
-            (int, int)[] targets = ReadCoordinates(Path.Combine(configParent, config.taskFile.Replace("/", "\\")), map);
+            ConfigFile config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(path), _options);
+            bool[,] map = ReadMap(Path.Combine(configParent, config.MapFile.Replace("/", "\\")));
+            (int, int)[] robots = ReadCoordinates(Path.Combine(configParent, config.AgentFile.Replace("/", "\\")), map);
+            (int, int)[] targets = ReadCoordinates(Path.Combine(configParent, config.TaskFile.Replace("/", "\\")), map);
             return new SchedulerData
             {
                 Map = map,
                 Robots = robots,
                 Targets = targets,
-                TeamSize = config.teamSize,
-                TasksSeen = config.numTasksReveal,
-                Strategy = config.taskAssignmentStrategy,
+                TeamSize = config.TeamSize,
+                TasksSeen = config.NumTasksReveal,
+                Strategy = config.TaskAssignmentStrategy,
             };
         }
         catch (Exception)
@@ -30,6 +49,12 @@ public static class ConfigReader
         }
     }
 
+    /// <summary>
+    /// Reads map file.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns>A matrix where the value is <see langword="true"/> at index i, j if there is a wall, otherwise <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentException"></exception>
     public static bool[,] ReadMap(string path)
     {
         try
@@ -78,6 +103,13 @@ public static class ConfigReader
         
     }
 
+    /// <summary>
+    /// Reads coordinates for robot and target positions.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="map"></param>
+    /// <returns>Array containing the coordinates.</returns>
+    /// <exception cref="ArgumentException"></exception>
     private static (int, int)[] ReadCoordinates(string path, bool[,] map)
     {
         try
@@ -102,5 +134,12 @@ public static class ConfigReader
         }
     }
 
+    /// <summary>
+    /// Converts coordinates.
+    /// </summary>
+    /// <param name="coor"></param>
+    /// <param name="width"></param>
+    /// <returns>A Tuple containing the x and y coordinates.</returns>
     private static (int, int) ConvertCoordinates(int coor, int width) => (coor / width, coor % width);
+    #endregion
 }

@@ -1,19 +1,61 @@
 ﻿namespace Warehouse_Simulation_Model.Model;
 
-
+/// <summary>
+/// Class responsible for calculating the routes of the robots.
+/// </summary>
 public class Controller
 {
+    #region Fields
+    /// <summary>
+    /// Array containing the robots.
+    /// </summary>
     private readonly Robot[] _robots;
+    /// <summary>
+    /// Array containing the routes of the robots.
+    /// </summary>
     private readonly Queue<(int, int)>[] _routes;
+    /// <summary>
+    /// Array containing the reserved coordinates.
+    /// </summary>
     private bool[] _reserved;
+    /// <summary>
+    /// Array containing the stuck robots.
+    /// </summary>
     private int[] _stuck;
+    /// <summary>
+    /// Array containing the map of the warehouse.
+    /// </summary>
     private readonly bool[,] _map;
+    /// <summary>
+    /// AStar object for calculating the routes.
+    /// </summary>
     private CAStar _castar;
+    /// <summary>
+    /// Random object for randomizing when is a task given back.
+    /// </summary>
+    private readonly Random _rnd;
+    #endregion
+
+    #region Properties
+    /// <summary>
+    /// Property representing the current step.
+    /// </summary>
     public int Step { get; set; }
+    #endregion
 
+    #region Events
+    /// <summary>
+    /// Event for when a robot is stuck.
+    /// </summary>
     public event EventHandler<int>? RobotStuck;
+    #endregion
 
-
+    #region Public Methods
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Controller"/> class.
+    /// </summary>
+    /// <param name="map"></param>
+    /// <param name="robots"></param>
     public Controller(bool[,] map, Robot[] robots)
     {
         _map = map;
@@ -22,6 +64,7 @@ public class Controller
         _routes = new Queue<(int, int)>[robots.Length];
         _reserved = new bool[robots.Length];
         _stuck = new int[robots.Length];
+        _rnd = new Random();
         for (int i = 0; i < robots.Length; i++)
         {
             _routes[i] = new Queue<(int, int)>();
@@ -29,7 +72,9 @@ public class Controller
         Step = 0;
     }
 
-
+    /// <summary>
+    /// Calculates the routes for the robots.
+    /// </summary>
     public void CalculateRoutes()
     {
         for (int i = 0; i < _robots.Length; i++)
@@ -48,6 +93,10 @@ public class Controller
         }
     }
 
+    /// <summary>
+    /// Calculates the steps for the robots.
+    /// </summary>
+    /// <returns> An array conatining the next step for each robot. </returns>
     public string[] CalculateSteps()
     {
         string[] steps = new string[_robots.Length];
@@ -55,28 +104,38 @@ public class Controller
         {
             steps[i] = CalculateStep(i);
         }
-
-        HashSet<(int, int)> positions = [];
-        for (int i = 0; i < _robots.Length; i++)
-        {
-            if (steps[i] == "F")
-                positions.Add(_robots[i].NextMove());
-            else
-                positions.Add(_robots[i].Pos);
-        }
-        if (positions.Count != _robots.Length)
-        {
-            Array.ForEach(_routes, e => e.Clear());
-            _reserved = new bool[_robots.Length];
-            _stuck = new int[_robots.Length];
-            _castar = new CAStar(_map);
-
-            return ["S"];
-        }
-
         return steps;
     }
 
+    /// <summary>
+    /// Resets the pathfinding in case of failure
+    /// </summary>
+    public void Reset()
+    {
+        Array.ForEach(_routes, e => e.Clear());
+        _reserved = new bool[_robots.Length];
+        _stuck = new int[_robots.Length];
+        _castar = new CAStar(_map);
+    }
+
+    /// <summary>
+    /// Gets the route of the robot.
+    /// </summary>
+    /// <param name="idx"></param>
+    /// <returns> List of coordinates that is the route of the robot. </returns>
+    public List<(int, int)> GetRoute(int idx)
+    {
+        return [_robots[idx].Pos, .. _routes[idx]];
+    }
+    #endregion
+
+    #region Private Methods
+    /// <summary>
+    /// Calculates the step for the robot.
+    /// </summary>
+    /// <param name="idx"></param>
+    /// <returns> The next step for the robot. </returns>
+    /// <exception cref="Exception"></exception>
     private string CalculateStep(int idx)
     {
         Robot robot = _robots[idx];
@@ -85,7 +144,7 @@ public class Controller
         if (route.Count == 0)
         {
             _stuck[idx]++;
-            if (_stuck[idx] >= 7)
+            if (_stuck[idx] >= _rnd.Next(5, 10))
             {
                 _stuck[idx] = 0;
                 RobotStuck?.Invoke(this, idx);
@@ -166,7 +225,7 @@ public class Controller
         else
             _stuck[idx] = 0;
 
-        if (_stuck[idx] >= 7)
+        if (_stuck[idx] >= _rnd.Next(5, 10))
         {
             _stuck[idx] = 0;
             RobotStuck?.Invoke(this, idx);
@@ -174,10 +233,5 @@ public class Controller
 
         return move;
     }
-
-
-    public List<(int, int)> GetRoute(int idx)
-    {
-        return [_robots[idx].Pos, .. _routes[idx]];
-    }
+    #endregion
 }

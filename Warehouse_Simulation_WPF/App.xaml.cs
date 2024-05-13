@@ -11,16 +11,31 @@ namespace Warehouse_Simulation_WPF;
 /// </summary>
 public partial class App : Application
 {
+    #region Fields
+    /// <summary>
+    /// Main window of the application.
+    /// </summary>
     private MainWindow _view = null!;
+    /// <summary>
+    /// Main view model of the application.
+    /// </summary>
     private MainViewModel _viewModel = null!;
+    #endregion
 
-
+    #region Methods
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class.
+    /// </summary>
     public App()
     {
         Startup += new StartupEventHandler(App_Startup);
     }
 
-
+    /// <summary>
+    /// Method that starts the application.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void App_Startup(object? sender, StartupEventArgs e)
     {
         _viewModel = new MainViewModel();
@@ -35,6 +50,11 @@ public partial class App : Application
         _view.Show();
     }
 
+    /// <summary>
+    /// Method that saves the log file.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void SaveLogFile(object? sender, EventArgs e)
     {
         if (_viewModel == null) return;
@@ -65,11 +85,22 @@ public partial class App : Application
 
     }
 
+    /// <summary>
+    /// Method that throws not implemented exception.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    /// <exception cref="NotImplementedException"></exception>
     private void NewReplay(object? sender, EventArgs e)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Method that loads the config or log file.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void LoadFile(object? sender, (string title, string type) e)
     {
         try
@@ -77,8 +108,8 @@ public partial class App : Application
             OpenFileDialog openFileDialog = new()
             {
                 Title = e.title,
-				DefaultExt = "json",
-				Filter = "Json Files|*.json",
+                DefaultExt = "json",
+                Filter = "Json Files|*.json",
                 DefaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -120,6 +151,11 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Method that handles the closing of the view.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void View_Closing(object? sender, CancelEventArgs e)
     {
         if (MessageBox.Show("Are you sure you want to exit?", "Warehouse Simulator", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
@@ -127,4 +163,5 @@ public partial class App : Application
             e.Cancel = true;
         }
     }
+    #endregion
 }
