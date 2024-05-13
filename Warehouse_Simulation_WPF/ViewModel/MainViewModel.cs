@@ -160,6 +160,10 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     _pathIdx = -1;
                 }
+                if (value)
+                {
+                    _pathIdx = 0;
+                }
                 _showPath = value;
                 OnPropertyChanged();
             }
@@ -253,6 +257,8 @@ public class MainViewModel : INotifyPropertyChanged
     public DelegateCommand EndCommand { get; init; }
     public DelegateCommand Slow { get; init; }
     public DelegateCommand Fast { get; init; }
+    public DelegateCommand PathNumberInc { get; init; }
+    public DelegateCommand PathNumberDec { get; init; }
 
     #endregion
 
@@ -286,6 +292,8 @@ public class MainViewModel : INotifyPropertyChanged
         EndCommand = new DelegateCommand(param => EndSimulation());
         Slow = new DelegateCommand(param => SlowReplay());
         Fast = new DelegateCommand(param => FastReplay());
+        PathNumberInc = new DelegateCommand(param => SwitchPath(1));
+        PathNumberDec = new DelegateCommand(param => SwitchPath(-1));
 
         Cells = new ObservableCollection<CellState>();
         _pauseText = "";
@@ -525,6 +533,26 @@ public class MainViewModel : INotifyPropertyChanged
                     _pathIdx = floor.Robot.Id;
                 }
             }
+        }
+    }
+
+    private void SwitchPath(int n)
+    {
+        if (ShowPath)
+        {
+            if (_pathIdx == _robotNumber-1 && n == 1)
+            {
+                _pathIdx = 0;
+            }
+            else if (_pathIdx == 0 && n == -1)
+            {
+                _pathIdx = _robotNumber - 1;
+            }
+            else
+            {
+                _pathIdx += n;
+            }
+
         }
     }
 
