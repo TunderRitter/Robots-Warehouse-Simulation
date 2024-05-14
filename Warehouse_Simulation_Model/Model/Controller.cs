@@ -141,7 +141,7 @@ public class Controller
         if (route.Count == 0)
         {
             _stuck[idx]++;
-            if (_stuck[idx] >= 10)
+            if (_stuck[idx] >= 8)
             {
                 bool[] longStuck = _stuck.Select(e => e >= 5).ToArray();
                 for (int i = 0; i < _stuck.Length; i++)
@@ -227,7 +227,7 @@ public class Controller
         else
             _stuck[idx] = 0;
 
-        if (_stuck[idx] >= 10)
+        if (_stuck[idx] >= 8)
         {
             bool[] longStuck = _stuck.Select(e => e >= 5).ToArray();
             for (int i = 0; i < _stuck.Length; i++)

@@ -182,7 +182,8 @@ public class Scheduler
                 {
                     _robots[stuck[i]].TargetPos = _targets[targets[i]].Pos;
                     _targets[targets[i]].Id = _robots[stuck[i]].Id;
-                }
+					WriteLogEvents(_targets[targets[i]].InitId, _robots[stuck[i]].Id, Step, "assigned");
+				}
                 _stuck.Clear();
             }
 
