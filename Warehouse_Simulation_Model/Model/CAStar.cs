@@ -78,12 +78,18 @@ public class CAStar
     /// <summary>
     /// Dictionary storing the cell reservations. They keys are tuples for the reserved cells' coordinates, and the values are the moments when that specific cell is occupied.
     /// </summary>
-    private Dictionary<(int I, int J), List<int>> Reservations;
-    private Dictionary<(int I, int J), int> reservationsFinish;
+    private readonly Dictionary<(int I, int J), List<int>> Reservations;
+    /// <summary>
+    /// Dictionary storing the cell reservations, after the robot finished the task.
+    /// </summary>
+    private readonly Dictionary<(int I, int J), int> reservationsFinish;
     /// <summary>
     /// Variable representing the map. Walls are true, empty cells are false.
     /// </summary>
     private readonly bool[,] Map;
+    /// <summary>
+    /// The reserved cells for waiting robots.
+    /// </summary>
     private readonly bool[,] reservationMap;
     /// <summary>
     /// Variable for the map's height
@@ -101,7 +107,7 @@ public class CAStar
     public CAStar(bool[,] m)
     {
         TimeStep = 0;
-        Reservations = new();
+        Reservations = [];
         reservationsFinish = [];
         Map = m;
         Row = Map.GetLength(0);
@@ -114,7 +120,7 @@ public class CAStar
     /// </summary>
     /// <param name="list">The Open cell where we search for the cell</param>
     /// <returns>The index of the cell with the lowest F value in the list</returns>
-    public static int Lowest_f_cost(List<CASCell> list)
+    public static int LowestFCost(List<CASCell> list)
     {
         int lowest = 0;
         for (int i = 1; i < list.Count; i++)
@@ -124,12 +130,20 @@ public class CAStar
         return lowest;
     }
 
+    /// <summary>
+    /// Reserve cell for waiting robot.
+    /// </summary>
+    /// <param name="robot"></param>
     public void Reserve(Robot robot)
     {
         reservationMap[robot.Pos.row, robot.Pos.col] = true;
         reservationsFinish.Remove(robot.Pos);
     }
 
+    /// <summary>
+    /// Remove cell reservation.
+    /// </summary>
+    /// <param name="robot"></param>
     public void UnReserve(Robot robot)
     {
         reservationMap[robot.Pos.row, robot.Pos.col] = false;
@@ -140,7 +154,7 @@ public class CAStar
     /// </summary>
     /// <param name="cell">The cell where the robot currently stands</param>
     /// <returns>true if the waiting is too long, false otherwise</returns>
-    private bool TooLongWait(CASCell cell)
+    private static bool TooLongWait(CASCell cell)
     {
         int n = 1;
         while (cell.Parent != null && cell.I == cell.Parent.I && cell.J == cell.Parent.J)
@@ -168,17 +182,14 @@ public class CAStar
         List<CASCell> Closed = [];
 
 
-        CASCell Start = new CASCell(Robot.Pos.row, Robot.Pos.col, null, StartTime)
-        {
-            G = 0
-        };
+        CASCell Start = new(Robot.Pos.row, Robot.Pos.col, null, StartTime) { G = 0 };
         Start.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
 
         Open.Add(Start);
 
         while (Open.Count != 0)
         {
-            int idx = Lowest_f_cost(Open);
+            int idx = LowestFCost(Open);
             CASCell Current = Open[idx];
             Open.RemoveAt(idx);
             if (Current.I == Robot.TargetPos.Value.row && Current.J == Robot.TargetPos.Value.col)
@@ -196,10 +207,10 @@ public class CAStar
             int time = Current.Time;
 
             (int I, int J)[] neighbors =
-                { (Current.I, Current.J - 1),
+                [ (Current.I, Current.J - 1),
                   (Current.I, Current.J + 1),
                   (Current.I - 1, Current.J),
-                  (Current.I + 1, Current.J) };
+                  (Current.I + 1, Current.J) ];
 
             foreach ((int I, int J) Neighbor in neighbors)
             {
@@ -424,8 +435,7 @@ public class CAStar
                         }
                     }
 
-                    CASCell NewCell = new CASCell(Neighbor.I, Neighbor.J, Current, n_time);
-                    NewCell.G = next_cost;
+                    CASCell NewCell = new(Neighbor.I, Neighbor.J, Current, n_time) { G = next_cost };
                     NewCell.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
                     Open.Add(NewCell);
                     neighborAdded = true;
@@ -436,8 +446,7 @@ public class CAStar
             if (!neighborAdded && Reservations.ContainsKey((Current.I, Current.J)) &&
                 !Reservations[(Current.I, Current.J)].Contains(time + 1) && !TooLongWait(Current))
             {
-                CASCell Waiting = new CASCell(Current.I, Current.J, Current, Current.Time + 1);
-                Waiting.G = Current.G + 1;
+                CASCell Waiting = new(Current.I, Current.J, Current, Current.Time + 1) { G = Current.G + 1 };
                 Waiting.SetH_F(Robot.TargetPos.Value.row, Robot.TargetPos.Value.col);
                 Open.Add(Waiting);
             }
@@ -457,7 +466,7 @@ public class CAStar
         {
             path.Insert(0, (Cell.I, Cell.J));
             if (!Reservations.ContainsKey((Cell.I, Cell.J)))
-                Reservations.Add((Cell.I, Cell.J), new List<int>());
+                Reservations.Add((Cell.I, Cell.J), []);
             Reservations[(Cell.I, Cell.J)].Add(Cell.Time);
 
 
@@ -465,7 +474,7 @@ public class CAStar
             if (Cell.Parent != null)
             {
                 if (!Reservations.ContainsKey((Cell.Parent.I, Cell.Parent.J)))
-                    Reservations.Add((Cell.Parent.I, Cell.Parent.J), new List<int>());
+                    Reservations.Add((Cell.Parent.I, Cell.Parent.J), []);
                 for (int i = Cell.Parent.Time + 1; i < Cell.Time; i++)
                 {
                     Reservations[(Cell.Parent.I, Cell.Parent.J)].Add(i);
@@ -474,7 +483,7 @@ public class CAStar
             Cell = Cell.Parent;
         }
 
-        Queue<(int, int)> Path = new Queue<(int, int)>(path);
+        Queue<(int, int)> Path = new(path);
         Path.Dequeue();
         return Path;
     }
