@@ -30,20 +30,6 @@ public partial class MainWindow : Window
         FastButton.Visibility = Visibility.Visible;
     }
 
-    private void ShowPathButtons(object sender, EventArgs e)
-    {
-        if (showinc.Visibility == Visibility.Collapsed)
-        {
-            showinc.Visibility = Visibility.Visible;
-            showdec.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            showinc.Visibility = Visibility.Collapsed;
-            showdec.Visibility = Visibility.Collapsed;
-        }
-    }
-
     public void Back(object sender, EventArgs e)
     {
         SimGrid.Visibility = Visibility.Collapsed;

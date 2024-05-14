@@ -222,7 +222,6 @@ public class MainViewModel : INotifyPropertyChanged
                 if (_showPath && value)
                 {
                     ShowPath = false;
-                    _pathIdx = -1;
                 }
                 OnPropertyChanged();
             }
@@ -246,10 +245,12 @@ public class MainViewModel : INotifyPropertyChanged
                 if (!value)
                 {
                     _pathIdx = -1;
+                    ShowPathChanged?.Invoke(this, false);
                 }
                 if (value)
                 {
                     _pathIdx = 0;
+                    ShowPathChanged?.Invoke(this, true);
                 }
                 _showPath = value;
                 OnPropertyChanged();
@@ -445,6 +446,10 @@ public class MainViewModel : INotifyPropertyChanged
     /// Event that represents the exit app.
     /// </summary>
     public event EventHandler? ExitApp;
+    /// <summary>
+    /// Evvent to hide and unhide the buttons.
+    /// </summary>
+    public event EventHandler<bool>? ShowPathChanged;
     #endregion
 
     #region Public Methods

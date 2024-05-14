@@ -42,11 +42,31 @@ public partial class App : Application
         _viewModel.NewSimulationStarted += new EventHandler<(string, string)>(LoadFile);
         _viewModel.Replay += new EventHandler<(string, string)>(LoadFile);
         _viewModel.SaveLog += new EventHandler(SaveLogFile);
+        _viewModel.ShowPathChanged += new EventHandler<bool>(ShowPathButtons);
 
         _view = new MainWindow { DataContext = _viewModel };
         _view.Closing += new CancelEventHandler(View_Closing);
         _view.ReplaySlider.ValueChanged += _viewModel.ReplaySLider_ValueChanged;
         _view.Show();
+    }
+
+    /// <summary>
+    /// Sets the path buttons' visibility.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void ShowPathButtons(object? sender, bool e)
+    {
+        if (e)
+        {
+            _view.showinc.Visibility = Visibility.Visible;
+            _view.showdec.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _view.showinc.Visibility = Visibility.Collapsed;
+            _view.showdec.Visibility = Visibility.Collapsed;
+        }
     }
 
     /// <summary>
