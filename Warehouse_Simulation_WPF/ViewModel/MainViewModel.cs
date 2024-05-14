@@ -247,6 +247,10 @@ public class MainViewModel : INotifyPropertyChanged
                 {
                     _pathIdx = -1;
                 }
+                if (value)
+                {
+                    _pathIdx = 0;
+                }
                 _showPath = value;
                 OnPropertyChanged();
             }
@@ -409,6 +413,15 @@ public class MainViewModel : INotifyPropertyChanged
     /// Command for speeding up the replay.
     /// </summary>
     public DelegateCommand Fast { get; init; }
+    /// <summary>
+    /// Command for switching to the next robot's path
+    /// </summary>
+    public DelegateCommand PathNumberInc { get; init; }
+    /// <summary>
+    /// Command for switching to the previous robot's path
+    /// </summary>
+    public DelegateCommand PathNumberDec { get; init; }
+
     #endregion
 
     #region Events
@@ -460,6 +473,8 @@ public class MainViewModel : INotifyPropertyChanged
         EndCommand = new DelegateCommand(param => EndSimulation());
         Slow = new DelegateCommand(param => SlowReplay());
         Fast = new DelegateCommand(param => FastReplay());
+        PathNumberInc = new DelegateCommand(param => SwitchPath(1));
+        PathNumberDec = new DelegateCommand(param => SwitchPath(-1));
 
         Cells = [];
         _pauseText = "";
@@ -469,7 +484,7 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>
     /// Method that creates the scheduler.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">The config file's path</param>
     public void CreateScheduler(string path)
     {
         try
@@ -492,7 +507,7 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>
     /// Method that saves the log file.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">The save file's path</param>
     public void SaveFile(string path)
     {
         if (_scheduler == null) return;
@@ -507,8 +522,8 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>
     /// Method that creates the replay.
     /// </summary>
-    /// <param name="logPath"></param>
-    /// <param name="mapPath"></param>
+    /// <param name="logPath">The log file's path</param>
+    /// <param name="mapPath">The map file's path</param>
     public void CreateReplay(string logPath, string mapPath)
     {
         try
@@ -780,9 +795,31 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
-
     /// <summary>
-    /// Method that updates the simulation map.
+    /// Method that handles the switching between paths
+    /// </summary>
+    /// <param name="n"></param>
+    private void SwitchPath(int n)
+    {
+        if (ShowPath)
+        {
+            if (_pathIdx == _robotNumber-1 && n == 1)
+            {
+                _pathIdx = 0;
+            }
+            else if (_pathIdx == 0 && n == -1)
+            {
+                _pathIdx = _robotNumber - 1;
+            }
+            else
+            {
+                _pathIdx += n;
+            }
+
+        }
+    }
+    /// <summary>
+    /// Method that updates the simulation map
     /// </summary>
     private void UpdateSimMap()
     {

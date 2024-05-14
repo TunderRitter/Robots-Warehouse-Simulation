@@ -43,7 +43,7 @@ test:
     - dotnet tool install --tool-path . dotnet-reportgenerator-globaltool
     - ./reportgenerator "-reports:$CI_PROJECT_DIR/*/TestResults/*/coverage.cobertura.xml" "-targetdir:report" "-reporttypes:Cobertura"
     - line_rate="$(head -n 3 ./report/Cobertura.xml | sed 'N;N;s/.*line-rate="\([^" ]*\).*/\1/g')"
-    - coverage=$(echo "${line_rate} * 212" | bc)
+    - coverage=$(echo "${line_rate} * 189" | bc)
     - 'printf "TOTAL_COVERAGE=%2.2f\n" "$coverage"'
   cache:
     key: "unittest-$CI_COMMIT_REF_SLUG"

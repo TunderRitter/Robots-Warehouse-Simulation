@@ -1,23 +1,52 @@
 ﻿namespace Warehouse_Simulation_Model.Model;
 
+/// <summary>
+/// Class representing a cell in the A* algorithm
+/// </summary>
 public class CASCell
 {
+    /// <summary>
+    /// property representing the row of the cell
+    /// </summary>
     public int I { get; set; }
+
+    /// <summary>
+    /// property representing the column of the cell
+    /// </summary>
     public int J { get; set; }
-    /*
-     * G: A kiindulóponttól megtett távolság
-     * H: becsült hátralévő távolság a célállomástól (a sor- és oszlopindexek különbségeinek összege)
-     * F: G + H, ez alapján választjuk ki az Open listából a legkedvezőbb cellát
-     */
+
+    /// <summary>
+    /// property representing the cell's F value, the sum of its G and H values
+    /// </summary>
     public int F { get; set; }
+
+    /// <summary>
+    /// property representing the cell's distance from the start cell
+    /// </summary>
     public int G { get; set; }
+
+    /// <summary>
+    /// property representing the cell's estimated distance from the target cell, using Manhattan distance
+    /// </summary>
     public int H { get; set; }
 
+    /// <summary>
+    /// property representing the parent cell from which the robot would move to this cell
+    /// </summary>
     public CASCell? Parent;
 
-    //annak az időpillanata, hogy a cellába léptünk
+    /// <summary>
+    /// property representing the time the robot would move to this cell
+    /// </summary>
     public int Time { get; set; }
 
+    /// <summary>
+    /// Constructor of the cell
+    /// </summary>
+    /// <param name="i">the cell's row</param>
+    /// <param name="j">the cell's column</param>
+    /// <param name="p">the cell's parent cell</param>
+    /// <param name="t">the time the robot would move to this cell</param>
     public CASCell(int i, int j, CASCell? p, int t)
     {
         I = i; J = j;
@@ -25,6 +54,11 @@ public class CASCell
         Parent = p;
     }
 
+    /// <summary>
+    /// Function for setting the cell's H and G value
+    /// </summary>
+    /// <param name="i">the row of the target cell</param>
+    /// <param name="j">the column of the target cell</param>
     public void SetH_F(int i, int j)
     {
         H = Math.Abs(I - i) + Math.Abs(J - j);
@@ -32,19 +66,38 @@ public class CASCell
     }
 }
 
+/// <summary>
+/// Class representing the Cooperative A* algorithm. It can calculate a robot's path while avoiding collision with previously calculated paths of other robots
+/// </summary>
 public class CAStar
 {
+    /// <summary>
+    /// Property representing the current time in the algorithm
+    /// </summary>
     public int TimeStep;
     /// <summary>
-    /// Adott (i,j) cella mely időpillanatokban lett már lefoglalva
+    /// Dictionary storing the cell reservations. They keys are tuples for the reserved cells' coordinates, and the values are the moments when that specific cell is occupied.
     /// </summary>
     private Dictionary<(int I, int J), List<int>> Reservations;
     private Dictionary<(int I, int J), int> reservationsFinish;
+    /// <summary>
+    /// Variable representing the map. Walls are true, empty cells are false.
+    /// </summary>
     private readonly bool[,] Map;
     private readonly bool[,] reservationMap;
+    /// <summary>
+    /// Variable for the map's height
+    /// </summary>
     private readonly int Row;
+    /// <summary>
+    /// Variable for the map's width
+    /// </summary>
     private readonly int Col;
 
+    /// <summary>
+    /// Constructor of the Cooperative A* algorithm
+    /// </summary>
+    /// <param name="m">The map</param>
     public CAStar(bool[,] m)
     {
         TimeStep = 0;
@@ -56,6 +109,11 @@ public class CAStar
         reservationMap = new bool[Row, Col];
     }
 
+    /// <summary>
+    /// Function for finding the cell with the lowest F value in the Open list: this will be the most ideal cell for the algorithm to continue the path with
+    /// </summary>
+    /// <param name="list">The Open cell where we search for the cell</param>
+    /// <returns>The index of the cell with the lowest F value in the list</returns>
     public static int Lowest_f_cost(List<CASCell> list)
     {
         int lowest = 0;
@@ -77,6 +135,11 @@ public class CAStar
         reservationMap[robot.Pos.row, robot.Pos.col] = false;
     }
 
+    /// <summary>
+    /// Function for deciding if the robot has been waiting for too long
+    /// </summary>
+    /// <param name="cell">The cell where the robot currently stands</param>
+    /// <returns>true if the waiting is too long, false otherwise</returns>
     private bool TooLongWait(CASCell cell)
     {
         int n = 1;
@@ -87,6 +150,13 @@ public class CAStar
         }
         return n > 5;
     }
+    /// <summary>
+    /// Function for calculating a robot's path
+    /// </summary>
+    /// <param name="Robot">The robot whose path we want to calculate</param>
+    /// <param name="StartTime">The time we call the function</param>
+    /// <returns>The queue containing the calculated path</returns>
+    /// <exception cref="ArgumentNullException">Exception thrown if the robot has no target</exception>
     public Queue<(int, int)> FindPath(Robot Robot, int StartTime)
     {
         if (Robot.TargetPos == null)
@@ -375,6 +445,11 @@ public class CAStar
         return new Queue<(int, int)>();
     }
 
+    /// <summary>
+    /// Function for reconstructing a path from the target cell by walking back on the parent cells
+    /// </summary>
+    /// <param name="Cell">The last/target cell of the path</param>
+    /// <returns>The queue containing the path</returns>
     public Queue<(int, int)> GetPath(CASCell? Cell)
     {
         List<(int, int)> path = [];
