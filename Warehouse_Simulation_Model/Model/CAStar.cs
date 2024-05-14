@@ -118,7 +118,7 @@ public class CAStar
     /// <summary>
     /// Function for finding the cell with the lowest F value in the Open list: this will be the most ideal cell for the algorithm to continue the path with
     /// </summary>
-    /// <param name="list">The Open cell where we search for the cell</param>
+    /// <param name="list">The Open list where we search for the cell</param>
     /// <returns>The index of the cell with the lowest F value in the list</returns>
     public static int LowestFCost(List<CASCell> list)
     {
@@ -225,73 +225,74 @@ public class CAStar
                     if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) ||
                         Reservations.ContainsKey((Current.I, Current.J)))
                     {
-                        //egyenesen megy tovább
+                        // the robot goes forward
                         if ((Robot.Direction == Direction.N && Current.I > Neighbor.I) ||
                             (Robot.Direction == Direction.S && Current.I < Neighbor.I) ||
                             (Robot.Direction == Direction.E && Current.J < Neighbor.J) ||
                             (Robot.Direction == Direction.W && Current.J > Neighbor.J))
                         {
-                            //foglalt a következő lépés idejében a cella
+                            // the neighbor cell is occupied in the next step
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
 
+                            // another robot is waiting in the neighbor cell
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 1 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //most foglalt a cella, valszeg helycsere lenne
+                            // possibility of two robots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
                         }
-                        // fordulni kell egyet
+                        // the robot has to turn to left or right
                         else if ((Robot.Direction == Direction.N && Current.J != Neighbor.J) ||
                             (Robot.Direction == Direction.S && Current.J != Neighbor.J) ||
                             (Robot.Direction == Direction.E && Current.I != Neighbor.I) ||
                             (Robot.Direction == Direction.W && Current.I != Neighbor.I))
                         {
-                            //a következő időegységben foglalt a cellánk, nincs időnk megfordulni
+                            // the robot has no time to turn, the cell is occupied in the next step
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
 
+                            // a robot is waiting here
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 2 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //két időegység múlva foglalt a szomszéd cella
+                            // the neighbor cell is occupied when the robot wants to step there
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
 
-                            //két időegység múlva foglalt a mi cellánk, egy időegység múlva foglalt a szomszéd:
-                            //helycsere esélye
+                            // possibility of two eobots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
                         }
-                        //fordulni kell kettőt
+                        // the robot has to take a 180 degree turn
                         else if ((Robot.Direction == Direction.N && Current.I < Neighbor.I) ||
                             (Robot.Direction == Direction.S && Current.I > Neighbor.I) ||
                             (Robot.Direction == Direction.E && Current.J > Neighbor.J) ||
                             (Robot.Direction == Direction.W && Current.J < Neighbor.J))
                         {
-                            //3 lépés múlva foglalt a szomszéd
+                            // the neighbor cell is occupied when the robot wants to step there
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
 
+                            //another robot is waiting there
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 3 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //foglalt a mi cellánk 1 vagy 2 lépés múlva, nincs idő fordulni
+                            // the robot has no time to turn
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2)) continue;
 
-                            //foglalt a mi cellánk 3 lépés múlva, a szomszéd 2 lépés múlva:
-                            //helcsere esélye
+                            // possibility of two robots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 3) &&
@@ -302,75 +303,75 @@ public class CAStar
                 }
                 else
                 {
-                    // Le van foglalva a szomszédos cella, lehet hogy nem jó:
                     if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) ||
                         Reservations.ContainsKey((Current.I, Current.J)))
                     {
-                        //egyenesen lép tovább, nem kell fordulni
+                        // the robot moves forward
                         if ((Current.Parent.I < Current.I && Current.I < Neighbor.I) ||
                             (Current.Parent.I > Current.I && Current.I > Neighbor.I) ||
                             (Current.Parent.J < Current.J && Current.J < Neighbor.J) ||
                             (Current.Parent.J > Current.J && Current.J > Neighbor.J))
                         {
-                            //foglalt a következő lépés idejében a cella
+                            // the neighbor cell is occupied
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
 
+                            // a robot is waiting here
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 1 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //most foglalt a cella, valszeg helycsere lenne
+                            // possibility of two robots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
                         }
-                        //Jobbra/balra lép tovább, fordulnia kell egyet
+                        // the robot has to turn left or right
                         if ((Current.Parent.I == Current.I && Current.I != Neighbor.I) ||
                             (Current.Parent.J == Current.J && Current.J != Neighbor.J))
                         {
-                            //a következő időegységben foglalt a cellánk, nincs időnk megfordulni
+                            // no time to turn
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
 
+                            // a robot is waiting there
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 2 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //két időegység múlva foglalt a szomszéd cella
+                            // the cell is occupied
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 2)) continue;
 
-                            //két időegység múlva foglalt a mi cellánk, egy időegység múlva foglalt a szomszéd:
-                            //helycsere esélye
+                            // possibility of two robots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 1)) continue;
                         }
-                        //hátra megy tovább, fordulni kell kettőt
+                        // the robot has to take a 180 degree turn
                         else if ((Current.Parent.I < Current.I && Current.I > Neighbor.I) ||
                             (Current.Parent.I > Current.I && Current.I < Neighbor.I) ||
                             (Current.Parent.J < Current.J && Current.J > Neighbor.J) ||
                             (Current.Parent.J > Current.J && Current.J < Neighbor.J))
                         {
-                            //3 lépés múlva foglalt a szomszéd
+                            // the cell is occupied
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations[(Neighbor.I, Neighbor.J)].Contains(time + 3)) continue;
 
+                            //a robot is waiting here
                             if (reservationsFinish.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 reservationsFinish[(Neighbor.I, Neighbor.J)] <= time + 3 &&
                                 Neighbor != Robot.TargetPos) continue;
 
-                            //foglalt a mi cellánk 1 vagy 2 lépés múlva, nincs idő fordulni
+                            // no time for turn
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 1)) continue;
                             if (Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 2)) continue;
 
-                            //foglalt a mi cellánk 3 lépés múlva, a szomszéd 2 lépés múlva:
-                            //helcsere esélye
+                            // possibility of two robots switching places
                             if (Reservations.ContainsKey((Neighbor.I, Neighbor.J)) &&
                                 Reservations.ContainsKey((Current.I, Current.J)) &&
                                 Reservations[(Current.I, Current.J)].Contains(time + 3) &&
@@ -379,7 +380,7 @@ public class CAStar
                     }
                 }
 
-                //esélyes a cella arra hogy odalépjünk
+                // the robot can move to this neighbor cell
                 int next_cost = Current.G + 1;
                 int n;
                 if ((n = Open.FindIndex(c => c.I == Neighbor.I && c.J == Neighbor.J)) != -1)
