@@ -795,10 +795,26 @@ public class MainViewModel : INotifyPropertyChanged
             int idx = i;
             List<(int, int)> path = _scheduler.GetRobotPath(_pathIdx >= 0 ? _pathIdx : 0);
             Cell cell = _scheduler.Map[Cells[idx].X, Cells[idx].Y];
-            string? id = ((cell is Floor s) ? (s.Robot != null ? s.Robot.Id.ToString() : (s.Target != null ? s.Target.Id.ToString() : String.Empty)) : String.Empty);
+            string? id = cell is Floor s
+                ? (s.Robot != null
+                    ? s.Robot.Id.ToString()
+                    : (s.Target != null ? s.Target.Id.ToString() : ""))
+                : "";
             Cells[idx].Circle = CircleColor(cell, Cells[idx].X, Cells[idx].Y);
-            Cells[idx].Square = (cell is Floor) ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) ? InPath : Brushes.White) : Brushes.DarkSlateGray;
-            Cells[idx].Id = id == null || ((cell is Floor f) && _pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y)) && path.Count != 0 && f.Robot == null && f.Target != null && path[^1] != f.Target.Pos) ? String.Empty : id;
+            Cells[idx].Square = cell is Floor
+                ? (_pathIdx >= 0 && path.Contains((Cells[idx].X, Cells[idx].Y))
+                    ? InPath
+                    : Floor)
+                : Wall;
+            Cells[idx].Id = id == null || (cell is Floor f
+                && _pathIdx >= 0
+                && path.Contains((Cells[idx].X, Cells[idx].Y))
+                && path.Count != 0
+                && f.Robot == null
+                && f.Target != null
+                && path[^1] != f.Target.Pos)
+                    ? ""
+                    : id;
 
         }
         if (_pathIdx >= 0)
@@ -886,12 +902,27 @@ public class MainViewModel : INotifyPropertyChanged
         TargetLeft = _replayer.TargetNum.ToString();
         for (int i = 0; i < Cells.Count; i++)
         {
-            int idx = i;
-            int x = Cells[idx].X; int y = Cells[idx].Y;
-            Cells[idx].Id = map[x, y] < -1 ? Math.Abs(map[x, y] + 2).ToString() : (map[x, y] > 1 ? ((map[x, y] / 10) - 2).ToString() : String.Empty);
-            Cells[idx].Square = map[x, y] == 0 ? Wall : Floor;
-            Cells[idx].Circle = map[x, y] == 0 ? Wall : (map[x, y] == 1 ? Floor : (map[x, y] < 0 ? Target :
-                (map[x, y] % 10 == 0 ? North : (map[x, y] % 10 == 1 ? East : (map[x, y] % 10 == 2 ? South : West)))));
+            int x = Cells[i].X; int y = Cells[i].Y;
+            Cells[i].Id = map[x, y] < -1
+                ? (-map[x, y] - 2).ToString()
+                : map[x, y] > 1
+                    ? (map[x, y] / 10 - 2).ToString()
+                    : "";
+            Cells[i].Square = map[x, y] == 0 ? Wall : Floor;
+            Cells[i].Circle = map[x, y] switch
+            {
+                0 => Wall,
+                1 => Floor,
+                -1 => InactiveTarget,
+                < -1 => Target,
+                _ => (map[x, y] % 10) switch
+                {
+                    0 => North,
+                    1 => East,
+                    2 => South,
+                    _ => West,
+                },
+            };
         }
         StepCount = _replayer.Step;
     }
@@ -928,7 +959,7 @@ public class MainViewModel : INotifyPropertyChanged
 
             if (floor.Target != null)
             {
-                if (floor.Target.Active) return Target;
+                if (floor.Target.Active && _scheduler != null) return Target;
                 return InactiveTarget;
             }
 
