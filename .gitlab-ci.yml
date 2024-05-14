@@ -61,7 +61,7 @@ test:
         path: ./*/TestResults/*/coverage.cobertura.xml
   coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
 
-documentation:
+pages:
   stage: deploy
   before_script:
     - apt-get update -yqq
