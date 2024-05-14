@@ -1,4 +1,5 @@
-﻿using Warehouse_Simulation_Model.Persistence;
+﻿using System.Diagnostics;
+using Warehouse_Simulation_Model.Persistence;
 
 namespace Warehouse_Simulation_Model.Model;
 
@@ -24,6 +25,8 @@ public class Replay
     /// Array representing the steps of the replay.
     /// </summary>
     private readonly List<string>[] _steps;
+
+    private readonly int[] _targetNums = [0];
     #endregion
 
     #region Properties
@@ -62,18 +65,7 @@ public class Replay
     /// <summary>
     /// property representing the number of targets in the replay.
     /// </summary>
-    public int TargetNum {
-        get
-        {
-            int num = 0;
-            foreach (int cell in Maps[Step])
-            {
-                if (cell < 0)
-                    num++;
-            }
-            return num;
-        }
-    }
+    public int TargetNum => _targetNums[Step];
     #endregion
 
     #region Events
@@ -105,6 +97,7 @@ public class Replay
         Paused = true;
         MaxStep = _log.SumOfCost / _log.PlannerPaths.Count;
         Maps = new int[MaxStep + 1][,];
+        _targetNums = new int[MaxStep + 1];
         GenerateMaps();
     }
 
@@ -199,6 +192,8 @@ public class Replay
     public void GenerateMaps()
     {
         Maps[0] = CompressMap(Map);
+        int targetsLeft = _log.Tasks.Count;
+        _targetNums[0] = targetsLeft;
         for (int i = 1; i < Maps.Length; i++)
         {
             for (int j = 0; j < _robots.Length; j++)
@@ -215,6 +210,7 @@ public class Replay
                         else if ((string)targetEvent[2] == "finished")
                         {
                             target.Active = false;
+                            targetsLeft--;
                             if (Map[target.Pos.row, target.Pos.col] is Floor floor)
                                 floor.Target = null;
                         }
@@ -256,6 +252,7 @@ public class Replay
             }
 
             Maps[i] = CompressMap(Map);
+            _targetNums[i] = targetsLeft;
         }
     }
     #endregion

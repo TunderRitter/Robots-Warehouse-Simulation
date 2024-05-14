@@ -44,6 +44,10 @@ public class Scheduler
     /// Boolean representing if a robot has been freed.
     /// </summary>
     private bool _robotFreed;
+    /// <summary>
+    /// The currently stuck robots.
+    /// </summary>
+    private readonly HashSet<int> _stuck;
     #endregion
 
     #region Properties
@@ -131,6 +135,7 @@ public class Scheduler
         _robotFreed = false;
         _controller = new Controller(data.Map, _robots);
         _controller.RobotStuck += Controller_RobotStuck;
+        _stuck = [];
 
         TimeLimit = 1000;
         MaxSteps = 10000;
@@ -166,6 +171,20 @@ public class Scheduler
                 AddTargets();
                 AssignTasks();
                 _robotFreed = false;
+            }
+            if (_stuck.Count > 0)
+            {
+                List<int> stuck = [.. _stuck];
+                List<int> targets = stuck.Select(e => _targets.FindIndex(x => x.Id == _robots[e].Id)).ToList();
+                targets.Add(targets[0]);
+                targets.RemoveAt(0);
+                for (int i = 0; i < stuck.Count; i++)
+                {
+                    _robots[stuck[i]].TargetPos = _targets[targets[i]].Pos;
+                    _targets[targets[i]].Id = _robots[stuck[i]].Id;
+					WriteLogEvents(_targets[targets[i]].InitId, _robots[stuck[i]].Id, Step, "assigned");
+				}
+                _stuck.Clear();
             }
 
             _controller.CalculateRoutes();
@@ -214,10 +233,7 @@ public class Scheduler
             {
                 ExecuteSteps(steps);
             }
-
-            WriteLogMakespan();
             WriteLogPlannerTimes(elapsedMillisecs);
-            WriteLogSumOfCost();
 
             CheckIfDone();
             ChangeOccurred?.Invoke(this, EventArgs.Empty);
@@ -236,8 +252,10 @@ public class Scheduler
         List<Target> assignable = _targets[..Math.Min(_targetsSeen, _targets.Count)].Where(
             e => e.Id == null && !_targets.Where(x => x.Id != null).Select(x => x.Pos).Contains(e.Pos)
         ).ToList();
-
-        (int, int)[] assignments = _strategy.Assign(free, assignable);
+        HashSet<(int, int)> positions = [.. assignable.Select(e => e.Pos)];
+        List<Target> newAssignable = positions.Select(e => _targets[_targets.FindIndex(x => x.Pos == e)]).ToList();
+        
+        (int, int)[] assignments = _strategy.Assign(free, newAssignable);
         foreach ((int robotId, int targetId) in assignments)
         {
             WriteLogEvents(targetId, robotId, Step, "assigned");
@@ -321,6 +339,8 @@ public class Scheduler
     public void WriteLog()
     {
         WriteLogAllValid();
+        WriteLogMakespan();
+        WriteLogSumOfCost();
     }
 
     /// <summary>
@@ -404,7 +424,7 @@ public class Scheduler
             Target? target = _targets.ElementAtOrDefault(_targets.FindIndex(e => e.Pos == robot.Pos));
             if (target != null)
             {
-                WriteLogEvents(target.InitId, robot.Id, Step, "finished");
+                WriteLogEvents(target.InitId, robot.Id, Step - 1, "finished");
                 _targets.Remove(target);
             }
             ((Floor)Map[robot.Pos.row, robot.Pos.col]).Target = null;
@@ -420,12 +440,7 @@ public class Scheduler
     /// <param name="e"></param>
     private void Controller_RobotStuck(object? sender, int e)
     {
-        int idx = _targets.FindIndex(x => x.Pos == _robots[e].TargetPos);
-        if (idx == -1) return;
-
-        _robots[e].TargetPos = null;
-        _targets[idx].Id = null;
-        _robotFreed = true;
+        _stuck.Add(e);
     }
 
     /// <summary>
@@ -494,7 +509,12 @@ public class Scheduler
     /// </summary>
     private void WriteLogSumOfCost()
     {
-        _log.SumOfCost += _robots.Length;
+        if (_log.ActualPaths.Count == 0)
+        {
+            _log.SumOfCost = 0;
+            return;
+        }
+        _log.SumOfCost = _log.ActualPaths[0].Split(',', StringSplitOptions.RemoveEmptyEntries).Length * _robots.Length;
     }
 
     /// <summary>
@@ -502,7 +522,12 @@ public class Scheduler
     /// </summary>
     private void WriteLogMakespan()
     {
-        _log.Makespan += 1;
+        if (_log.ActualPaths.Count == 0)
+        {
+            _log.Makespan = 0;
+            return;
+        }
+        _log.Makespan = _log.ActualPaths[0].Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
     }
 
     /// <summary>

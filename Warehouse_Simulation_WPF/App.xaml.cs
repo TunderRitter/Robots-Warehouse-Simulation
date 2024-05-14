@@ -42,12 +42,31 @@ public partial class App : Application
         _viewModel.NewSimulationStarted += new EventHandler<(string, string)>(LoadFile);
         _viewModel.Replay += new EventHandler<(string, string)>(LoadFile);
         _viewModel.SaveLog += new EventHandler(SaveLogFile);
+        _viewModel.ShowPathChanged += new EventHandler<bool>(ShowPathButtons);
 
-        _view = new MainWindow();
-        _view.DataContext = _viewModel;
+        _view = new MainWindow { DataContext = _viewModel };
         _view.Closing += new CancelEventHandler(View_Closing);
         _view.ReplaySlider.ValueChanged += _viewModel.ReplaySLider_ValueChanged;
         _view.Show();
+    }
+
+    /// <summary>
+    /// Sets the path buttons' visibility.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void ShowPathButtons(object? sender, bool e)
+    {
+        if (e)
+        {
+            _view.showinc.Visibility = Visibility.Visible;
+            _view.showdec.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _view.showinc.Visibility = Visibility.Collapsed;
+            _view.showdec.Visibility = Visibility.Collapsed;
+        }
     }
 
     /// <summary>
@@ -79,21 +98,7 @@ public partial class App : Application
             {
                 MessageBox.Show("Couldn't save log file!", "Warehouse Simulator", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
         }
-
-
-    }
-
-    /// <summary>
-    /// Method that throws not implemented exception.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    /// <exception cref="NotImplementedException"></exception>
-    private void NewReplay(object? sender, EventArgs e)
-    {
-        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -128,10 +133,12 @@ public partial class App : Application
                 }
                 if (e.type == "log")
                 {
-                    OpenFileDialog mapDialog = new OpenFileDialog();
-                    mapDialog.Title = "Choose map file";
-                    mapDialog.Filter = "Map files|*.map";
-                    mapDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    OpenFileDialog mapDialog = new()
+                    {
+                        Title = "Choose map file",
+                        Filter = "Map files|*.map",
+                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                    };
                     if (mapDialog.ShowDialog() == true)
                     {
                         _viewModel.CreateReplay(openFileDialog.FileName, mapDialog.FileName);
@@ -140,9 +147,7 @@ public partial class App : Application
                         _view.SimGrid.Visibility = Visibility.Visible;
                         _view.ReplayStartGrid.Visibility = Visibility.Visible;
                     }
-
                 }
-
             }
         }
         catch (Exception)
