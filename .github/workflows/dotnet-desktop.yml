@@ -1,0 +1,90 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+
+stages:
+  - build
+  - test
+  - deploy
+  - deploy_
+
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+
+variables:
+  SOLUTION: "Warehouse_Simulation.sln"
+
+before_script:
+  - 'echo | dotnet --version'
+  - apt-get update -qq
+  - apt-get install bc -y
+  - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
+  - 'export PATH=$PATH:$HOME/.dotnet/tools'
+  - 'dotnet tool install dotnet-reportgenerator-globaltool --global || echo "DRG already installed."'
+
+build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build
+    - echo "Build succes"
+
+
+test:
+  stage: test
+  before_script:
+    - dotnet restore Warehouse_Simulation_Tests --packages .nuget
+  script:
+    - > 
+      dotnet test Warehouse_Simulation_Tests --no-restore
+      --logger:"junit;LogFilePath=../junit/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"
+      --collect="XPlat Code Coverage"
+    - apt-get update -yqq
+    - apt-get install -yqq bc
+    - dotnet tool install --tool-path . dotnet-reportgenerator-globaltool
+    - ./reportgenerator "-reports:$CI_PROJECT_DIR/*/TestResults/*/coverage.cobertura.xml" "-targetdir:report" "-reporttypes:Cobertura"
+    - line_rate="$(head -n 3 ./report/Cobertura.xml | sed 'N;N;s/.*line-rate="\([^" ]*\).*/\1/g')"
+    - coverage=$(echo "${line_rate} * 189" | bc)
+    - 'printf "TOTAL_COVERAGE=%2.2f\n" "$coverage"'
+  cache:
+    key: "unittest-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .nuget
+  artifacts:
+    paths:
+      - ./junit/*test-result.xml
+      - ./*/TestResults/*/coverage.cobertura.xml
+    reports:
+      junit:
+        - ./junit/*test-result.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ./*/TestResults/*/coverage.cobertura.xml
+  coverage: '/TOTAL_COVERAGE=(\d+.\d+)/'
+
+pages:
+  stage: deploy
+  before_script:
+    - apt-get update -yqq
+    - apt-get install -yqq doxygen graphviz
+  script:
+    - doxygen
+    - cp -r doc/html/. public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
+release:
+  stage: deploy_
+  script:
+    - pwd
+    - ls -a
+    - dotnet publish ./Warehouse_Simulation.sln -o ./Release --runtime win-x64 --configuration Release --sc true -p:PublishProfile=PublishSingleFile -p:UseAppHost=true
+    - echo "Publish succes"
+    - ls
+  artifacts:
+    paths:
+      - ./Release
+  only:
+    - master
