@@ -1,7 +1,3 @@
-[![pipeline status](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/badges/master/pipeline.svg)](https://szofttech.inf.elte.huszofttech-ab-2024/group-04/csapat3/-/commits/master)
-
-[![coverage report](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/badges/master/coverage.svg)](https://szofttech.inf.elte.hu/szofttech-ab-2024/group-04/csapat3/-/commits/master)
-
 # Warehouse Robots Simulation
 
 This repository contains a simulation program for optimizing the routes of robots in a warehouse. The simulation allows users to play out the movement of robots, experiment with different pathfinding solutions, and analyze their performance.
@@ -13,7 +9,7 @@ The simulation operates on a grid-based warehouse layout where robots navigate t
 - **Basic Functionality**: Robots can execute tasks and manage conflicts. The program generates a log file which can be save at the end of the simulation.
 - **Configurability**: Users can specify warehouse layout, number of robots, starting positions, task destinations, and scheduling strategy. The speed of the robots and the maximum number of steps are also modifiable.
 - **Interactive Order Assignment**: Allows users to designate task destinations interactively during simulation.
-- **Pathfinding Algorithms**: Utilizes advanced pathfinding algorithms like A* or Cooperative A* for efficient route planning.
+- **Pathfinding Algorithms**: Utilizes advanced pathfinding algorithms like Cooperative A* for efficient route planning.
 - **Deadlock Detection**: Detects and resolves deadlock situations to ensure smooth operation.
 - **Playback and Analysis**: Log files can be loaded to replay simulations, enabling analysis and debugging.
 
@@ -26,7 +22,6 @@ The simulation operates on a grid-based warehouse layout where robots navigate t
 
 ## Dependencies
 - C#
-- [Additional dependencies, if any]
 
 ## Configuration
 Write a configuration file (`.json`), map file (`.map`), agents file (`.agents`) and tasks file (`.tasks`) to customize warehouse layout, robots' starting positions, tasks' positions, etc.
