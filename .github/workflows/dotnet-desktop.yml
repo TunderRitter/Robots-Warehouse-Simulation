@@ -62,26 +62,6 @@ jobs:
           path: |
             ./junit/*test-result.xml
             ./*/TestResults/*/coverage.cobertura.xml
-
-  deploy:
-    name: Generate Documentation
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:8.0
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Documentation Tools
-        run: |
-          sudo apt-get update -yqq
-          sudo apt-get install -yqq doxygen graphviz
-      - name: Generate Documentation
-        run: doxygen
-      - name: Deploy Documentation
-        uses: actions/upload-artifact@v3
-        with:
-          name: documentation
-          path: public
-
   release:
     name: Release
     runs-on: ubuntu-latest
