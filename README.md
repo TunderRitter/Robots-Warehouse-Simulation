@@ -15,7 +15,7 @@ The simulation operates on a grid-based warehouse layout where robots navigate t
 
 ## Usage
 1. Clone the repository.
-2. Configure simulation parameters in the provided configuration file.
+2. Configure simulation parameters. You can use the files in the sample-files folder.
 3. Run the simulation program.
 4. Analyze the generated log file for simulation results.
 
